@@ -9,9 +9,9 @@ Live on GitHub Pages: **[https://mukpostproduction-debug.github.io/friday-puck-p
 
 ## ⚡ Current Season Status: WEEK 2
 
-- **Week 1**: Placed by **Alex** (Completed).
-- **Week 2 (Oct 16, 2026)**: 👑 **WILL** is ON DECK to place this week's 5-leg ticket on his sportsbook!
-- **Rotation Order**: Alex → Will → Jackson → Axel → Ben (repeats every 5 weeks).
+- **Week 1**: Placed by **Will** (Completed).
+- **Week 2 (Oct 16, 2026)**: 👑 **JACKSON** is ON DECK to place this week's 5-leg ticket on his sportsbook!
+- **Rotation Order**: Will → Jackson → Alex → Axel → Ben (repeats every 5 weeks; Will bets at the end of each cycle).
 - **Slip Status**: Completely blank for Week 2 (`0 / 5 Legs Locked`). Everyone inputs 1 leg before Friday puck drop.
 
 ---

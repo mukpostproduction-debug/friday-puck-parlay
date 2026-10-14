@@ -3,18 +3,21 @@
  * 5 Boys. 5 Legs. Every Friday NHL.
  */
 
-// SQUAD CONFIGURATION
+// SQUAD CONFIGURATION & ROTATION ORDER
+// Week 1 was Friday, October 9, 2026 (Will placed the bet)
+// Week 2 is Friday, October 16, 2026 (Jackson - On Deck this week)
+// Will bets at the end of the 5-week cycle
 const SQUAD = [
-  { id: 'alex', name: 'Alex', initials: 'AL', role: 'Week 1 Bettor' },
-  { id: 'will', name: 'Will', initials: 'WI', role: 'Week 2 Bettor (On Deck)' },
-  { id: 'jackson', name: 'Jackson', initials: 'JA', role: 'Week 3 Bettor' },
+  { id: 'will', name: 'Will', initials: 'WI', role: 'Week 1 Bettor' },
+  { id: 'jackson', name: 'Jackson', initials: 'JA', role: 'Week 2 Bettor (On Deck)' },
+  { id: 'alex', name: 'Alex', initials: 'AL', role: 'Week 3 Bettor' },
   { id: 'axel', name: 'Axel', initials: 'AX', role: 'Week 4 Bettor' },
   { id: 'ben', name: 'Ben', initials: 'BE', role: 'Week 5 Bettor' }
 ];
 
 // REFERENCE START DATE FOR ROTATION
-// Week 1 was Friday, October 9, 2026 (Alex)
-// Week 2 is Friday, October 16, 2026 (Will)
+// Week 1 was Friday, October 9, 2026 (Will placed the bet)
+// Week 2 is Friday, October 16, 2026 (Jackson)
 const ROTATION_START_FRIDAY = new Date('2026-10-09T12:00:00Z');
 
 // PRE-CONFIGURED SUPABASE CREDENTIALS (Jackson's live Supabase instance)
