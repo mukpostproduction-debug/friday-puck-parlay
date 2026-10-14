@@ -1,0 +1,22 @@
+{
+  "name": "Bet the Show",
+  "short_name": "Bet the Show",
+  "description": "Friday NHL 5-Leg Parlay Pool for Alex, Will, Jackson, Axel, and Ben.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0c0d10",
+  "theme_color": "#111111",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
