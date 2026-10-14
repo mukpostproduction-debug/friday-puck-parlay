@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Friday Puck Parlay | 5 Boys. 5 Legs. Every Friday NHL.</title>
+  <meta name="description" content="Weekly NHL Friday parlay builder & rotation pool for Alex, Will, Jackson, Axel, and Ben." />
+  <meta name="theme-color" content="#070b14" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Puck Parlay" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Confetti library for winning & leg lock-ins -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+  <!-- Supabase JS Client v2 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Ambient Ice Glow Elements -->
+  <div class="glow-bg glow-top"></div>
+  <div class="glow-bg glow-bottom"></div>
+
+  <!-- Top Navigation Bar -->
+  <header class="navbar">
+    <div class="nav-container">
+      <div class="brand">
+        <div class="puck-icon">
+          <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <ellipse cx="12" cy="7" rx="9" ry="4"></ellipse>
+            <path d="M3 7v10c0 2.21 4.03 4 9 4s9-1.79 9-4V7"></path>
+            <path d="M3 12c0 2.21 4.03 4 9 4s9-1.79 9-4"></path>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <span class="brand-title">PUCK PARLAY</span>
+          <span class="brand-badge">FRIDAY NHL ONLY</span>
+        </div>
+      </div>
+
+      <!-- Live Sync Status & Settings -->
+      <div class="nav-actions">
+        <button id="syncStatusBtn" class="status-chip local-mode" title="Click to configure Supabase live cloud sync">
+          <span class="pulse-dot"></span>
+          <span id="syncStatusText">Local Storage</span>
+          <svg class="gear-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <!-- Friday Date Control & Navigation Bar -->
+    <section class="date-navigator-wrap">
+      <div class="date-navigator">
+        <button id="prevWeekBtn" class="nav-arrow-btn" aria-label="Previous Friday">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+        <div class="current-date-box">
+          <div class="date-label">TARGET FRIDAY</div>
+          <div class="date-value" id="currentFridayDisplay">Friday, Oct 16, 2026</div>
+          <div class="date-sub" id="puckDropCountdown">Calculating puck drop...</div>
+        </div>
+        <button id="nextWeekBtn" class="nav-arrow-btn" aria-label="Next Friday">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </button>
+      </div>
+      <button id="jumpCurrentBtn" class="jump-btn">This Week</button>
+    </section>
+
+    <!-- ON DECK SPOTLIGHT BANNER: Who places the bet this week -->
+    <section class="on-deck-banner">
+      <div class="on-deck-card">
+        <div class="on-deck-glow"></div>
+        <div class="on-deck-left">
+          <div class="bettor-badge">
+            <span class="crown-icon">👑</span>
+            <span>THIS WEEK'S BET PLACER</span>
+          </div>
+          <div class="bettor-hero">
+            <div class="bettor-avatar-lg" id="bettorAvatar">AL</div>
+            <div class="bettor-info">
+              <h2 class="bettor-name" id="bettorName">Alex</h2>
+              <p class="bettor-sub" id="bettorSub">It's Alex's turn to place the 5-leg parlay on his sportsbook.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="on-deck-right">
+          <div class="status-meter-card">
+            <div class="meter-header">
+              <span class="meter-label">SLIP COMPLETION</span>
+              <span class="meter-count" id="slipProgressText">0 / 5 LEGS</span>
+            </div>
+            <div class="progress-bar-track">
+              <div class="progress-bar-fill" id="slipProgressBar" style="width: 0%;"></div>
+            </div>
+            <div class="meter-footer" id="slipStatusMsg">Waiting for the boys to lock in picks</div>
+          </div>
+
+          <div class="action-buttons-group">
+            <button id="quickChirpBtn" class="btn btn-secondary">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+              <span>Chirp The Boys</span>
+            </button>
+            <button id="copySportsbookSlipBtn" class="btn btn-primary">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              <span>Copy Bet Slip</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- App View Tabs: [Parlay Board] | [Friday NHL Schedule] | [Rotation Roadmap] -->
+    <div class="tabs-nav">
+      <button class="tab-btn active" data-tab="tab-board">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+        <span>The 5-Leg Slip</span>
+      </button>
+      <button class="tab-btn" data-tab="tab-schedule">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        <span>Friday NHL Games (<span id="nhlGamesCount">0</span>)</span>
+      </button>
+      <button class="tab-btn" data-tab="tab-rotation">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path></svg>
+        <span>Rotation & History</span>
+      </button>
+    </div>
+
+    <!-- TAB 1: PARLAY BOARD (THE 5 LEGS + SUMMARY SLIP) -->
+    <div class="tab-content active" id="tab-board">
+      <div class="board-grid">
+        <!-- LEFT: THE 5 BOYS' CARDS -->
+        <div class="legs-column">
+          <div class="section-title-row">
+            <h3 class="section-heading">THE SQUAD'S LEGS</h3>
+            <span class="section-badge">1 Leg Per Guy</span>
+          </div>
+
+          <div class="legs-cards-container" id="legsCardsContainer">
+            <!-- Dynamically populated via JS for Alex, Will, Jackson, Axel, Ben -->
+          </div>
+        </div>
+
+        <!-- RIGHT: THE PARLAY SLIP & PAYOUT TICKET -->
+        <div class="slip-column">
+          <div class="parlay-ticket-card" id="parlayTicket">
+            <div class="ticket-header">
+              <div class="ticket-title-row">
+                <span class="ticket-brand">FRIDAY NHL 5-LEGGER</span>
+                <span class="ticket-pill" id="ticketStatusPill">BUILDING</span>
+              </div>
+              <div class="ticket-date" id="ticketDateText">Oct 16, 2026</div>
+            </div>
+
+            <div class="ticket-divider-sawtooth"></div>
+
+            <div class="ticket-legs-summary" id="ticketLegsSummary">
+              <!-- Mini leg summary list -->
+            </div>
+
+            <div class="ticket-calculations">
+              <div class="calc-row">
+                <span class="calc-label">Total Combined Odds:</span>
+                <div class="odds-pills">
+                  <span class="odds-val-american" id="totalAmericanOdds">+0</span>
+                  <span class="odds-val-decimal" id="totalDecimalOdds">1.00x</span>
+                </div>
+              </div>
+
+              <div class="calc-row stake-row">
+                <span class="calc-label">Weekly Pool Stake ($):</span>
+                <div class="stake-input-wrap">
+                  <span class="currency-prefix">$</span>
+                  <input type="number" id="stakeInput" value="25" min="5" max="1000" step="5" class="stake-input" />
+                </div>
+              </div>
+
+              <div class="payout-banner">
+                <div class="payout-label">POTENTIAL TOTAL PAYOUT</div>
+                <div class="payout-amount" id="potentialPayoutDisplay">$0.00</div>
+                <div class="payout-profit" id="potentialProfitDisplay">+$0.00 profit</div>
+              </div>
+            </div>
+
+            <div class="ticket-actions">
+              <button id="ticketCopyBtn" class="btn btn-full btn-gold">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                <span>Copy Slip For Sportsbook</span>
+              </button>
+
+              <button id="markPlacedBtn" class="btn btn-full btn-outline">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span id="markPlacedText">Mark as Placed by Bettor</span>
+              </button>
+            </div>
+
+            <div class="ticket-footer-note">
+              <span>Bettor of the week rotates automatically. Everyone inputs 1 leg.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: LIVE FRIDAY NHL SCHEDULE -->
+    <div class="tab-content" id="tab-schedule">
+      <div class="schedule-container">
+        <div class="schedule-header-row">
+          <div>
+            <h3 class="section-heading">FRIDAY'S NHL MATCHUPS</h3>
+            <p class="section-sub">Live games from the official NHL schedule for this Friday.</p>
+          </div>
+          <button id="refreshScheduleBtn" class="btn btn-sm btn-outline">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+            <span>Refresh</span>
+          </button>
+        </div>
+
+        <div class="games-grid" id="gamesGrid">
+          <div class="loading-state">
+            <div class="spinner"></div>
+            <span>Fetching Friday NHL schedule...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: ROTATION ROADMAP & LEAGUE STATS -->
+    <div class="tab-content" id="tab-rotation">
+      <div class="rotation-container">
+        <div class="stats-overview-grid">
+          <div class="stat-card">
+            <div class="stat-icon">💰</div>
+            <div class="stat-value" id="statTotalStaked">$0</div>
+            <div class="stat-label">Total Staked</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🏆</div>
+            <div class="stat-value text-green" id="statTotalWon">$0</div>
+            <div class="stat-label">Total Returned</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🎯</div>
+            <div class="stat-value" id="statParlaysHit">0 / 0</div>
+            <div class="stat-label">Parlays Hit</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">📈</div>
+            <div class="stat-value" id="statRoi">0%</div>
+            <div class="stat-label">Group ROI</div>
+          </div>
+        </div>
+
+        <div class="roadmap-section">
+          <h3 class="section-heading">THE 5-WEEK ROTATION SCHEDULE</h3>
+          <p class="section-sub">Who places the bet each Friday. Cycle keeps cash even for the whole season.</p>
+          
+          <div class="rotation-timeline" id="rotationTimeline">
+            <!-- Dynamically populated 10 upcoming Fridays -->
+          </div>
+        </div>
+
+        <div class="squad-roster-section">
+          <h3 class="section-heading">SQUAD ROSTER & HIT RATES</h3>
+          <div class="roster-grid" id="rosterGrid">
+            <!-- 5 boys cards with individual hit counts -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- SUBMIT / EDIT LEG MODAL -->
+  <div class="modal-backdrop" id="legModalBackdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <div class="modal-icon">🏒</div>
+          <div>
+            <h3 class="modal-title" id="modalTitle">Lock In Your Friday Leg</h3>
+            <p class="modal-sub">Submit your pick to be combined into this week's 5-leg parlay.</p>
+          </div>
+        </div>
+        <button id="closeModalBtn" class="modal-close-btn" aria-label="Close modal">&times;</button>
+      </div>
+
+      <form id="legForm" class="modal-body">
+        <!-- 1. Who is submitting -->
+        <div class="form-group">
+          <label class="form-label">WHO ARE YOU?</label>
+          <div class="boys-picker" id="modalBoysPicker">
+            <!-- Option buttons for Alex, Will, Jackson, Axel, Ben -->
+          </div>
+          <input type="hidden" id="selectedBoyInput" name="user_name" required />
+        </div>
+
+        <!-- 2. Friday Game Matchup -->
+        <div class="form-group">
+          <label class="form-label" for="gameSelect">NHL GAME</label>
+          <select id="gameSelect" class="form-select" required>
+            <option value="">Select a Friday matchup...</option>
+          </select>
+        </div>
+
+        <!-- 3. Bet Type -->
+        <div class="form-group">
+          <label class="form-label">BET TYPE</label>
+          <div class="bet-type-chips" id="betTypeChips">
+            <button type="button" class="type-chip active" data-type="Moneyline">Moneyline</button>
+            <button type="button" class="type-chip" data-type="Puckline">Puckline (-1.5 / +1.5)</button>
+            <button type="button" class="type-chip" data-type="Total">Total (Over / Under)</button>
+            <button type="button" class="type-chip" data-type="Player Prop">Player Prop</button>
+            <button type="button" class="type-chip" data-type="Other">Other</button>
+          </div>
+          <input type="hidden" id="betTypeInput" value="Moneyline" />
+        </div>
+
+        <!-- 4. Pick Description & Odds -->
+        <div class="form-row">
+          <div class="form-group flex-2">
+            <label class="form-label" for="pickTextInput">PICK DETAILS</label>
+            <input type="text" id="pickTextInput" class="form-input" placeholder="e.g. Avalanche Moneyline or Matthews Anytime Goal" required />
+          </div>
+          <div class="form-group flex-1">
+            <label class="form-label" for="oddsInput">ODDS (American)</label>
+            <input type="text" id="oddsInput" class="form-input text-mono" placeholder="-130 or +125" required />
+            <span class="odds-helper" id="oddsHelper">Decimal: 1.00x</span>
+          </div>
+        </div>
+
+        <!-- 5. Chirp / Trash Talk / Hot Take -->
+        <div class="form-group">
+          <label class="form-label" for="chirpInput">CHIRP / HOT TAKE <span class="optional-tag">(Optional)</span></label>
+          <input type="text" id="chirpInput" class="form-input" placeholder="e.g. Free money boys, lock it down" maxlength="120" />
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" id="cancelModalBtn" class="btn btn-outline">Cancel</button>
+          <button type="submit" id="submitLegBtn" class="btn btn-primary btn-glow">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span>Lock In Leg</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- SUPABASE LIVE CLOUD SYNC MODAL -->
+  <div class="modal-backdrop" id="syncModalBackdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <div class="modal-icon">⚡</div>
+          <div>
+            <h3 class="modal-title">Live Cloud Sync (Supabase)</h3>
+            <p class="modal-sub">Connect free Supabase so every boy's phone updates live with no page reload.</p>
+          </div>
+        </div>
+        <button id="closeSyncModalBtn" class="modal-close-btn">&times;</button>
+      </div>
+
+      <div class="modal-body sync-modal-content">
+        <div class="sync-status-box" id="syncConnectionStatus">
+          <div class="status-indicator-dot local"></div>
+          <div>
+            <strong>Currently in Local Storage Mode</strong>
+            <p>Data stays in this browser. Add your free Supabase keys below to sync live across all 5 phones!</p>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="supabaseUrlInput">SUPABASE PROJECT URL</label>
+          <input type="url" id="supabaseUrlInput" class="form-input" placeholder="https://your-project-id.supabase.co" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="supabaseAnonKeyInput">SUPABASE ANON / PUBLIC KEY</label>
+          <input type="text" id="supabaseAnonKeyInput" class="form-input text-mono" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." />
+        </div>
+
+        <div class="sql-guide-accordion">
+          <div class="accordion-header" id="sqlAccordionHeader">
+            <span>📋 Click here for the 1-Click Supabase SQL Setup</span>
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </div>
+          <div class="accordion-body" id="sqlAccordionBody">
+            <p class="accordion-sub">Run this snippet in your free <a href="https://supabase.com" target="_blank" rel="noreferrer">Supabase.com</a> SQL Editor:</p>
+            <pre class="sql-code-block" id="sqlCodeBlock"><code>-- 1. Table for Friday Parlays
+CREATE TABLE IF NOT EXISTS friday_parlays (
+  id TEXT PRIMARY KEY,
+  week_date DATE NOT NULL,
+  bettor_name TEXT NOT NULL,
+  status TEXT DEFAULT 'building',
+  stake NUMERIC DEFAULT 25.00,
+  total_odds TEXT,
+  potential_payout NUMERIC,
+  notes TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 2. Table for Individual Boys' Legs
+CREATE TABLE IF NOT EXISTS parlay_legs (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  week_date DATE NOT NULL,
+  user_name TEXT NOT NULL,
+  game_title TEXT NOT NULL,
+  pick_text TEXT NOT NULL,
+  odds TEXT NOT NULL,
+  bet_type TEXT,
+  chirp TEXT,
+  locked BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(week_date, user_name)
+);
+
+-- 3. Enable RLS and public policies for the boys
+ALTER TABLE friday_parlays ENABLE ROW LEVEL SECURITY;
+ALTER TABLE parlay_legs ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow public all" ON friday_parlays FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "Allow public all" ON parlay_legs FOR ALL USING (true) WITH CHECK (true);
+
+-- 4. Enable Realtime updates
+ALTER PUBLICATION supabase_realtime ADD TABLE friday_parlays;
+ALTER PUBLICATION supabase_realtime ADD TABLE parlay_legs;</code></pre>
+            <button id="copySqlBtn" class="btn btn-sm btn-outline">Copy SQL Script</button>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button id="clearSyncBtn" class="btn btn-danger-outline">Reset to Local</button>
+          <button id="saveSyncBtn" class="btn btn-primary">Connect & Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Application Script -->
+  <script src="app.js"></script>
+</body>
+</html>
