@@ -484,7 +484,7 @@ const DEFAULT_OCT16_SLATE = [
       },
       {
         id: "mackinnon_sog",
-        boyName: "Will",
+        boyName: "Jackson",
         playerName: "Nathan MacKinnon",
         team: "COL",
         marketLabel: "4+ Shots on Goal",
@@ -493,18 +493,6 @@ const DEFAULT_OCT16_SLATE = [
         apiStat: 5,
         manualDelta: 0,
         subDetail: "5 SOG • 1G, 1A"
-      },
-      {
-        id: "makar_pts",
-        boyName: "Edward",
-        playerName: "Cale Makar",
-        team: "COL",
-        marketLabel: "1+ Points",
-        statType: "points",
-        target: 1,
-        apiStat: 2,
-        manualDelta: 0,
-        subDetail: "1G, 1A • 3 SOG"
       }
     ]
   },
@@ -521,7 +509,7 @@ const DEFAULT_OCT16_SLATE = [
     legs: [
       {
         id: "zacha_pts",
-        boyName: "Jackson",
+        boyName: "Will",
         playerName: "Pavel Zacha",
         team: "BOS",
         marketLabel: "1+ Points",
@@ -567,8 +555,8 @@ function getSlateForDate(dateStr) {
 }
 
 // Initialize Tracker Data from LocalStorage or Default
-const TRACKER_STORAGE_KEY = "b365_sgp_tracker_data_v3";
-const OVERRIDES_STORAGE_KEY = "b365_sgp_manual_overrides_v3";
+const TRACKER_STORAGE_KEY = "b365_sgp_tracker_data_v4";
+const OVERRIDES_STORAGE_KEY = "b365_sgp_manual_overrides_v4";
 
 function initTrackerData() {
   const currentKey = `${TRACKER_STORAGE_KEY}_${state.currentFridayStr}`;
@@ -636,23 +624,22 @@ function loadAragonDemoSlate() {
 // =============================================================================
 // 7. SQUAD STATS & LEADERBOARD HISTORICAL ENGINE
 // =============================================================================
-const STATS_STORAGE_KEY = "bts_squad_stats_history_v3";
+const STATS_STORAGE_KEY = "bts_squad_stats_history_v4";
 
 const DEFAULT_STATS_HISTORY = [
   {
     weekNum: 1,
     dateStr: '2026-10-16',
     bettor: 'Axel',
-    stake: 30,
-    totalOdds: '+1050',
-    result: 'loss', // 5 of 6 hit!
-    notes: 'Axel placed from the States while Jackson was away. 5 of 6 hit — Ben missed his leg and sold the parlay!',
+    stake: 25,
+    totalOdds: '+950',
+    result: 'loss', // 4 of 5 hit!
+    notes: 'Axel placed from the States while Jackson was away. 4 of 5 legs hit — Ben missed on Leo Carlsson and sold the parlay! (Edward joined the squad in Week 2)',
     legs: [
       { boy: 'Axel', pick: 'Brock Nelson 1+ Points', odds: '-140', result: 'hit' },
-      { boy: 'Jackson', pick: 'Pavel Zacha 1+ Points', odds: '+120', result: 'hit' },
-      { boy: 'Will', pick: 'Nathan MacKinnon 4+ SOG', odds: '-130', result: 'hit' },
-      { boy: 'Alex', pick: 'David Pastrnak 4+ Shots', odds: '-120', result: 'hit' },
-      { boy: 'Edward', pick: 'Cale Makar 1+ Points', odds: '-135', result: 'hit' },
+      { boy: 'Jackson', pick: 'Nathan MacKinnon 4+ SOG', odds: '-130', result: 'hit' },
+      { boy: 'Will', pick: 'Pavel Zacha 1+ Points', odds: '+120', result: 'hit' },
+      { boy: 'Alex', pick: 'Beckett Sennecke 1+ Points', odds: '+110', result: 'hit' },
       { boy: 'Ben', pick: 'Leo Carlsson 1+ Points', odds: '-115', result: 'miss' }
     ]
   },
@@ -663,7 +650,7 @@ const DEFAULT_STATS_HISTORY = [
     stake: 30,
     totalOdds: '+1150',
     result: 'pending',
-    notes: 'Jackson on deck for Week 2! $30 pool ticket across 6 legs.',
+    notes: 'Jackson on deck for Week 2! $30 pool ticket across 6 legs (welcoming Edward to the squad!).',
     legs: [
       { boy: 'Axel', pick: 'Cole Caufield 1+ Points', odds: '-135', result: 'pending' },
       { boy: 'Jackson', pick: 'Connor Bedard 3+ Shots', odds: '-125', result: 'pending' },
@@ -796,8 +783,10 @@ function computeSquadAnalytics() {
     };
   });
 
-  // Rank by win rate descending, then hits descending
+  // Rank by win rate descending, then hits descending (debut players with 0 bets placed go to bottom)
   list.sort((a, b) => {
+    if (a.total === 0 && b.total > 0) return 1;
+    if (b.total === 0 && a.total > 0) return -1;
     if (b.rate !== a.rate) return b.rate - a.rate;
     if (b.hits !== a.hits) return b.hits - a.hits;
     return a.misses - b.misses;
@@ -808,20 +797,20 @@ function computeSquadAnalytics() {
   const qualifiedHitters = [...list].filter(p => p.hits > 0).sort((a, b) => b.rate - a.rate || b.hits - a.hits);
   const sniper = qualifiedHitters[0] || list[0];
 
-  // Slump King: most misses
-  const slumpSorted = [...list].sort((a, b) => b.misses - a.misses || a.rate - b.rate);
-  const slumpKing = slumpSorted[0] && slumpSorted[0].misses > 0 ? slumpSorted[0] : { name: 'Nobody (Clean Slip!)', misses: 0, hits: 0 };
+  // Slump King: most misses (must have at least 1 miss)
+  const slumpSorted = [...list].filter(p => p.misses > 0).sort((a, b) => b.misses - a.misses || a.rate - b.rate);
+  const slumpKing = slumpSorted[0] || { name: 'Nobody (Clean Slip!)', misses: 0, hits: 0 };
 
   // Longshot King: highest maxWinningOdds
-  const longshotSorted = [...list].sort((a, b) => b.maxWinningOdds - a.maxWinningOdds);
-  const longshotKing = longshotSorted[0] && longshotSorted[0].maxWinningOdds > 0 ? longshotSorted[0] : list[0];
+  const longshotSorted = [...list].filter(p => p.maxWinningOdds > 0).sort((a, b) => b.maxWinningOdds - a.maxWinningOdds);
+  const longshotKing = longshotSorted[0] || list[0];
 
-  // Chalk Merchant: lowest avgDec
-  const chalkSorted = [...list].sort((a, b) => a.avgDec - b.avgDec);
+  // Chalk Merchant: lowest avgDec (only for active bettors)
+  const chalkSorted = [...list].filter(p => p.total > 0).sort((a, b) => a.avgDec - b.avgDec);
   const chalkMerchant = chalkSorted[0] || list[0];
 
-  // Group totals
-  let totalWagered = state.statsHistory.length * 30;
+  // Group totals: sum stakes across all weeks (e.g. $25 Week 1 + $30 Week 2)
+  let totalWagered = state.statsHistory.reduce((acc, w) => acc + (w.stake || 30), 0);
   let totalLegsCount = list.reduce((acc, p) => acc + p.total, 0);
   let totalHitsCount = list.reduce((acc, p) => acc + p.hits, 0);
   let squadWinRate = totalLegsCount > 0 ? ((totalHitsCount / totalLegsCount) * 100).toFixed(1) : "0.0";
@@ -862,7 +851,11 @@ function renderStatsView() {
   // Leaderboard table
   DOM.leaderboardTbody.innerHTML = data.players.map((p, idx) => {
     let titlePill = '<span class="title-tag-pill">Contender</span>';
-    if (p.name === data.sniper?.name && p.hits > 0) {
+    const isDebut = p.total === 0;
+
+    if (isDebut) {
+      titlePill = '<span class="title-tag-pill" style="background:#262a2f; color:#a1a1aa; border-color:#383f47;">🆕 Week 2 Debut</span>';
+    } else if (p.name === data.sniper?.name && p.hits > 0) {
       titlePill = '<span class="title-tag-pill sniper">🎯 Sniper</span>';
     } else if (p.name === data.slumpKing?.name && p.misses > 0) {
       titlePill = '<span class="title-tag-pill slump">🥶 Slump King</span>';
@@ -872,12 +865,13 @@ function renderStatsView() {
       titlePill = '<span class="title-tag-pill chalk">🍦 Chalk</span>';
     }
 
-    const streakDisplay = p.streak > 0 ? `${p.streakType}${p.streak}` : '--';
+    const streakDisplay = isDebut ? '--' : (p.streak > 0 ? `${p.streakType}${p.streak}` : '--');
     const rankClass = idx === 0 ? 'rank-1' : (idx === 1 ? 'rank-2' : (idx === 2 ? 'rank-3' : ''));
+    const rankBadge = isDebut ? '<span class="rank-badge" style="opacity:0.4;">--</span>' : `<span class="rank-badge ${rankClass}">#${idx + 1}</span>`;
 
     return `
       <tr>
-        <td><span class="rank-badge ${rankClass}">#${idx + 1}</span></td>
+        <td>${rankBadge}</td>
         <td>
           <div class="table-player-cell">
             <div class="player-avatar-small">${p.initials}</div>
@@ -886,17 +880,19 @@ function renderStatsView() {
         </td>
         <td>
           <div class="hit-rate-cell">
-            <span class="rate-num">${p.rate}%</span>
-            <div class="rate-bar-track">
-              <div class="rate-bar-fill" style="width: ${p.rate}%"></div>
-            </div>
+            ${isDebut ? '<span class="rate-num" style="font-size:0.75rem; color:var(--text-secondary);">Debut W2</span>' : `
+              <span class="rate-num">${p.rate}%</span>
+              <div class="rate-bar-track">
+                <div class="rate-bar-fill" style="width: ${p.rate}%"></div>
+              </div>
+            `}
           </div>
         </td>
-        <td class="font-mono font-bold">${p.hits}-${p.misses}</td>
+        <td class="font-mono font-bold">${isDebut ? '0-0' : `${p.hits}-${p.misses}`}</td>
         <td class="b365-green font-mono font-bold">${p.hits}</td>
         <td class="text-red-400 font-mono font-bold">${p.misses}</td>
         <td class="font-mono font-bold">${streakDisplay}</td>
-        <td class="font-mono text-zinc-300">${p.avgAmerican}</td>
+        <td class="font-mono text-zinc-300">${isDebut ? '--' : p.avgAmerican}</td>
         <td>${titlePill}</td>
       </tr>
     `;
@@ -905,11 +901,12 @@ function renderStatsView() {
   // Weekly History logs
   DOM.historyWeeksContainer.innerHTML = state.statsHistory.map((week, wIdx) => {
     const hitsCount = week.legs.filter(l => l.result === 'hit').length;
+    const totalLegs = week.legs.length;
     const isWin = week.result === 'win';
     const isLoss = week.result === 'loss';
     const statusText = isWin
-      ? '🎉 TICKET CAShed!'
-      : (isLoss ? `PARLAY SOLD (${hitsCount}/6 HITS)` : 'IN PROGRESS (OCT 16)');
+      ? '🎉 TICKET CASHED!'
+      : (isLoss ? `PARLAY SOLD (${hitsCount}/${totalLegs} HITS)` : `IN PROGRESS (WEEK ${week.weekNum})`);
     const statusClass = isWin ? 'win' : (isLoss ? 'loss' : 'in-progress');
 
     return `
@@ -1464,21 +1461,20 @@ const DEFAULT_OCT23_PICKS = {
 
 const DEFAULT_OCT16_PICKS = {
   Axel: { boy: 'Axel', game: 'PIT @ COL', betType: 'prop', pick_text: 'Brock Nelson 1+ Points', odds: '-140', chirp: 'Axel locking in from the States' },
-  Jackson: { boy: 'Jackson', game: 'BOS @ ANA', betType: 'prop', pick_text: 'Pavel Zacha 1+ Points', odds: '+120', chirp: 'Top line center duties' },
-  Will: { boy: 'Will', game: 'PIT @ COL', betType: 'prop', pick_text: 'Nathan MacKinnon 4+ Shots', odds: '-130', chirp: 'Puts up 6 shots easily' },
+  Jackson: { boy: 'Jackson', game: 'PIT @ COL', betType: 'prop', pick_text: 'Nathan MacKinnon 4+ Shots', odds: '-130', chirp: 'High volume night in Denver' },
+  Will: { boy: 'Will', game: 'BOS @ ANA', betType: 'prop', pick_text: 'Pavel Zacha 1+ Points', odds: '+120', chirp: 'Top line center duties' },
   Alex: { boy: 'Alex', game: 'BOS @ ANA', betType: 'prop', pick_text: 'Beckett Sennecke 1+ Points', odds: '+110', chirp: 'Rookie phenom power' },
-  Ben: { boy: 'Ben', game: 'BOS @ ANA', betType: 'prop', pick_text: 'Leo Carlsson 1+ Points', odds: '-115', chirp: 'Bounce back performance' },
-  Edward: { boy: 'Edward', game: 'PIT @ COL', betType: 'prop', pick_text: 'Cale Makar 1+ Points', odds: '-135', chirp: 'Welcome Edward to the squad!' }
+  Ben: { boy: 'Ben', game: 'BOS @ ANA', betType: 'prop', pick_text: 'Leo Carlsson 1+ Points', odds: '-115', chirp: 'Sold the parlay 🤦‍♂️' }
 };
 
 function loadLocalData(dateStr) {
-  const key = `bet_the_show_${dateStr}_v3`;
+  const key = `bet_the_show_${dateStr}_v4`;
   const saved = localStorage.getItem(key);
   if (saved) {
     try {
       const parsed = JSON.parse(saved);
       state.legs = parsed.legs || {};
-      state.stake = parsed.stake || 30;
+      state.stake = parsed.stake || (dateStr === '2026-10-16' ? 25 : 30);
       state.isPlaced = !!parsed.isPlaced;
       return;
     } catch (e) {}
@@ -1491,7 +1487,7 @@ function loadLocalData(dateStr) {
     state.isPlaced = false;
   } else if (dateStr === '2026-10-16') {
     state.legs = JSON.parse(JSON.stringify(DEFAULT_OCT16_PICKS));
-    state.stake = 30;
+    state.stake = 25;
     state.isPlaced = true;
   } else {
     state.legs = {};
@@ -1502,7 +1498,7 @@ function loadLocalData(dateStr) {
 }
 
 function saveLocalData(dateStr) {
-  const key = `bet_the_show_${dateStr}_v3`;
+  const key = `bet_the_show_${dateStr}_v4`;
   const payload = {
     date: dateStr,
     legs: state.legs,
@@ -1634,6 +1630,26 @@ function renderSquadLegs() {
   const bettorThisWeek = getBettorForFriday(state.currentFriday);
 
   DOM.legsCardsContainer.innerHTML = SQUAD.map(boy => {
+    if (state.currentFridayStr === '2026-10-16' && boy.name === 'Edward') {
+      return `
+        <div class="leg-card-nhl empty" style="opacity: 0.6; border-style: dashed;">
+          <div class="leg-card-top">
+            <div class="boy-info-group">
+              <div class="boy-jersey" style="opacity: 0.4;">ED</div>
+              <div>
+                <div style="display: flex; align-items: center;">
+                  <span class="boy-name-text">Edward</span>
+                  <span class="title-tag-pill" style="margin-left: 8px; font-size: 0.65rem;">Joined Week 2</span>
+                </div>
+                <div class="boy-sub-role">Not in group for Week 1 (5-boy $25 ticket)</div>
+              </div>
+            </div>
+            <span class="leg-status-tag" style="background:#262a2f; color:#a1a1aa; border-color:#383f47;">N/A (Joined W2)</span>
+          </div>
+        </div>
+      `;
+    }
+
     const leg = state.legs[boy.name];
     const isLocked = !!(leg && leg.odds);
     const isBettor = (boy.name === bettorThisWeek.name);
