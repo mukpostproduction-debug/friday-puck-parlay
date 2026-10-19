@@ -57,6 +57,12 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100vw;
+}
+
 body {
   font-family: var(--font-ui);
   background-color: var(--nhl-black);
@@ -321,6 +327,9 @@ body {
   align-items: center;
   padding: 0 16px;
   overflow: hidden;
+  width: 100%;
+  max-width: 100vw;
+  box-sizing: border-box;
 }
 
 .ribbon-label {
@@ -347,12 +356,15 @@ body {
 }
 
 .ribbon-scroll {
+  flex: 1;
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: 10px;
   overflow-x: auto;
   padding: 6px 12px;
   scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
 }
 
 .ribbon-scroll::-webkit-scrollbar {
@@ -1380,11 +1392,485 @@ body {
 }
 
 /* =====================================================================
-   VIEW 2: LIVE BET TRACKER SPECIFIC STYLES
+   VIEW 2: LIVE BET TRACKER SPECIFIC STYLES (BET365 GLASSMORPHIC ENGINE)
    ===================================================================== */
 .live-tracker-wrap {
-  max-width: 620px;
+  max-width: 580px;
+  width: 100%;
   margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.tracker-card {
+  background: #181b1e;
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.tracker-header {
+  padding: 12px 14px;
+  background: #14171a;
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  box-sizing: border-box;
+}
+
+.tracker-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+
+.tracker-header-title {
+  font-family: var(--font-sports);
+  font-size: 1.05rem;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  line-height: 1.1;
+  flex-wrap: wrap;
+}
+
+.tracker-odds-badge {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(0, 255, 135, 0.12);
+  color: var(--b365-green);
+  border: 1px solid rgba(0, 255, 135, 0.35);
+  display: inline-block;
+}
+
+.tracker-header-sub {
+  font-size: 0.68rem;
+  color: var(--text-secondary);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tracker-header-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.tracker-sync-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  border-radius: 8px;
+  background: #252b32;
+  border: 1px solid #3d4653;
+  color: #f1f1f1;
+  font-family: var(--font-sports);
+  font-size: 0.74rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.tracker-sync-btn:hover {
+  background: #313842;
+  border-color: var(--b365-green);
+}
+
+.tracker-progress-banner {
+  padding: 10px 14px;
+  background: #191d21;
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-sizing: border-box;
+}
+
+.tracker-progress-banner-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.tracker-legs-hit-text {
+  font-family: var(--font-sports);
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.tracker-legs-hit-text strong {
+  color: #ffffff;
+  font-size: 1rem;
+}
+
+.tracker-overall-track {
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: #0d0f11;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.tracker-overall-bar {
+  height: 100%;
+  background: var(--b365-green);
+  box-shadow: 0 0 10px rgba(0, 255, 135, 0.5);
+  transition: width 0.4s ease;
+}
+
+.tracker-reset-link {
+  font-size: 0.70rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-decoration: underline;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  padding: 2px 4px;
+}
+
+.tracker-reset-link:hover {
+  color: #ffffff;
+}
+
+.tracker-games-area {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-sizing: border-box;
+}
+
+.tracker-game-block {
+  background: #14171a;
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.tracker-game-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 10px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tracker-game-tag {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-sports);
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.8px;
+  color: #ffffff;
+}
+
+.tracker-game-mult {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #a1a1aa;
+}
+
+.tracker-game-state-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: #252b32;
+  color: #d1d5db;
+  border: 1px solid #374151;
+}
+
+.tracker-leg-card {
+  background: #1c2126;
+  border: 1px solid #2d343c;
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.tracker-leg-card:last-child {
+  margin-bottom: 0;
+}
+
+.tracker-leg-card.hit {
+  background: rgba(0, 255, 135, 0.08);
+  border-color: rgba(0, 255, 135, 0.45);
+}
+
+.tracker-leg-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.tracker-leg-person {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  flex: 1;
+}
+
+.tracker-hit-indicator {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 900;
+  flex-shrink: 0;
+  border: 1.5px solid #4b5563;
+  color: transparent;
+}
+
+.tracker-leg-card.hit .tracker-hit-indicator {
+  background: var(--b365-green);
+  border-color: var(--b365-green);
+  color: #0c0d10;
+}
+
+.tracker-boy-pill {
+  font-family: var(--font-sports);
+  font-size: 0.68rem;
+  font-weight: 900;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgba(0, 255, 135, 0.12);
+  color: var(--b365-green);
+  border: 1px solid rgba(0, 255, 135, 0.28);
+  flex-shrink: 0;
+}
+
+.tracker-player-title {
+  font-size: 0.86rem;
+  font-weight: 800;
+  color: #ffffff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.tracker-target-odds {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #d1d5db;
+  flex-shrink: 0;
+  white-space: nowrap;
+  text-align: right;
+}
+
+.tracker-leg-card.hit .tracker-target-odds {
+  color: var(--b365-green);
+}
+
+.tracker-leg-action-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+  gap: 8px;
+}
+
+.tracker-leg-stats-detail {
+  font-size: 0.70rem;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+  min-width: 0;
+  flex: 1;
+}
+
+.tracker-manual-flag {
+  font-size: 0.60rem;
+  font-weight: 800;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: rgba(245, 158, 11, 0.2);
+  color: #fcd34d;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+.tracker-stepper-control {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.tracker-adjust-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: #2a313a;
+  border: 1px solid #3e4854;
+  color: #ffffff;
+  font-weight: 900;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.1s ease;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.tracker-adjust-btn:active {
+  transform: scale(0.92);
+  background: #3a4552;
+}
+
+.tracker-current-box {
+  min-width: 56px;
+  padding: 3px 5px;
+  text-align: center;
+  background: #0f1214;
+  border: 1px solid #2d343c;
+  border-radius: 6px;
+  font-family: var(--font-sports);
+  font-size: 0.80rem;
+  font-weight: 800;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+.tracker-leg-card.hit .tracker-current-box {
+  color: var(--b365-green);
+  border-color: rgba(0, 255, 135, 0.35);
+}
+
+.tracker-progress-track {
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: #0f1214;
+  overflow: hidden;
+  margin-top: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.tracker-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: #f59e0b;
+  transition: width 0.35s ease;
+}
+
+.tracker-leg-card.hit .tracker-progress-fill {
+  background: var(--b365-green);
+  box-shadow: 0 0 8px rgba(0, 255, 135, 0.5);
+}
+
+.tracker-matchup-bar {
+  background: #1a1e22;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: #d1d5db;
+  margin-top: 4px;
+}
+
+.tracker-footer-card {
+  padding: 16px;
+  background: #14171a;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.tracker-footer-metrics {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.tracker-metric-label {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+}
+
+.tracker-metric-val {
+  font-family: var(--font-sports);
+  font-size: 1.45rem;
+  font-weight: 900;
+  color: #ffffff;
+  line-height: 1;
+}
+
+.tracker-metric-val.green {
+  color: var(--b365-green);
+  text-shadow: 0 0 10px rgba(0, 255, 135, 0.3);
+}
+
+.tracker-cashout-btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  font-family: var(--font-sports);
+  font-size: 0.95rem;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  text-align: center;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.tracker-cashout-btn.active {
+  background: var(--b365-btn-green);
+  color: #ffffff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.tracker-cashout-btn.active:hover {
+  background: var(--b365-btn-green-hover);
+}
+
+.tracker-cashout-btn.all-hit {
+  background: var(--b365-green);
+  color: #0c0d10;
+  box-shadow: 0 0 16px rgba(0, 255, 135, 0.4);
 }
 
 /* =====================================================================
@@ -2257,6 +2743,19 @@ body {
     width: 100%;
   }
   .ticket-col {
+    width: 100%;
+  }
+  .bettor-banner-inner {
+    grid-template-columns: 1fr !important;
+    gap: 16px;
+  }
+  .bettor-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+  }
+  .bettor-actions .nhl-btn {
     width: 100%;
   }
   .sportsbook-ticket {

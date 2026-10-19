@@ -308,7 +308,7 @@ const DOM = {
 // =============================================================================
 // 5. VIEW SWITCHER
 // =============================================================================
-function switchView(targetViewId) {
+function switchView(targetViewId, updateHash = true) {
   state.currentView = targetViewId;
 
   // Views
@@ -320,6 +320,13 @@ function switchView(targetViewId) {
   DOM.tabSlipBuilder.classList.toggle('active', targetViewId === 'slipBuilderView');
   DOM.tabLiveTracker.classList.toggle('active', targetViewId === 'liveTrackerView');
   DOM.tabStats.classList.toggle('active', targetViewId === 'statsView');
+
+  if (updateHash && window.history && window.history.replaceState) {
+    let hash = '#slip';
+    if (targetViewId === 'liveTrackerView') hash = '#tracker';
+    else if (targetViewId === 'statsView') hash = '#stats';
+    window.history.replaceState(null, '', hash);
+  }
 
   if (targetViewId === 'liveTrackerView') {
     renderTracker();
@@ -958,8 +965,8 @@ function renderTracker() {
   let hitLegs = 0;
 
   state.trackerData.forEach(game => {
-    const gameCard = document.createElement("div");
-    gameCard.className = "rounded-xl bg-[#181b1e] border border-zinc-800/90 p-4 space-y-3.5";
+    const gameBlock = document.createElement("div");
+    gameBlock.className = "tracker-game-block";
 
     let allGameLegsHit = true;
     game.legs.forEach(l => {
@@ -969,19 +976,19 @@ function renderTracker() {
       else allGameLegsHit = false;
     });
 
-    gameCard.innerHTML = `
-      <div class="flex items-center justify-between border-b border-zinc-800 pb-2.5">
-        <div class="flex items-center gap-2">
-          <span class="w-2.5 h-2.5 rounded-full ${allGameLegsHit ? 'bg-[#00ff87]' : 'border-2 border-zinc-500'}"></span>
-          <span class="text-xs font-extrabold tracking-wider text-white">SAME GAME <span class="b365-green">PARLAY</span></span>
-          <span class="text-xs font-bold text-zinc-200 ml-1">${game.odds}x</span>
+    gameBlock.innerHTML = `
+      <div class="tracker-game-top">
+        <div class="tracker-game-tag">
+          <span class="live-dot-mini" style="background:${allGameLegsHit ? 'var(--b365-green)' : '#6b7280'};"></span>
+          <span>SAME GAME <span class="b365-green">PARLAY</span></span>
+          <span class="tracker-game-mult">${game.odds}x</span>
         </div>
-        <span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 border border-zinc-700">
+        <span class="tracker-game-state-badge">
           ${game.gameStateText}
         </span>
       </div>
 
-      <div class="space-y-3">
+      <div class="tracker-legs-wrap">
         ${game.legs.map(leg => {
           const currentVal = Math.max(0, (leg.apiStat || 0) + (leg.manualDelta || 0));
           const pct = Math.min(100, Math.round((currentVal / leg.target) * 100));
@@ -989,58 +996,52 @@ function renderTracker() {
           const unitLabel = leg.statType === "shots" ? "SOG" : "PTS";
 
           return `
-            <div class="p-3 rounded-lg bg-[#202428] border ${isHit ? 'border-[#00ff87]/50 bg-emerald-950/15' : 'border-zinc-800'} transition">
-              <div class="flex justify-between items-start gap-2">
-                <div class="flex items-start gap-2.5">
-                  <div class="mt-0.5 w-4 h-4 rounded-full flex items-center justify-center ${isHit ? 'bg-[#00ff87] text-black' : 'border border-zinc-500 text-transparent'} text-[10px] font-black shrink-0">
-                    ✓
-                  </div>
-                  <div>
-                    <div class="text-sm font-bold text-white leading-tight">
-                      <span class="text-xs font-bold text-[#00ff87] mr-1.5">[${leg.boyName || 'SQUAD'}]</span>
-                      ${leg.playerName}: <span class="${isHit ? 'b365-green' : 'text-zinc-100'}">${leg.marketLabel}</span>
-                    </div>
-                    <div class="text-[11px] text-zinc-400 mt-0.5 flex items-center gap-2">
-                      <span>${leg.subDetail || '0G, 0A • 0 SOG'}</span>
-                      ${leg.manualDelta !== 0 && leg.manualDelta ? `<span class="text-[10px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40">Manual ${leg.manualDelta > 0 ? '+' + leg.manualDelta : leg.manualDelta}</span>` : ''}
-                    </div>
-                  </div>
+            <div class="tracker-leg-card ${isHit ? 'hit' : ''}">
+              <div class="tracker-leg-header-row">
+                <div class="tracker-leg-person">
+                  <div class="tracker-hit-indicator">✓</div>
+                  <span class="tracker-boy-pill">${leg.boyName || 'SQUAD'}</span>
+                  <span class="tracker-player-title">${leg.playerName}</span>
+                </div>
+                <div class="tracker-target-odds">${leg.marketLabel}</div>
+              </div>
+
+              <div class="tracker-leg-action-row">
+                <div class="tracker-leg-stats-detail">
+                  <span>${leg.subDetail || '0G, 0A • 0 SOG'}</span>
+                  ${leg.manualDelta !== 0 && leg.manualDelta ? `<span class="tracker-manual-flag">Manual ${leg.manualDelta > 0 ? '+' + leg.manualDelta : leg.manualDelta}</span>` : ''}
                 </div>
 
-                <!-- Manual & Live Counter Controls -->
-                <div class="flex items-center gap-1.5 shrink-0">
-                  <button onclick="adjustManual('${leg.id}', -1)" title="Subtract 1" class="w-6 h-6 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold text-xs flex items-center justify-center border border-zinc-700">-</button>
-                  <div class="min-w-[54px] text-center px-2 py-0.5 rounded bg-zinc-900 border border-zinc-700">
-                    <span class="text-sm font-extrabold ${isHit ? 'b365-green' : 'text-white'}">${currentVal}</span>
-                    <span class="text-[11px] text-zinc-400">/ ${leg.target}${unitLabel}</span>
+                <div class="tracker-stepper-control">
+                  <button onclick="adjustManual('${leg.id}', -1)" title="Subtract 1" class="tracker-adjust-btn">−</button>
+                  <div class="tracker-current-box">
+                    <span>${currentVal}</span>
+                    <span style="font-size:0.7rem; color:var(--text-secondary); margin-left:2px;">/ ${leg.target}${unitLabel}</span>
                   </div>
-                  <button onclick="adjustManual('${leg.id}', 1)" title="Add 1" class="w-6 h-6 rounded bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-xs flex items-center justify-center border border-zinc-700">+</button>
+                  <button onclick="adjustManual('${leg.id}', 1)" title="Add 1" class="tracker-adjust-btn">+</button>
                 </div>
               </div>
 
-              <!-- Progress Bar -->
-              <div class="mt-2.5 w-full bg-zinc-900 h-2 rounded-full overflow-hidden border border-zinc-800">
-                <div class="h-full progress-bar-fill ${isHit ? 'bg-[#00ff87]' : 'bg-amber-400'}" style="width: ${pct}%"></div>
+              <div class="tracker-progress-track">
+                <div class="tracker-progress-fill" style="width: ${pct}%"></div>
               </div>
             </div>
           `;
         }).join("")}
       </div>
 
-      <!-- Matchup Pill Box -->
-      <div class="b365-subcard rounded-lg px-3.5 py-2.5 flex items-center justify-between text-xs text-zinc-300">
-        <div class="space-y-0.5 font-semibold">
-          <div>${game.awayName}</div>
-          <div>${game.homeName}</div>
+      <!-- Matchup Bar -->
+      <div class="tracker-matchup-bar">
+        <div style="font-weight:700;">
+          <span>${game.awayName}</span> vs <span>${game.homeName}</span>
         </div>
-        <div class="text-right text-zinc-400 text-[11px]">
-          <div>${game.startTime}</div>
-          <div class="text-[10px] text-zinc-500">Live NHL Boxscore Linked</div>
+        <div style="text-align:right; font-size:0.7rem; color:var(--text-secondary);">
+          <span>${game.startTime}</span>
         </div>
       </div>
     `;
 
-    DOM.trackerGamesContainer.appendChild(gameCard);
+    DOM.trackerGamesContainer.appendChild(gameBlock);
   });
 
   // Update Overall Header & Ticket Banner
@@ -1057,10 +1058,10 @@ function renderTracker() {
 
   if (hitLegs === totalLegs && totalLegs > 0) {
     DOM.ticketStatusBanner.textContent = `🎉 ALL ${totalLegs} LEGS HIT! PAYOUT: $${payout}`;
-    DOM.ticketStatusBanner.className = "w-full py-3 rounded-lg bg-[#00ff87] text-black text-center font-extrabold text-sm tracking-wide shadow-lg cursor-pointer";
+    DOM.ticketStatusBanner.className = "tracker-cashout-btn all-hit";
   } else {
     DOM.ticketStatusBanner.textContent = `Cash Out $${state.stake.toFixed(2)} • ${hitLegs} of ${totalLegs} Legs Hit`;
-    DOM.ticketStatusBanner.className = "w-full py-3 rounded-lg b365-btn-green text-center font-bold text-white text-sm tracking-wide shadow-inner cursor-pointer";
+    DOM.ticketStatusBanner.className = "tracker-cashout-btn active";
   }
 }
 
@@ -2176,6 +2177,22 @@ window.addEventListener('DOMContentLoaded', () => {
   initSupabase();
   fetchFridayNhlGames(state.currentFridayStr);
   toggleAutoPoll();
+
+  // Support URL hash routing (#tracker, #stats, #slip)
+  function handleHash() {
+    const hash = (window.location.hash || '').toLowerCase();
+    if (hash === '#tracker' || hash === '#live' || hash === '#livetracker') {
+      switchView('liveTrackerView', false);
+    } else if (hash === '#stats' || hash === '#leaderboard') {
+      switchView('statsView', false);
+    } else if (hash === '#slip') {
+      switchView('slipBuilderView', false);
+    }
+  }
+  window.addEventListener('hashchange', handleHash);
+  if (window.location.hash) {
+    handleHash();
+  }
 
   setInterval(updateCountdown, 60000);
 });

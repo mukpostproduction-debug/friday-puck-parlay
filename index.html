@@ -25,7 +25,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
 
-  <link rel="stylesheet" href="style.css?v=2.3" />
+  <link rel="stylesheet" href="style.css?v=2.5" />
 </head>
 <body>
   <!-- TOP GLOBAL NAVIGATION BAR (BET365 / BROADCAST DARK AESTHETIC) -->
@@ -267,74 +267,73 @@
     <!-- ===================================================================== -->
     <div id="liveTrackerView" class="app-view">
       <div class="live-tracker-wrap">
-        <div class="b365-card rounded-2xl shadow-2xl overflow-hidden">
+        <div class="tracker-card">
           <!-- Top Header -->
-          <div class="px-5 py-4 border-b border-zinc-800 flex items-center justify-between bg-[#16191c]">
-            <div class="flex items-center gap-2.5">
-              <span class="w-2.5 h-2.5 rounded-full bg-[#00ff87] live-dot"></span>
+          <div class="tracker-header">
+            <div class="tracker-header-left">
+              <span class="live-dot-mini" style="width: 9px; height: 9px;"></span>
               <div>
-                <h1 class="text-base font-extrabold tracking-tight text-white flex items-center gap-2">
+                <div class="tracker-header-title">
                   LIVE SGP+ TRACKER
-                  <span id="trackerTotalOddsBadge" class="text-xs font-bold px-2 py-0.5 rounded bg-emerald-950 text-[#00ff87] border border-emerald-800/60">10.50x</span>
-                </h1>
-                <p id="syncStatus" class="text-[11px] text-zinc-400">Syncing live NHL boxscores...</p>
+                  <span id="trackerTotalOddsBadge" class="tracker-odds-badge">10.50x</span>
+                </div>
+                <div id="syncStatus" class="tracker-header-sub">Syncing live NHL boxscores...</div>
               </div>
             </div>
 
-            <div class="flex items-center gap-2">
-              <button id="loadOct16SlateBtn" onclick="loadAragonDemoSlate()" class="text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-zinc-800/80 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 transition flex items-center gap-1">
-                <span>⚡ Oct 16 Slate</span>
-              </button>
-              <button id="refreshBtn" onclick="fetchAllLiveStats(true)" class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 transition flex items-center gap-1.5">
-                <svg id="refreshIcon" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+            <div class="tracker-header-right">
+              <button id="refreshBtn" onclick="fetchAllLiveStats(true)" class="tracker-sync-btn" title="Refresh stats from NHL/ESPN">
+                <svg id="refreshIcon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                 </svg>
-                <span>Sync Now</span>
+                <span>Sync</span>
               </button>
             </div>
           </div>
 
           <!-- Overall Parlay Progress Banner -->
-          <div class="px-5 py-3 bg-[#191d20] border-b border-zinc-800/80 flex items-center justify-between">
-            <div class="text-xs text-zinc-400">
-              Legs Hit: <span id="legsHitCount" class="font-bold text-white">0 / 6</span>
+          <div class="tracker-progress-banner">
+            <div class="tracker-progress-banner-top">
+              <div class="tracker-legs-hit-text">
+                Legs Hit: <strong id="legsHitCount">0 / 6</strong>
+              </div>
+              <button onclick="resetOverrides()" class="tracker-reset-link">
+                Reset Manual
+              </button>
             </div>
-            <div class="w-48 bg-zinc-800 h-2 rounded-full overflow-hidden">
-              <div id="overallProgressBar" class="h-full bg-[#00ff87] progress-bar-fill" style="width: 0%"></div>
+            <div class="tracker-overall-track">
+              <div id="overallProgressBar" class="tracker-overall-bar" style="width: 0%"></div>
             </div>
-            <button onclick="resetOverrides()" class="text-[11px] text-zinc-400 hover:text-zinc-200 underline">
-              Reset Manual
-            </button>
           </div>
 
           <!-- Main Live Content Container -->
-          <div id="gamesContainer" class="p-4 space-y-4">
+          <div id="gamesContainer" class="tracker-games-area">
             <!-- Dynamically populated games & legs with live scores and +/- controls -->
           </div>
 
           <!-- Bet Slip Footer -->
-          <div class="px-5 py-4 bg-[#16191c] border-t border-zinc-800">
-            <div class="flex justify-between items-end mb-3">
+          <div class="tracker-footer-card">
+            <div class="tracker-footer-metrics">
               <div>
-                <div class="text-xs text-zinc-400 font-medium">Wager ($5 / Boy)</div>
-                <div class="text-xl font-extrabold text-white" id="trackerWagerDisplay">$30.00</div>
+                <div class="tracker-metric-label">Wager ($5 / Boy)</div>
+                <div class="tracker-metric-val" id="trackerWagerDisplay">$30.00</div>
               </div>
-              <div class="text-center">
-                <div class="text-[11px] text-zinc-400">Auto-Poll</div>
-                <label class="inline-flex items-center cursor-pointer mt-0.5">
+              <div style="text-align: center;">
+                <div class="tracker-metric-label">Auto-Poll</div>
+                <label class="inline-flex items-center cursor-pointer mt-1">
                   <input type="checkbox" id="autoPollToggle" checked class="sr-only peer" onchange="toggleAutoPoll()">
                   <div class="w-9 h-5 bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all relative peer-checked:bg-[#137a52]"></div>
                 </label>
               </div>
-              <div class="text-right">
-                <div class="text-xs text-zinc-400 font-medium">To Return</div>
-                <div class="text-xl font-extrabold text-[#00ff87]" id="trackerReturnDisplay">$315.00</div>
+              <div style="text-align: right;">
+                <div class="tracker-metric-label">To Return</div>
+                <div class="tracker-metric-val green" id="trackerReturnDisplay">$315.00</div>
               </div>
             </div>
 
-            <div id="ticketStatusBanner" class="w-full py-3 rounded-lg b365-btn-green text-center font-bold text-white text-sm tracking-wide shadow-inner transition cursor-pointer">
+            <button id="ticketStatusBanner" class="tracker-cashout-btn active">
               Cash Out $30.00 • Ticket Active
-            </div>
+            </button>
           </div>
         </div>
       </div>
@@ -652,6 +651,6 @@
   <div class="nhl-toast-container" id="toastContainer"></div>
 
   <!-- Main JavaScript Controller -->
-  <script src="app.js?v=2.3"></script>
+  <script src="app.js?v=2.5"></script>
 </body>
 </html>
