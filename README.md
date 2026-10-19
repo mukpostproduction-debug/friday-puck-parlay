@@ -25,14 +25,16 @@ Live on GitHub Pages: **[https://mukpostproduction-debug.github.io/friday-puck-p
 
 ---
 
-## 🏆 Squad Stats & Betting Hall of Fame
+## 🏆 Squad Stats & Dynamic Accolades Engine
 
-- 🎯 **The Sniper**: Highest Hit Rate & most winning legs.
-- 🥶 **The Slump King**: Most missed picks (responsible for selling the parlay).
-- 🚀 **The Longshot King**: Highest odds leg ever cashed.
-- 🍦 **The Chalk Merchant**: Lowest average odds (safest bettor).
-- 🔥 **Active Win Streaks**: Real-time streak indicators (`W2`, `L1`, etc.).
-- **Interactive Weekly Log & Grader**: Tap `[✓ HIT]` or `[✗ MISS]` on any leg in past or current weeks to recalculate leaderboards on the fly!
+- 🎯 **The Sharpshooters**: Tie-aware Hit Rate leader(s) (recognizes all undefeated/tied leaders fairly).
+- 💰 **Top Odds Cashed**: Highest plus-money odds leg cashed on a pool ticket (e.g. Will's +120 Pavel Zacha in W1).
+- 🧊 **The Hot Seat / Revenge Arc**: Bettor hungry for redemption after a near-miss (e.g. Ben after W1).
+- 🛡️ **The Puck Anchor**: Lowest average odds / steady foundation favorite picker (e.g. Axel with -140).
+- 🆕 **Squad Debut**: Clean-slate tracking for new pool members (Edward joining in Week 2).
+- 🔥 **Active Win / Loss Streaks**: Dynamic real-time streak trackers (`W1`, `W2`, `L1`, etc.).
+- 📱 **Real-time Slip Badges**: Every boy's card on the main slip displays their live season record, active streak, and dynamic banter title.
+- **Interactive Weekly Log & Grader**: Tap `[✓ HIT]` or `[✗ MISS]` on any leg in past or current weeks to recalculate all leaderboards and trophies on the fly!
 
 ---
 

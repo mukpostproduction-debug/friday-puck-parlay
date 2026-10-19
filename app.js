@@ -298,12 +298,20 @@ const DOM = {
   statsParlayRecord: document.getElementById('statsParlayRecord'),
   trophySniperName: document.getElementById('trophySniperName'),
   trophySniperStat: document.getElementById('trophySniperStat'),
+  trophySniperLabel: document.getElementById('trophySniperLabel'),
+  trophySniperNote: document.getElementById('trophySniperNote'),
   trophySlumpName: document.getElementById('trophySlumpName'),
   trophySlumpStat: document.getElementById('trophySlumpStat'),
+  trophySlumpLabel: document.getElementById('trophySlumpLabel'),
+  trophySlumpNote: document.getElementById('trophySlumpNote'),
   trophyLongshotName: document.getElementById('trophyLongshotName'),
   trophyLongshotStat: document.getElementById('trophyLongshotStat'),
+  trophyLongshotLabel: document.getElementById('trophyLongshotLabel'),
+  trophyLongshotNote: document.getElementById('trophyLongshotNote'),
   trophyChalkName: document.getElementById('trophyChalkName'),
   trophyChalkStat: document.getElementById('trophyChalkStat'),
+  trophyChalkLabel: document.getElementById('trophyChalkLabel'),
+  trophyChalkNote: document.getElementById('trophyChalkNote'),
   leaderboardTbody: document.getElementById('leaderboardTbody'),
   historyWeeksContainer: document.getElementById('historyWeeksContainer')
 };
@@ -370,6 +378,7 @@ const ICONS = {
   alert: `<svg class="bts-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
   trash: `<svg class="bts-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>`,
   stats: `<svg class="bts-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>`,
+  cash: `<svg class="bts-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>`,
   chat: `<svg class="bts-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`
 };
 
@@ -721,7 +730,7 @@ function loadAragonDemoSlate() {
 // =============================================================================
 // 7. SQUAD STATS & LEADERBOARD HISTORICAL ENGINE
 // =============================================================================
-const STATS_STORAGE_KEY = "bts_squad_stats_history_v4";
+const STATS_STORAGE_KEY = "bts_squad_stats_history_v6";
 
 const DEFAULT_STATS_HISTORY = [
   {
@@ -780,6 +789,7 @@ function resetStatsHistory() {
     state.statsHistory = JSON.parse(JSON.stringify(DEFAULT_STATS_HISTORY));
     saveStatsHistory();
     renderStatsView();
+    renderSquadLegs();
     showToast("Stats reset to baseline", "stats");
   }
 }
@@ -805,7 +815,155 @@ function toggleLegResult(weekIndex, legIndex, targetResult) {
 
   saveStatsHistory();
   renderStatsView();
+  renderSquadLegs();
   playSound('lock');
+
+  if (week.result === 'win') {
+    if (window.confetti) confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
+    playSound('triumph');
+    showToast(`Week ${week.weekNum} Ticket Cashed! All legs hit!`, 'trophy');
+  }
+}
+
+// Bespoke Dynamic Accolade Resolver for Players
+function resolvePlayerAccolade(p, ctx) {
+  // If player hasn't placed any settled bets yet (Edward in W1)
+  if (p.total === 0) {
+    return {
+      title: 'Squad Debut',
+      pillClass: 'debut',
+      icon: 'spark',
+      statTag: '0-0 (Debut)',
+      blurb: 'New 6th man joining the $30 pool',
+      statClass: 'debut'
+    };
+  }
+
+  // Active winning streak >= 2
+  if (p.streakType === 'W' && p.streak >= 2) {
+    return {
+      title: `Heater (W${p.streak})`,
+      pillClass: 'hot',
+      icon: 'fire',
+      statTag: `${p.hits}-${p.misses} (${p.rate}%)`,
+      blurb: `${p.streak} straight legs cashed! Running hot`,
+      statClass: 'hit'
+    };
+  }
+
+  // Active losing streak >= 2
+  if (p.streakType === 'L' && p.streak >= 2) {
+    return {
+      title: `Cold Streak (L${p.streak})`,
+      pillClass: 'slump',
+      icon: 'frost',
+      statTag: `${p.hits}-${p.misses} (${p.rate}%)`,
+      blurb: 'Due for positive regression — bounce-back time',
+      statClass: 'miss'
+    };
+  }
+
+  // If 1-0 or undefeated
+  if (p.hits > 0 && p.misses === 0) {
+    // Highest odds hit (+120 Will)
+    if (ctx.topOddsWinner && ctx.topOddsWinner.name === p.name && p.maxWinningOdds > 2.0) {
+      return {
+        title: 'Top Value (+120)',
+        pillClass: 'value',
+        icon: 'cash',
+        statTag: `${p.hits}-${p.misses} (100%)`,
+        blurb: 'Hit Zacha (+120) • Season High Odds Win',
+        statClass: 'hit'
+      };
+    }
+    // Plus-money hit (+110 Alex)
+    if (p.maxWinningOdds > 2.0) {
+      return {
+        title: 'Plus-Money (+110)',
+        pillClass: 'value',
+        icon: 'bolt',
+        statTag: `${p.hits}-${p.misses} (100%)`,
+        blurb: 'Hit Sennecke (+110) • Plus-Money Club',
+        statClass: 'hit'
+      };
+    }
+    // Bettor on deck (Jackson)
+    if (p.isBettorOnDeck) {
+      return {
+        title: 'On Target',
+        pillClass: 'sniper',
+        icon: 'crown',
+        statTag: `${p.hits}-${p.misses} (100%)`,
+        blurb: `Hit MacKinnon SOG (-130) • On Deck W${ctx.currentWeekNum}`,
+        statClass: 'hit'
+      };
+    }
+    // Lowest avg odds / Anchor (Axel)
+    if (ctx.anchorWinner && ctx.anchorWinner.name === p.name) {
+      return {
+        title: 'Puck Anchor',
+        pillClass: 'chalk',
+        icon: 'shield',
+        statTag: `${p.hits}-${p.misses} (100%)`,
+        blurb: 'Hit Nelson (-140) • Placed W1',
+        statClass: 'hit'
+      };
+    }
+    return {
+      title: 'Undefeated',
+      pillClass: 'sniper',
+      icon: 'sniper',
+      statTag: `${p.hits}-${p.misses} (100%)`,
+      blurb: 'Perfect 1/1 legs cashed this season',
+      statClass: 'hit'
+    };
+  }
+
+  // 0 hits, 1 miss (Ben)
+  if (p.hits === 0 && p.misses > 0) {
+    return {
+      title: 'Revenge Arc',
+      pillClass: 'slump',
+      icon: 'frost',
+      statTag: `${p.hits}-${p.misses} (0%)`,
+      blurb: `Sold W1 on Carlsson • Primed for W${ctx.currentWeekNum} revenge`,
+      statClass: 'miss'
+    };
+  }
+
+  // Redeemed after loss
+  if (p.streakType === 'W' && p.streak === 1 && p.misses > 0) {
+    return {
+      title: 'Bounce-Back (W1)',
+      pillClass: 'hot',
+      icon: 'checkCircle',
+      statTag: `${p.hits}-${p.misses} (${p.rate}%)`,
+      blurb: 'Bounced back with a hit! Turning it around',
+      statClass: 'hit'
+    };
+  }
+
+  // Winning record
+  if (p.rate >= 60) {
+    return {
+      title: `Sharpshooter (${p.rate}%)`,
+      pillClass: 'sniper',
+      icon: 'sniper',
+      statTag: `${p.hits}-${p.misses} (${p.rate}%)`,
+      blurb: `${p.hits} hits across ${p.total} weeks`,
+      statClass: 'hit'
+    };
+  }
+
+  // Default Contender
+  return {
+    title: 'Contender',
+    pillClass: 'contender',
+    icon: 'puck',
+    statTag: `${p.hits}-${p.misses} (${p.rate}%)`,
+    blurb: `${p.streakType}${p.streak} form • ${p.avgAmerican} avg odds`,
+    statClass: p.rate >= 50 ? 'hit' : 'miss'
+  };
 }
 
 // Compute All Squad Analytics
@@ -824,7 +982,9 @@ function computeSquadAnalytics() {
       streakType: '',
       oddsList: [],
       maxWinningOdds: 0,
-      maxWinningOddsStr: '--'
+      maxWinningOddsStr: '--',
+      parlaysSold: 0,
+      plusMoneyHits: 0
     };
   });
 
@@ -837,14 +997,17 @@ function computeSquadAnalytics() {
       if (!p) return;
 
       const dec = americanToDecimal(leg.odds);
-      p.oddsList.push(dec);
 
       if (leg.result === 'hit') {
         p.total++;
         p.hits++;
+        p.oddsList.push(dec);
+        if (dec > 2.0) {
+          p.plusMoneyHits++;
+        }
         if (dec > p.maxWinningOdds) {
           p.maxWinningOdds = dec;
-          p.maxWinningOddsStr = leg.odds;
+          p.maxWinningOddsStr = `${leg.odds} (${leg.pick})`;
         }
         if (p.streakType === 'W') {
           p.streak++;
@@ -855,6 +1018,10 @@ function computeSquadAnalytics() {
       } else if (leg.result === 'miss') {
         p.total++;
         p.misses++;
+        p.oddsList.push(dec);
+        if (w.result === 'loss') {
+          p.parlaysSold++;
+        }
         if (p.streakType === 'L') {
           p.streak++;
         } else {
@@ -867,20 +1034,26 @@ function computeSquadAnalytics() {
     });
   });
 
-  // Calculate percentages and titles
+  const targetFri = state.currentFriday || getActiveFridayDate();
+  const bettorThisWeek = getBettorForFriday(targetFri);
+  const currentWeekNum = getFridayDiffWeeks(targetFri) + 1;
+
+  // Calculate percentages and averages
   const list = Object.values(playerStats).map(p => {
     const rate = p.total > 0 ? Math.round((p.hits / p.total) * 100) : 0;
     const avgDec = p.oddsList.length > 0 ? (p.oddsList.reduce((a, b) => a + b, 0) / p.oddsList.length) : 1.8;
     const avgAmerican = decimalToAmerican(avgDec);
+    const isBettorOnDeck = (p.name === bettorThisWeek.name);
     return {
       ...p,
       rate,
       avgDec,
-      avgAmerican
+      avgAmerican,
+      isBettorOnDeck
     };
   });
 
-  // Rank by win rate descending, then hits descending (debut players with 0 bets placed go to bottom)
+  // Rank by win rate descending, then hits descending, misses ascending
   list.sort((a, b) => {
     if (a.total === 0 && b.total > 0) return 1;
     if (b.total === 0 && a.total > 0) return -1;
@@ -889,22 +1062,92 @@ function computeSquadAnalytics() {
     return a.misses - b.misses;
   });
 
-  // Find Trophy Winners
-  // Sniper: highest rate (with min 1 hit)
-  const qualifiedHitters = [...list].filter(p => p.hits > 0).sort((a, b) => b.rate - a.rate || b.hits - a.hits);
-  const sniper = qualifiedHitters[0] || list[0];
+  // 1. Sharpshooters (Tie-aware calculation)
+  const qualifiedHitters = [...list].filter(p => p.hits > 0);
+  let sharpshooters = {
+    names: 'TBD',
+    stat: '--',
+    note: 'Awaiting settled legs.',
+    isTie: false,
+    list: []
+  };
 
-  // Slump King: most misses (must have at least 1 miss)
+  if (qualifiedHitters.length > 0) {
+    const topRate = qualifiedHitters[0].rate;
+    const topHits = qualifiedHitters[0].hits;
+    const tied = qualifiedHitters.filter(p => p.rate === topRate && p.hits === topHits);
+    if (tied.length > 1) {
+      const namesStr = tied.length === 2 
+        ? `${tied[0].name} & ${tied[1].name}`
+        : `${tied.slice(0, -1).map(p => p.name).join(', ')} & ${tied[tied.length - 1].name}`;
+      sharpshooters = {
+        names: namesStr,
+        stat: `${topRate}% Hit Rate (${topHits}-${tied[0].misses} Each)`,
+        note: `${tied.length}-way tie for the squad lead — all ${tied.length} boys cashed their legs!`,
+        isTie: true,
+        list: tied
+      };
+    } else {
+      const leader = tied[0];
+      sharpshooters = {
+        names: leader.name,
+        stat: `${leader.rate}% Hit Rate (${leader.hits}/${leader.total} Hits)`,
+        note: `Sole leader in squad accuracy with a ${leader.streakType}${leader.streak} streak.`,
+        isTie: false,
+        list: [leader]
+      };
+    }
+  }
+
+  // 2. Top Odds Cashed (Highest maxWinningOdds)
+  const oddsSorted = [...list].filter(p => p.maxWinningOdds > 0).sort((a, b) => b.maxWinningOdds - a.maxWinningOdds);
+  const topOddsWinner = oddsSorted[0] || null;
+  const topOddsData = topOddsWinner ? {
+    name: topOddsWinner.name,
+    stat: `${topOddsWinner.maxWinningOddsStr} Cashed`,
+    note: `Highest plus-money payout cashed on a pool ticket this season.`
+  } : {
+    name: 'TBD',
+    stat: '--',
+    note: 'No winning bets cashed yet.'
+  };
+
+  // 3. The Hot Seat / Revenge Arc (Most misses)
   const slumpSorted = [...list].filter(p => p.misses > 0).sort((a, b) => b.misses - a.misses || a.rate - b.rate);
-  const slumpKing = slumpSorted[0] || { name: 'Nobody (Clean Slip!)', misses: 0, hits: 0 };
+  const hotSeatWinner = slumpSorted[0] || null;
+  const hotSeatData = hotSeatWinner ? {
+    name: hotSeatWinner.name,
+    stat: `${hotSeatWinner.misses} Miss${hotSeatWinner.misses === 1 ? '' : 'es'} • Sold W1 by 1 Leg`,
+    note: `Missed on Leo Carlsson by just 1 leg — locked in for revenge in Week ${currentWeekNum}!`
+  } : {
+    name: 'Nobody (Clean Sheet)',
+    stat: '0 Misses Recorded',
+    note: 'The squad is undefeated so far!'
+  };
 
-  // Longshot King: highest maxWinningOdds
-  const longshotSorted = [...list].filter(p => p.maxWinningOdds > 0).sort((a, b) => b.maxWinningOdds - a.maxWinningOdds);
-  const longshotKing = longshotSorted[0] || list[0];
-
-  // Chalk Merchant: lowest avgDec (only for active bettors)
+  // 4. The Puck Anchor (Lowest average odds among active bettors)
   const chalkSorted = [...list].filter(p => p.total > 0).sort((a, b) => a.avgDec - b.avgDec);
-  const chalkMerchant = chalkSorted[0] || list[0];
+  const anchorWinner = chalkSorted[0] || null;
+  const anchorData = anchorWinner ? {
+    name: anchorWinner.name,
+    stat: `${anchorWinner.avgAmerican} Avg Odds`,
+    note: `Builds the ticket floor with steady high-probability favorites.`
+  } : {
+    name: 'TBD',
+    stat: '--',
+    note: 'Awaiting locked legs.'
+  };
+
+  // Attach bespoke dynamic accolade to each player
+  list.forEach(p => {
+    p.accolade = resolvePlayerAccolade(p, {
+      topOddsWinner,
+      anchorWinner,
+      hotSeatWinner,
+      sharpshooters,
+      currentWeekNum
+    });
+  });
 
   // Parlay totals (settled weeks only)
   const settledWeeks = sortedWeeks.filter(w => w.result === 'win' || w.result === 'loss');
@@ -924,10 +1167,10 @@ function computeSquadAnalytics() {
 
   return {
     players: list,
-    sniper,
-    slumpKing,
-    longshotKing,
-    chalkMerchant,
+    sharpshooters,
+    topOddsData,
+    hotSeatData,
+    anchorData,
     totalWagered,
     totalLegsCount,
     totalHitsCount,
@@ -937,7 +1180,8 @@ function computeSquadAnalytics() {
     wonParlays,
     lostParlays,
     parlayWinRate,
-    parlayRecordStr
+    parlayRecordStr,
+    currentWeekNum
   };
 }
 
@@ -958,38 +1202,47 @@ function renderStatsView() {
   }
 
   // Trophies
-  DOM.trophySniperName.textContent = data.sniper ? data.sniper.name : 'TBD';
-  DOM.trophySniperStat.textContent = data.sniper ? `${data.sniper.rate}% Hit Rate (${data.sniper.hits} Hits)` : '--';
+  // 1. Sharpshooters
+  if (DOM.trophySniperName) DOM.trophySniperName.textContent = data.sharpshooters.names;
+  if (DOM.trophySniperStat) DOM.trophySniperStat.textContent = data.sharpshooters.stat;
+  if (DOM.trophySniperLabel) DOM.trophySniperLabel.textContent = data.sharpshooters.isTie ? 'THE SHARPSHOOTERS' : 'THE SNIPER';
+  if (DOM.trophySniperNote) DOM.trophySniperNote.textContent = data.sharpshooters.note;
 
-  DOM.trophySlumpName.textContent = data.slumpKing ? data.slumpKing.name : 'Nobody (Clean)';
-  DOM.trophySlumpStat.textContent = data.slumpKing ? `${data.slumpKing.misses} Miss${data.slumpKing.misses === 1 ? '' : 'es'} Recorded` : '0 Misses';
+  // 2. The Hot Seat
+  if (DOM.trophySlumpName) DOM.trophySlumpName.textContent = data.hotSeatData.name;
+  if (DOM.trophySlumpStat) DOM.trophySlumpStat.textContent = data.hotSeatData.stat;
+  if (DOM.trophySlumpLabel) DOM.trophySlumpLabel.textContent = 'THE HOT SEAT';
+  if (DOM.trophySlumpNote) DOM.trophySlumpNote.textContent = data.hotSeatData.note;
 
-  DOM.trophyLongshotName.textContent = data.longshotKing ? data.longshotKing.name : 'TBD';
-  DOM.trophyLongshotStat.textContent = data.longshotKing ? `${data.longshotKing.maxWinningOddsStr} Cashed` : '--';
+  // 3. Top Odds Cashed
+  if (DOM.trophyLongshotName) DOM.trophyLongshotName.textContent = data.topOddsData.name;
+  if (DOM.trophyLongshotStat) DOM.trophyLongshotStat.textContent = data.topOddsData.stat;
+  if (DOM.trophyLongshotLabel) DOM.trophyLongshotLabel.textContent = 'TOP ODDS CASHED';
+  if (DOM.trophyLongshotNote) DOM.trophyLongshotNote.textContent = data.topOddsData.note;
 
-  DOM.trophyChalkName.textContent = data.chalkMerchant ? data.chalkMerchant.name : 'TBD';
-  DOM.trophyChalkStat.textContent = data.chalkMerchant ? `${data.chalkMerchant.avgAmerican} Avg Odds` : '--';
+  // 4. The Puck Anchor
+  if (DOM.trophyChalkName) DOM.trophyChalkName.textContent = data.anchorData.name;
+  if (DOM.trophyChalkStat) DOM.trophyChalkStat.textContent = data.anchorData.stat;
+  if (DOM.trophyChalkLabel) DOM.trophyChalkLabel.textContent = 'THE PUCK ANCHOR';
+  if (DOM.trophyChalkNote) DOM.trophyChalkNote.textContent = data.anchorData.note;
 
-  // Leaderboard table
+  // Leaderboard table (with tie-aware rank display)
+  let currentRank = 1;
   DOM.leaderboardTbody.innerHTML = data.players.map((p, idx) => {
-    let titlePill = '<span class="title-tag-pill">Contender</span>';
     const isDebut = p.total === 0;
-
-    if (isDebut) {
-      titlePill = `<span class="title-tag-pill" style="background:#262a2f; color:#a1a1aa; border-color:#383f47;">${getIcon('spark')} Week 2 Debut</span>`;
-    } else if (p.name === data.sniper?.name && p.hits > 0) {
-      titlePill = `<span class="title-tag-pill sniper">${getIcon('sniper')} Sniper</span>`;
-    } else if (p.name === data.slumpKing?.name && p.misses > 0) {
-      titlePill = `<span class="title-tag-pill slump">${getIcon('frost')} Slump King</span>`;
-    } else if (p.name === data.longshotKing?.name && p.maxWinningOdds > 0) {
-      titlePill = `<span class="title-tag-pill hot">${getIcon('rocket')} Longshot</span>`;
-    } else if (p.name === data.chalkMerchant?.name) {
-      titlePill = `<span class="title-tag-pill chalk">${getIcon('shield')} Chalk</span>`;
+    if (idx > 0 && !isDebut) {
+      const prev = data.players[idx - 1];
+      if (prev.rate !== p.rate || prev.hits !== p.hits || prev.misses !== p.misses) {
+        currentRank = idx + 1;
+      }
     }
+    const isTie = !isDebut && data.players.filter(other => other.total > 0 && other.rate === p.rate && other.hits === p.hits && other.misses === p.misses).length > 1;
+    const rankText = isDebut ? '--' : (isTie ? `#${currentRank} TIE` : `#${currentRank}`);
+    const rankClass = currentRank === 1 ? 'rank-1' : (currentRank === 2 ? 'rank-2' : (currentRank === 3 ? 'rank-3' : ''));
+    const rankBadge = isDebut ? '<span class="rank-badge" style="opacity:0.4;">--</span>' : `<span class="rank-badge ${rankClass}">${rankText}</span>`;
 
+    const titlePill = `<span class="title-tag-pill ${p.accolade.pillClass}">${getIcon(p.accolade.icon)} ${p.accolade.title}</span>`;
     const streakDisplay = isDebut ? '--' : (p.streak > 0 ? `${p.streakType}${p.streak}` : '--');
-    const rankClass = idx === 0 ? 'rank-1' : (idx === 1 ? 'rank-2' : (idx === 2 ? 'rank-3' : ''));
-    const rankBadge = isDebut ? '<span class="rank-badge" style="opacity:0.4;">--</span>' : `<span class="rank-badge ${rankClass}">#${idx + 1}</span>`;
 
     return `
       <tr>
@@ -1799,6 +2052,24 @@ async function persistLeg(legObj) {
   state.legs[legObj.user_name] = legObj;
   saveLocalData(state.currentFridayStr);
 
+  // Keep state.statsHistory in sync if this date matches a week in history
+  const histWeek = state.statsHistory.find(w => w.dateStr === state.currentFridayStr);
+  if (histWeek) {
+    const existingLeg = histWeek.legs.find(l => l.boy === legObj.user_name);
+    if (existingLeg) {
+      existingLeg.pick = legObj.pick_text;
+      existingLeg.odds = legObj.odds;
+    } else {
+      histWeek.legs.push({
+        boy: legObj.user_name,
+        pick: legObj.pick_text,
+        odds: legObj.odds,
+        result: 'pending'
+      });
+    }
+    saveStatsHistory();
+  }
+
   if (state.supabase) {
     try {
       await state.supabase
@@ -1823,6 +2094,15 @@ async function deleteLeg(userName) {
   delete state.legs[userName];
   saveLocalData(state.currentFridayStr);
 
+  const histWeek = state.statsHistory.find(w => w.dateStr === state.currentFridayStr);
+  if (histWeek) {
+    const existingLeg = histWeek.legs.find(l => l.boy === userName);
+    if (existingLeg) {
+      existingLeg.result = 'pending';
+    }
+    saveStatsHistory();
+  }
+
   if (state.supabase) {
     try {
       await state.supabase
@@ -1842,9 +2122,21 @@ async function deleteLeg(userName) {
 // 11. RENDER SLIP BUILDER & BETTOR ROTATION
 // =============================================================================
 function renderSquadLegs() {
-  const bettorThisWeek = getBettorForFriday(state.currentFriday);
+  const targetFri = state.currentFriday || getActiveFridayDate();
+  const bettorThisWeek = getBettorForFriday(targetFri);
+  const analytics = computeSquadAnalytics();
 
   DOM.legsCardsContainer.innerHTML = SQUAD.map(boy => {
+    const pInfo = analytics.players.find(p => p.name === boy.name);
+    const acc = pInfo ? pInfo.accolade : {
+      title: 'Contender',
+      pillClass: 'contender',
+      icon: 'puck',
+      statTag: '0-0',
+      blurb: 'Friday NHL Pick',
+      statClass: 'debut'
+    };
+
     if (state.currentFridayStr === '2026-10-16' && boy.name === 'Edward') {
       return `
         <div class="leg-card-nhl empty" style="opacity: 0.6; border-style: dashed;">
@@ -1852,11 +2144,15 @@ function renderSquadLegs() {
             <div class="boy-info-group">
               <div class="boy-jersey" style="opacity: 0.4;">ED</div>
               <div>
-                <div style="display: flex; align-items: center;">
+                <div class="boy-title-line">
                   <span class="boy-name-text">Edward</span>
-                  <span class="title-tag-pill" style="margin-left: 8px; font-size: 0.65rem;">Joined Week 2</span>
+                  <span class="title-tag-pill debut">${getIcon('spark')} Joined Week 2</span>
                 </div>
-                <div class="boy-sub-role">Not in group for Week 1 (5-boy $25 ticket)</div>
+                <div class="boy-sub-role">
+                  <span class="boy-stat-tag debut">N/A</span>
+                  <span class="boy-stat-divider">•</span>
+                  <span class="boy-blurb-text">Not in group for Week 1 (5-boy $25 ticket)</span>
+                </div>
               </div>
             </div>
             <span class="leg-status-tag" style="background:#262a2f; color:#a1a1aa; border-color:#383f47;">N/A (Joined W2)</span>
@@ -1877,11 +2173,16 @@ function renderSquadLegs() {
             <div class="boy-info-group">
               <div class="boy-jersey">${boy.initials}</div>
               <div>
-                <div style="display: flex; align-items: center;">
+                <div class="boy-title-line">
                   <span class="boy-name-text">${boy.name}</span>
+                  <span class="title-tag-pill ${acc.pillClass}">${getIcon(acc.icon)} ${acc.title}</span>
                   ${isBettor ? `<span class="bettor-tag-inline">${getIcon('crown')} BETTOR ON DECK</span>` : ''}
                 </div>
-                <div class="boy-sub-role">${leg.bet_type || 'NHL Pick'}</div>
+                <div class="boy-sub-role">
+                  <span class="boy-stat-tag ${acc.statClass}">${acc.statTag}</span>
+                  <span class="boy-stat-divider">•</span>
+                  <span class="boy-blurb-text">${acc.blurb}</span>
+                </div>
               </div>
             </div>
 
@@ -1923,11 +2224,16 @@ function renderSquadLegs() {
             <div class="boy-info-group">
               <div class="boy-jersey" style="opacity: 0.5;">${boy.initials}</div>
               <div>
-                <div style="display: flex; align-items: center;">
+                <div class="boy-title-line">
                   <span class="boy-name-text">${boy.name}</span>
+                  <span class="title-tag-pill ${acc.pillClass}">${getIcon(acc.icon)} ${acc.title}</span>
                   ${isBettor ? `<span class="bettor-tag-inline">${getIcon('crown')} BETTOR ON DECK</span>` : ''}
                 </div>
-                <div class="boy-sub-role">Waiting on ${boy.name}'s leg ($5 share)</div>
+                <div class="boy-sub-role">
+                  <span class="boy-stat-tag ${acc.statClass}">${acc.statTag}</span>
+                  <span class="boy-stat-divider">•</span>
+                  <span class="boy-blurb-text">${acc.blurb}</span>
+                </div>
               </div>
             </div>
 
@@ -2097,6 +2403,7 @@ function renderAll() {
   renderSquadLegs();
   renderSportsbookTicket();
   renderRotationSchedule();
+  renderStatsView();
 }
 
 // =============================================================================

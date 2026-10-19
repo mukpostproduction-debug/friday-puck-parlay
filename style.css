@@ -803,6 +803,44 @@ body {
   color: var(--text-secondary);
 }
 
+.boy-title-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.boy-stat-tag {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.boy-stat-tag.hit {
+  color: var(--b365-green);
+}
+
+.boy-stat-tag.miss {
+  color: #ef4444;
+}
+
+.boy-stat-tag.debut {
+  color: #a1a1aa;
+}
+
+.boy-stat-divider {
+  margin: 0 4px;
+  color: var(--border-medium);
+}
+
+.boy-blurb-text {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+}
+
 .bettor-tag-inline {
   font-size: 0.65rem;
   font-weight: 800;
@@ -811,7 +849,7 @@ body {
   background: rgba(0, 255, 135, 0.1);
   padding: 1px 6px;
   border-radius: 4px;
-  margin-left: 6px;
+  margin-left: 2px;
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -2383,14 +2421,16 @@ body {
 
 .title-tag-pill {
   font-family: var(--font-sports);
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 800;
-  padding: 2px 8px;
+  padding: 2px 7px;
   border-radius: 4px;
   text-transform: uppercase;
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
 }
 
 .title-tag-pill svg {
@@ -2399,23 +2439,45 @@ body {
 }
 
 .title-tag-pill.sniper {
-  background: rgba(0, 255, 135, 0.15);
+  background: rgba(0, 255, 135, 0.14);
   color: var(--b365-green);
+  border: 1px solid rgba(0, 255, 135, 0.28);
 }
 
 .title-tag-pill.slump {
-  background: rgba(239, 68, 68, 0.15);
+  background: rgba(239, 68, 68, 0.14);
   color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.28);
 }
 
 .title-tag-pill.chalk {
-  background: rgba(56, 189, 248, 0.15);
+  background: rgba(56, 189, 248, 0.14);
   color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.28);
 }
 
 .title-tag-pill.hot {
-  background: rgba(245, 158, 11, 0.15);
+  background: rgba(245, 158, 11, 0.14);
   color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.28);
+}
+
+.title-tag-pill.value {
+  background: rgba(234, 179, 8, 0.14);
+  color: #facc15;
+  border: 1px solid rgba(234, 179, 8, 0.3);
+}
+
+.title-tag-pill.debut {
+  background: rgba(161, 161, 170, 0.12);
+  color: #d4d4d8;
+  border: 1px solid rgba(161, 161, 170, 0.25);
+}
+
+.title-tag-pill.contender {
+  background: rgba(255, 255, 255, 0.06);
+  color: #a1a1aa;
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
 /* History Section */
