@@ -1564,20 +1564,20 @@ body {
   transition: width 0.4s ease;
 }
 
-.tracker-reset-link {
-  font-size: 0.70rem;
-  font-weight: 700;
-  color: var(--text-muted);
-  text-decoration: underline;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  white-space: nowrap;
-  padding: 2px 4px;
-}
-
-.tracker-reset-link:hover {
-  color: #ffffff;
+.tracker-api-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-sports);
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: var(--b365-green);
+  background: rgba(0, 255, 135, 0.08);
+  border: 1px solid rgba(0, 255, 135, 0.25);
+  padding: 3px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
 }
 
 .tracker-games-area {
@@ -1743,63 +1743,50 @@ body {
   flex: 1;
 }
 
-.tracker-manual-flag {
-  font-size: 0.60rem;
-  font-weight: 800;
-  padding: 1px 5px;
-  border-radius: 3px;
-  background: rgba(245, 158, 11, 0.2);
-  color: #fcd34d;
-  border: 1px solid rgba(245, 158, 11, 0.4);
-}
-
-.tracker-stepper-control {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  flex-shrink: 0;
-}
-
-.tracker-adjust-btn {
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
-  background: #2a313a;
-  border: 1px solid #3e4854;
-  color: #ffffff;
-  font-weight: 900;
-  font-size: 0.95rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.1s ease;
-  user-select: none;
-  touch-action: manipulation;
-}
-
-.tracker-adjust-btn:active {
-  transform: scale(0.92);
-  background: #3a4552;
-}
-
+.tracker-stat-box,
 .tracker-current-box {
-  min-width: 56px;
-  padding: 3px 5px;
-  text-align: center;
-  background: #0f1214;
-  border: 1px solid #2d343c;
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 2px;
+  padding: 4px 10px;
+  background: #0d1114;
+  border: 1px solid #242c35;
   border-radius: 6px;
   font-family: var(--font-sports);
-  font-size: 0.80rem;
-  font-weight: 800;
-  color: #ffffff;
   white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
 }
 
+.tracker-current-num {
+  font-size: 1.05rem;
+  font-weight: 900;
+  color: #ffffff;
+  line-height: 1;
+}
+
+.tracker-target-num {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  line-height: 1;
+}
+
+.tracker-leg-card.hit .tracker-stat-box,
 .tracker-leg-card.hit .tracker-current-box {
+  background: rgba(0, 255, 135, 0.10);
+  border-color: rgba(0, 255, 135, 0.45);
+  box-shadow: 0 0 10px rgba(0, 255, 135, 0.15);
+}
+
+.tracker-leg-card.hit .tracker-current-num {
   color: var(--b365-green);
-  border-color: rgba(0, 255, 135, 0.35);
+  text-shadow: 0 0 8px rgba(0, 255, 135, 0.35);
+}
+
+.tracker-leg-card.hit .tracker-target-num {
+  color: rgba(0, 255, 135, 0.85);
 }
 
 .tracker-progress-track {

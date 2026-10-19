@@ -25,7 +25,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
 
-  <link rel="stylesheet" href="style.css?v=2.7" />
+  <link rel="stylesheet" href="style.css?v=2.8" />
 </head>
 <body>
   <!-- TOP GLOBAL NAVIGATION BAR (BET365 / BROADCAST DARK AESTHETIC) -->
@@ -305,9 +305,10 @@
               <div class="tracker-legs-hit-text">
                 Legs Hit: <strong id="legsHitCount">0 / 6</strong>
               </div>
-              <button onclick="resetOverrides()" class="tracker-reset-link">
-                Reset Manual
-              </button>
+              <div class="tracker-api-badge">
+                <span class="live-dot-mini"></span>
+                <span>NHL LIVE API</span>
+              </div>
             </div>
             <div class="tracker-overall-track">
               <div id="overallProgressBar" class="tracker-overall-bar" style="width: 0%"></div>
@@ -316,7 +317,7 @@
 
           <!-- Main Live Content Container -->
           <div id="gamesContainer" class="tracker-games-area">
-            <!-- Dynamically populated games & legs with live scores and +/- controls -->
+            <!-- Dynamically populated games & legs with live scores and real-time NHL API progress -->
           </div>
 
           <!-- Bet Slip Footer -->
@@ -670,6 +671,6 @@
   <div class="nhl-toast-container" id="toastContainer"></div>
 
   <!-- Main JavaScript Controller -->
-  <script src="app.js?v=2.7"></script>
+  <script src="app.js?v=2.8"></script>
 </body>
 </html>

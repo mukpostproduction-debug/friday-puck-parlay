@@ -588,9 +588,8 @@ function getSlateForDate(dateStr) {
   return JSON.parse(JSON.stringify(DEFAULT_OCT23_SLATE));
 }
 
-// Initialize Tracker Data from LocalStorage or Default
+// Initialize Tracker Data from LocalStorage or Default (Purely NHL API Data-Driven)
 const TRACKER_STORAGE_KEY = "b365_sgp_tracker_data_v4";
-const OVERRIDES_STORAGE_KEY = "b365_sgp_manual_overrides_v4";
 
 function initTrackerData() {
   const currentKey = `${TRACKER_STORAGE_KEY}_${state.currentFridayStr}`;
@@ -604,52 +603,16 @@ function initTrackerData() {
   } else {
     state.trackerData = getSlateForDate(state.currentFridayStr);
   }
-
-  // Restore manual deltas
-  const savedDeltas = JSON.parse(localStorage.getItem(OVERRIDES_STORAGE_KEY) || "{}");
-  state.trackerData.forEach(g => {
-    g.legs.forEach(leg => {
-      if (typeof savedDeltas[leg.id] === "number") {
-        leg.manualDelta = savedDeltas[leg.id];
-      }
-    });
-  });
 }
 
-function saveTrackerDeltas() {
+function saveTrackerData() {
   const currentKey = `${TRACKER_STORAGE_KEY}_${state.currentFridayStr}`;
-  const map = {};
-  state.trackerData.forEach(g => g.legs.forEach(l => map[l.id] = l.manualDelta || 0));
-  localStorage.setItem(OVERRIDES_STORAGE_KEY, JSON.stringify(map));
   localStorage.setItem(currentKey, JSON.stringify(state.trackerData));
-}
-
-function adjustManual(legId, amount) {
-  state.trackerData.forEach(g => {
-    g.legs.forEach(leg => {
-      if (leg.id === legId) {
-        const currentTotal = Math.max(0, (leg.apiStat || 0) + (leg.manualDelta || 0));
-        if (currentTotal + amount >= 0) {
-          leg.manualDelta = (leg.manualDelta || 0) + amount;
-        }
-      }
-    });
-  });
-  saveTrackerDeltas();
-  renderTracker();
-}
-
-function resetOverrides() {
-  state.trackerData.forEach(g => g.legs.forEach(l => l.manualDelta = 0));
-  saveTrackerDeltas();
-  renderTracker();
-  showToast("Manual adjustments reset", "refresh");
 }
 
 function loadAragonDemoSlate() {
   state.trackerData = getSlateForDate(state.currentFridayStr);
-  localStorage.removeItem(OVERRIDES_STORAGE_KEY);
-  saveTrackerDeltas();
+  saveTrackerData();
   renderTracker();
   fetchAllLiveStats(true);
   showToast(`Loaded ${state.currentFridayStr} 6-Leg Slate!`, "puck");
@@ -1002,7 +965,7 @@ function renderTracker() {
     let allGameLegsHit = true;
     game.legs.forEach(l => {
       totalLegs++;
-      const val = Math.max(0, (l.apiStat || 0) + (l.manualDelta || 0));
+      const val = Math.max(0, l.apiStat || 0);
       if (val >= l.target) hitLegs++;
       else allGameLegsHit = false;
     });
@@ -1021,7 +984,7 @@ function renderTracker() {
 
       <div class="tracker-legs-wrap">
         ${game.legs.map(leg => {
-          const currentVal = Math.max(0, (leg.apiStat || 0) + (leg.manualDelta || 0));
+          const currentVal = Math.max(0, leg.apiStat || 0);
           const pct = Math.min(100, Math.round((currentVal / leg.target) * 100));
           const isHit = currentVal >= leg.target;
           const unitLabel = leg.statType === "shots" ? "SOG" : "PTS";
@@ -1040,16 +1003,11 @@ function renderTracker() {
               <div class="tracker-leg-action-row">
                 <div class="tracker-leg-stats-detail">
                   <span>${leg.subDetail || '0G, 0A • 0 SOG'}</span>
-                  ${leg.manualDelta !== 0 && leg.manualDelta ? `<span class="tracker-manual-flag">Manual ${leg.manualDelta > 0 ? '+' + leg.manualDelta : leg.manualDelta}</span>` : ''}
                 </div>
 
-                <div class="tracker-stepper-control">
-                  <button onclick="adjustManual('${leg.id}', -1)" title="Subtract 1" class="tracker-adjust-btn">−</button>
-                  <div class="tracker-current-box">
-                    <span>${currentVal}</span>
-                    <span style="font-size:0.7rem; color:var(--text-secondary); margin-left:2px;">/ ${leg.target}${unitLabel}</span>
-                  </div>
-                  <button onclick="adjustManual('${leg.id}', 1)" title="Add 1" class="tracker-adjust-btn">+</button>
+                <div class="tracker-stat-box ${isHit ? 'hit' : ''}">
+                  <span class="tracker-current-num">${currentVal}</span>
+                  <span class="tracker-target-num">/ ${leg.target} ${unitLabel}</span>
                 </div>
               </div>
 
@@ -1185,6 +1143,7 @@ async function fetchAllLiveStats(isManualClick = false) {
     setTimeout(() => DOM.refreshIcon.classList.remove("animate-spin"), 350);
   }
 
+  saveTrackerData();
   renderTracker();
 }
 
