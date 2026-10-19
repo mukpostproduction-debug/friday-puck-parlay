@@ -64,7 +64,7 @@ body {
   min-height: 100vh;
   line-height: 1.45;
   -webkit-font-smoothing: antialiased;
-  padding-bottom: 60px;
+  padding-bottom: max(60px, env(safe-area-inset-bottom, 20px));
 }
 
 /* Utility Bet365 Classes */
@@ -139,22 +139,29 @@ body {
   background-color: #14171a;
   border-bottom: 2px solid var(--border-subtle);
   box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4);
+  padding-top: 10px;
 }
 
 .nhl-nav-inner {
   max-width: var(--max-width);
   margin: 0 auto;
-  padding: 10px 16px;
+  padding: 6px 14px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.nhl-nav-top-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  width: 100%;
 }
 
 .brand-zone {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   flex-shrink: 0;
 }
 
@@ -171,7 +178,7 @@ body {
 
 .brand-main {
   font-family: var(--font-sports);
-  font-size: 1.45rem;
+  font-size: 1.35rem;
   font-weight: 900;
   font-style: italic;
   letter-spacing: 0.5px;
@@ -182,7 +189,7 @@ body {
 
 .brand-sub {
   font-family: var(--font-sports);
-  font-size: 0.68rem;
+  font-size: 0.65rem;
   font-weight: 700;
   letter-spacing: 1px;
   color: var(--b365-green);
@@ -192,31 +199,36 @@ body {
 
 /* VIEW NAVIGATION TABS (SEGMENTED TABS) */
 .view-nav-tabs {
-  display: flex;
-  align-items: center;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  width: 100%;
   gap: 4px;
   background: #0f1214;
-  padding: 4px;
+  padding: 3px;
   border-radius: 10px;
   border: 1px solid var(--border-subtle);
 }
 
 .view-tab-btn {
+  width: 100%;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 7px 14px;
+  justify-content: center;
+  gap: 4px;
+  padding: 7px 4px;
   border-radius: 7px;
   border: none;
   background: transparent;
   color: var(--text-secondary);
   font-family: var(--font-sports);
-  font-size: 0.85rem;
-  font-weight: 700;
-  letter-spacing: 0.4px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.3px;
   cursor: pointer;
   transition: all 0.15s ease;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .view-tab-btn:hover {
@@ -1854,6 +1866,9 @@ body {
 .nhl-modal-card {
   width: 100%;
   max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   padding: 22px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7);
   animation: modalScale 0.18s ease-out;
@@ -2231,14 +2246,18 @@ body {
   margin-top: 2px;
 }
 
-/* RESPONSIVE DESIGN */
+/* RESPONSIVE DESIGN & IPHONE SAFE-AREA */
 @media (max-width: 960px) {
   .show-workspace {
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
   }
-  .bettor-banner-inner {
-    grid-template-columns: 1fr;
-    gap: 16px;
+  .lineup-col {
+    width: 100%;
+  }
+  .ticket-col {
+    width: 100%;
   }
   .sportsbook-ticket {
     position: static;
@@ -2252,29 +2271,72 @@ body {
 }
 
 @media (max-width: 680px) {
+  /* Push down below iPhone Dynamic Island / Notch */
+  .nhl-header {
+    padding-top: max(54px, env(safe-area-inset-top, 54px));
+    padding-left: max(10px, env(safe-area-inset-left, 10px));
+    padding-right: max(10px, env(safe-area-inset-right, 10px));
+  }
   .nhl-nav-inner {
-    flex-wrap: wrap;
-    padding: 8px 12px;
+    padding: 6px 4px 8px;
+    gap: 8px;
+  }
+  .brand-main {
+    font-size: 1.15rem;
+  }
+  .brand-sub {
+    font-size: 0.58rem;
+    letter-spacing: 0.8px;
+  }
+  .nhl-shield-badge svg {
+    width: 20px;
+    height: 23px;
+  }
+  .nhl-nav-btn {
+    padding: 4px 8px;
+    font-size: 0.72rem;
   }
   .view-nav-tabs {
-    order: 3;
-    width: 100%;
-    justify-content: space-around;
-    margin-top: 4px;
+    gap: 3px;
+    padding: 3px;
   }
   .view-tab-btn {
-    padding: 6px 8px;
-    font-size: 0.78rem;
+    padding: 7px 2px;
+    font-size: 0.76rem;
+    gap: 3px;
   }
-  .nav-btn-text {
-    display: none;
+  .tab-icon {
+    font-size: 0.8rem;
   }
-  .trophies-grid {
-    grid-template-columns: 1fr;
+  .live-badge-mini {
+    padding: 1px 4px;
+    font-size: 0.62rem;
+  }
+  .nhl-content {
+    padding: 12px 10px 40px;
+  }
+  .bettor-banner {
+    padding: 14px;
+    margin-bottom: 16px;
+  }
+  .bettor-jersey-badge {
+    width: 44px;
+    height: 44px;
+    font-size: 1.2rem;
+  }
+  .bettor-name-strong {
+    font-size: 1.5rem;
+  }
+  .bettor-actions {
+    flex-direction: column;
   }
   .stats-hero-banner {
+    padding: 14px;
     flex-direction: column;
     align-items: flex-start;
+  }
+  .stats-hero-title {
+    font-size: 1.45rem;
   }
   .stats-hero-meta {
     width: 100%;
@@ -2282,12 +2344,34 @@ body {
   }
   .meta-stat-pill {
     flex: 1;
-    padding: 8px;
+    padding: 8px 4px;
+  }
+  .meta-val {
+    font-size: 1.25rem;
+  }
+  .trophies-grid {
+    grid-template-columns: 1fr;
   }
   .history-legs-grid {
     grid-template-columns: 1fr;
   }
   .boys-selector-grid {
     grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 390px) {
+  .view-tab-btn {
+    font-size: 0.70rem;
+    padding: 6px 2px;
+  }
+  .live-badge-mini {
+    display: none;
+  }
+  .brand-main {
+    font-size: 1.05rem;
+  }
+  .brand-sub {
+    font-size: 0.52rem;
   }
 }

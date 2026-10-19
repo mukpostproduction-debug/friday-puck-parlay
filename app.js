@@ -20,8 +20,29 @@ const SQUAD = [
 ];
 
 // REFERENCE START DATE FOR ROTATION
-// Week 1 was Friday, October 9, 2026 (Axel placed the bet)
-const ROTATION_START_FRIDAY = new Date('2026-10-09T12:00:00Z');
+// Week 1 was Friday, October 16, 2026 (Axel placed the bet from the States)
+// Week 2 is Friday, October 23, 2026 (Jackson is ON DECK this week)
+const ROTATION_START_FRIDAY = new Date('2026-10-16T12:00:00Z');
+
+// DYNAMIC SUNDAY SWITCH ENGINE
+// "Each Sunday it should switch from our previous week to the new one."
+function getActiveFridayDate(refDate = new Date()) {
+  const d = new Date(refDate);
+  const day = d.getDay(); // 0 = Sun, 1 = Mon, 2 = Tue, 3 = Wed, 4 = Thu, 5 = Fri, 6 = Sat
+
+  if (day === 0) {
+    // Sunday: automatically switches to the new upcoming Friday (in 5 days)
+    d.setDate(d.getDate() + 5);
+  } else if (day >= 1 && day <= 5) {
+    // Mon-Fri: upcoming or current Friday
+    d.setDate(d.getDate() + (5 - day));
+  } else if (day === 6) {
+    // Saturday: still showing yesterday's Friday until Sunday rolls over
+    d.setDate(d.getDate() - 1);
+  }
+  d.setHours(12, 0, 0, 0);
+  return d;
+}
 
 // PRE-CONFIGURED SUPABASE CREDENTIALS (Jackson's live Supabase instance)
 const DEFAULT_SUPABASE_CONFIG = {
@@ -326,25 +347,26 @@ function showToast(message, icon = '🏒') {
 }
 
 // =============================================================================
-// 6. DEFAULT 6-LEG LIVE PARLAY DATA (ARAGON'S OCT 16 SLATE + 6TH LEG FOR EDWARD)
 // =============================================================================
-const DEFAULT_OCT16_SLATE = [
+// 6. DEFAULT 6-LEG LIVE PARLAY DATA (ARAGON BET365 ENGINE)
+// =============================================================================
+const DEFAULT_OCT23_SLATE = [
   {
-    gameId: "PIT_COL",
+    gameId: "MTL_CHI",
     title: "SAME GAME PARLAY",
-    odds: "2.80",
-    awayTeam: "PIT",
-    awayName: "PIT Penguins",
-    homeTeam: "COL",
-    homeName: "COL Avalanche",
-    startTime: "Fri Oct 16 • 8:07 PM",
-    gameStateText: "Scheduled • 8:07 PM",
+    odds: "3.20",
+    awayTeam: "MTL",
+    awayName: "MTL Canadiens",
+    homeTeam: "CHI",
+    homeName: "CHI Blackhawks",
+    startTime: "Fri Oct 23 • 8:30 PM",
+    gameStateText: "Scheduled • 8:30 PM",
     legs: [
       {
-        id: "nelson_pts",
+        id: "caufield_pts",
         boyName: "Axel",
-        playerName: "Brock Nelson",
-        team: "COL",
+        playerName: "Cole Caufield",
+        team: "MTL",
         marketLabel: "1+ Points",
         statType: "points",
         target: 1,
@@ -353,8 +375,57 @@ const DEFAULT_OCT16_SLATE = [
         subDetail: "0G, 0A • 0 SOG"
       },
       {
-        id: "mackinnon_sog",
+        id: "bedard_sog",
+        boyName: "Jackson",
+        playerName: "Connor Bedard",
+        team: "CHI",
+        marketLabel: "3+ Shots on Goal",
+        statType: "shots",
+        target: 3,
+        apiStat: 0,
+        manualDelta: 0,
+        subDetail: "0 SOG • 0G, 0A"
+      },
+      {
+        id: "suzuki_pts",
+        boyName: "Alex",
+        playerName: "Nick Suzuki",
+        team: "MTL",
+        marketLabel: "1+ Points",
+        statType: "points",
+        target: 1,
+        apiStat: 0,
+        manualDelta: 0,
+        subDetail: "0G, 0A • 0 SOG"
+      }
+    ]
+  },
+  {
+    gameId: "TBL_COL",
+    title: "SAME GAME PARLAY",
+    odds: "3.60",
+    awayTeam: "TBL",
+    awayName: "TBL Lightning",
+    homeTeam: "COL",
+    homeName: "COL Avalanche",
+    startTime: "Fri Oct 23 • 9:00 PM",
+    gameStateText: "Scheduled • 9:00 PM",
+    legs: [
+      {
+        id: "kucherov_pts",
         boyName: "Will",
+        playerName: "Nikita Kucherov",
+        team: "TBL",
+        marketLabel: "1+ Points",
+        statType: "points",
+        target: 1,
+        apiStat: 0,
+        manualDelta: 0,
+        subDetail: "0G, 0A • 0 SOG"
+      },
+      {
+        id: "mackinnon_sog2",
+        boyName: "Ben",
         playerName: "Nathan MacKinnon",
         team: "COL",
         marketLabel: "4+ Shots on Goal",
@@ -365,7 +436,7 @@ const DEFAULT_OCT16_SLATE = [
         subDetail: "0 SOG • 0G, 0A"
       },
       {
-        id: "makar_pts",
+        id: "makar_pts2",
         boyName: "Edward",
         playerName: "Cale Makar",
         team: "COL",
@@ -375,6 +446,58 @@ const DEFAULT_OCT16_SLATE = [
         apiStat: 0,
         manualDelta: 0,
         subDetail: "0G, 0A • 0 SOG"
+      }
+    ]
+  }
+];
+
+const DEFAULT_OCT16_SLATE = [
+  {
+    gameId: "PIT_COL",
+    title: "SAME GAME PARLAY",
+    odds: "2.80",
+    awayTeam: "PIT",
+    awayName: "PIT Penguins",
+    homeTeam: "COL",
+    homeName: "COL Avalanche",
+    startTime: "Fri Oct 16 • 8:07 PM",
+    gameStateText: "Completed • Final",
+    legs: [
+      {
+        id: "nelson_pts",
+        boyName: "Axel",
+        playerName: "Brock Nelson",
+        team: "COL",
+        marketLabel: "1+ Points",
+        statType: "points",
+        target: 1,
+        apiStat: 1,
+        manualDelta: 0,
+        subDetail: "0G, 1A • 2 SOG"
+      },
+      {
+        id: "mackinnon_sog",
+        boyName: "Will",
+        playerName: "Nathan MacKinnon",
+        team: "COL",
+        marketLabel: "4+ Shots on Goal",
+        statType: "shots",
+        target: 4,
+        apiStat: 5,
+        manualDelta: 0,
+        subDetail: "5 SOG • 1G, 1A"
+      },
+      {
+        id: "makar_pts",
+        boyName: "Edward",
+        playerName: "Cale Makar",
+        team: "COL",
+        marketLabel: "1+ Points",
+        statType: "points",
+        target: 1,
+        apiStat: 2,
+        manualDelta: 0,
+        subDetail: "1G, 1A • 3 SOG"
       }
     ]
   },
@@ -387,7 +510,7 @@ const DEFAULT_OCT16_SLATE = [
     homeTeam: "ANA",
     homeName: "ANA Ducks",
     startTime: "Fri Oct 16 • 9:07 PM",
-    gameStateText: "Scheduled • 9:07 PM",
+    gameStateText: "Completed • Final",
     legs: [
       {
         id: "zacha_pts",
@@ -397,9 +520,9 @@ const DEFAULT_OCT16_SLATE = [
         marketLabel: "1+ Points",
         statType: "points",
         target: 1,
-        apiStat: 0,
+        apiStat: 1,
         manualDelta: 0,
-        subDetail: "0G, 0A • 0 SOG"
+        subDetail: "1G, 0A • 2 SOG"
       },
       {
         id: "sennecke_pts",
@@ -409,9 +532,9 @@ const DEFAULT_OCT16_SLATE = [
         marketLabel: "1+ Points",
         statType: "points",
         target: 1,
-        apiStat: 0,
+        apiStat: 1,
         manualDelta: 0,
-        subDetail: "0G, 0A • 0 SOG"
+        subDetail: "0G, 1A • 1 SOG"
       },
       {
         id: "carlsson_pts",
@@ -423,26 +546,34 @@ const DEFAULT_OCT16_SLATE = [
         target: 1,
         apiStat: 0,
         manualDelta: 0,
-        subDetail: "0G, 0A • 0 SOG"
+        subDetail: "0G, 0A • 1 SOG"
       }
     ]
   }
 ];
 
+function getSlateForDate(dateStr) {
+  if (dateStr === '2026-10-16') {
+    return JSON.parse(JSON.stringify(DEFAULT_OCT16_SLATE));
+  }
+  return JSON.parse(JSON.stringify(DEFAULT_OCT23_SLATE));
+}
+
 // Initialize Tracker Data from LocalStorage or Default
-const TRACKER_STORAGE_KEY = "b365_sgp_tracker_data_v2";
-const OVERRIDES_STORAGE_KEY = "b365_sgp_manual_overrides_v2";
+const TRACKER_STORAGE_KEY = "b365_sgp_tracker_data_v3";
+const OVERRIDES_STORAGE_KEY = "b365_sgp_manual_overrides_v3";
 
 function initTrackerData() {
-  const saved = localStorage.getItem(TRACKER_STORAGE_KEY);
+  const currentKey = `${TRACKER_STORAGE_KEY}_${state.currentFridayStr}`;
+  const saved = localStorage.getItem(currentKey);
   if (saved) {
     try {
       state.trackerData = JSON.parse(saved);
     } catch (e) {
-      state.trackerData = JSON.parse(JSON.stringify(DEFAULT_OCT16_SLATE));
+      state.trackerData = getSlateForDate(state.currentFridayStr);
     }
   } else {
-    state.trackerData = JSON.parse(JSON.stringify(DEFAULT_OCT16_SLATE));
+    state.trackerData = getSlateForDate(state.currentFridayStr);
   }
 
   // Restore manual deltas
@@ -457,10 +588,11 @@ function initTrackerData() {
 }
 
 function saveTrackerDeltas() {
+  const currentKey = `${TRACKER_STORAGE_KEY}_${state.currentFridayStr}`;
   const map = {};
   state.trackerData.forEach(g => g.legs.forEach(l => map[l.id] = l.manualDelta || 0));
   localStorage.setItem(OVERRIDES_STORAGE_KEY, JSON.stringify(map));
-  localStorage.setItem(TRACKER_STORAGE_KEY, JSON.stringify(state.trackerData));
+  localStorage.setItem(currentKey, JSON.stringify(state.trackerData));
 }
 
 function adjustManual(legId, amount) {
@@ -486,51 +618,51 @@ function resetOverrides() {
 }
 
 function loadAragonDemoSlate() {
-  state.trackerData = JSON.parse(JSON.stringify(DEFAULT_OCT16_SLATE));
+  state.trackerData = getSlateForDate(state.currentFridayStr);
   localStorage.removeItem(OVERRIDES_STORAGE_KEY);
   saveTrackerDeltas();
   renderTracker();
   fetchAllLiveStats(true);
-  showToast("Loaded Oct 16 6-Leg Slate!", "🏒");
+  showToast(`Loaded ${state.currentFridayStr} 6-Leg Slate!`, "🏒");
 }
 
 // =============================================================================
 // 7. SQUAD STATS & LEADERBOARD HISTORICAL ENGINE
 // =============================================================================
-const STATS_STORAGE_KEY = "bts_squad_stats_history_v2";
+const STATS_STORAGE_KEY = "bts_squad_stats_history_v3";
 
 const DEFAULT_STATS_HISTORY = [
   {
     weekNum: 1,
-    dateStr: '2026-10-09',
+    dateStr: '2026-10-16',
     bettor: 'Axel',
     stake: 30,
-    totalOdds: '+1250',
+    totalOdds: '+1050',
     result: 'loss', // 5 of 6 hit!
-    notes: 'Axel placed from the States. 5 of 6 hit — Ben missed Bedard 1+ pts and sold the parlay!',
+    notes: 'Axel placed from the States while Jackson was away. 5 of 6 hit — Ben missed his leg and sold the parlay!',
     legs: [
-      { boy: 'Axel', pick: 'Nathan MacKinnon 1+ Points', odds: '-150', result: 'hit' },
-      { boy: 'Jackson', pick: 'Auston Matthews 1+ Goal', odds: '+115', result: 'hit' },
-      { boy: 'Will', pick: 'NY Rangers Moneyline', odds: '-135', result: 'hit' },
+      { boy: 'Axel', pick: 'Brock Nelson 1+ Points', odds: '-140', result: 'hit' },
+      { boy: 'Jackson', pick: 'Pavel Zacha 1+ Points', odds: '+120', result: 'hit' },
+      { boy: 'Will', pick: 'Nathan MacKinnon 4+ SOG', odds: '-130', result: 'hit' },
       { boy: 'Alex', pick: 'David Pastrnak 4+ Shots', odds: '-120', result: 'hit' },
-      { boy: 'Edward', pick: 'Quinn Hughes 1+ Points', odds: '-140', result: 'hit' },
-      { boy: 'Ben', pick: 'Connor Bedard 1+ Points', odds: '-130', result: 'miss' }
+      { boy: 'Edward', pick: 'Cale Makar 1+ Points', odds: '-135', result: 'hit' },
+      { boy: 'Ben', pick: 'Leo Carlsson 1+ Points', odds: '-115', result: 'miss' }
     ]
   },
   {
     weekNum: 2,
-    dateStr: '2026-10-16',
+    dateStr: '2026-10-23',
     bettor: 'Jackson',
     stake: 30,
-    totalOdds: '+1050',
+    totalOdds: '+1150',
     result: 'pending',
-    notes: 'Jackson on deck! $30 pool ticket.',
+    notes: 'Jackson on deck for Week 2! $30 pool ticket across 6 legs.',
     legs: [
-      { boy: 'Axel', pick: 'Brock Nelson 1+ Points', odds: '-140', result: 'pending' },
-      { boy: 'Jackson', pick: 'Pavel Zacha 1+ Points', odds: '+120', result: 'pending' },
-      { boy: 'Will', pick: 'Nathan MacKinnon 4+ SOG', odds: '-130', result: 'pending' },
-      { boy: 'Alex', pick: 'Beckett Sennecke 1+ Points', odds: '+110', result: 'pending' },
-      { boy: 'Ben', pick: 'Leo Carlsson 1+ Points', odds: '-115', result: 'pending' },
+      { boy: 'Axel', pick: 'Cole Caufield 1+ Points', odds: '-135', result: 'pending' },
+      { boy: 'Jackson', pick: 'Connor Bedard 3+ Shots', odds: '-125', result: 'pending' },
+      { boy: 'Will', pick: 'Nikita Kucherov 1+ Points', odds: '-150', result: 'pending' },
+      { boy: 'Alex', pick: 'Nick Suzuki 1+ Points', odds: '-120', result: 'pending' },
+      { boy: 'Ben', pick: 'Nathan MacKinnon 4+ SOG', odds: '-130', result: 'pending' },
       { boy: 'Edward', pick: 'Cale Makar 1+ Points', odds: '-135', result: 'pending' }
     ]
   }
@@ -1175,20 +1307,45 @@ function parseNhlScheduleData(data, targetDateStr) {
 }
 
 function getFallbackGames(dateStr) {
+  if (dateStr === '2026-10-16') {
+    return [
+      {
+        id: 2026020138,
+        startTimeUTC: `${dateStr}T23:00:00Z`,
+        venue: 'Ball Arena',
+        away: { abbrev: 'PIT', name: 'Penguins', place: 'Pittsburgh', logo: 'https://assets.nhle.com/logos/nhl/svg/PIT_light.svg' },
+        home: { abbrev: 'COL', name: 'Avalanche', place: 'Colorado', logo: 'https://assets.nhle.com/logos/nhl/svg/COL_light.svg' }
+      },
+      {
+        id: 2026020139,
+        startTimeUTC: `${dateStr}T02:00:00Z`,
+        venue: 'Honda Center',
+        away: { abbrev: 'BOS', name: 'Bruins', place: 'Boston', logo: 'https://assets.nhle.com/logos/nhl/svg/BOS_light.svg' },
+        home: { abbrev: 'ANA', name: 'Ducks', place: 'Anaheim', logo: 'https://assets.nhle.com/logos/nhl/svg/ANA_light.svg' }
+      }
+    ];
+  }
   return [
     {
-      id: 2026020138,
-      startTimeUTC: `${dateStr}T23:00:00Z`,
+      id: 2026020160,
+      startTimeUTC: `${dateStr}T00:30:00Z`,
+      venue: 'United Center',
+      away: { abbrev: 'MTL', name: 'Canadiens', place: 'Montreal', logo: 'https://assets.nhle.com/logos/nhl/svg/MTL_light.svg' },
+      home: { abbrev: 'CHI', name: 'Blackhawks', place: 'Chicago', logo: 'https://assets.nhle.com/logos/nhl/svg/CHI_light.svg' }
+    },
+    {
+      id: 2026020161,
+      startTimeUTC: `${dateStr}T01:00:00Z`,
       venue: 'Ball Arena',
-      away: { abbrev: 'PIT', name: 'Penguins', place: 'Pittsburgh', logo: 'https://assets.nhle.com/logos/nhl/svg/PIT_light.svg' },
+      away: { abbrev: 'TBL', name: 'Lightning', place: 'Tampa Bay', logo: 'https://assets.nhle.com/logos/nhl/svg/TBL_light.svg' },
       home: { abbrev: 'COL', name: 'Avalanche', place: 'Colorado', logo: 'https://assets.nhle.com/logos/nhl/svg/COL_light.svg' }
     },
     {
-      id: 2026020139,
+      id: 2026020162,
       startTimeUTC: `${dateStr}T02:00:00Z`,
-      venue: 'Honda Center',
-      away: { abbrev: 'BOS', name: 'Bruins', place: 'Boston', logo: 'https://assets.nhle.com/logos/nhl/svg/BOS_light.svg' },
-      home: { abbrev: 'ANA', name: 'Ducks', place: 'Anaheim', logo: 'https://assets.nhle.com/logos/nhl/svg/ANA_light.svg' }
+      venue: 'T-Mobile Arena',
+      away: { abbrev: 'EDM', name: 'Oilers', place: 'Edmonton', logo: 'https://assets.nhle.com/logos/nhl/svg/EDM_light.svg' },
+      home: { abbrev: 'VGK', name: 'Golden Knights', place: 'Vegas', logo: 'https://assets.nhle.com/logos/nhl/svg/VGK_light.svg' }
     }
   ];
 }
@@ -1295,11 +1452,26 @@ function formatGameTime(utcString) {
   }
 }
 
-// =============================================================================
-// 10. LOCAL STORAGE & SUPABASE SYNC
-// =============================================================================
+const DEFAULT_OCT23_PICKS = {
+  Axel: { boy: 'Axel', game: 'MTL @ CHI', betType: 'prop', pick_text: 'Cole Caufield 1+ Points', odds: '-135', chirp: 'Sniper heating up!' },
+  Jackson: { boy: 'Jackson', game: 'MTL @ CHI', betType: 'prop', pick_text: 'Connor Bedard 3+ Shots', odds: '-125', chirp: 'High volume night at United Center' },
+  Will: { boy: 'Will', game: 'TBL @ COL', betType: 'prop', pick_text: 'Nikita Kucherov 1+ Points', odds: '-150', chirp: 'Kuch always produces' },
+  Alex: { boy: 'Alex', game: 'MTL @ CHI', betType: 'prop', pick_text: 'Nick Suzuki 1+ Points', odds: '-120', chirp: 'Captain leads the way' },
+  Ben: { boy: 'Ben', game: 'TBL @ COL', betType: 'prop', pick_text: 'Nathan MacKinnon 4+ SOG', odds: '-130', chirp: 'Redemption week for Ben!' },
+  Edward: { boy: 'Edward', game: 'TBL @ COL', betType: 'prop', pick_text: 'Cale Makar 1+ Points', odds: '-135', chirp: 'Makar power play wizardry' }
+};
+
+const DEFAULT_OCT16_PICKS = {
+  Axel: { boy: 'Axel', game: 'PIT @ COL', betType: 'prop', pick_text: 'Brock Nelson 1+ Points', odds: '-140', chirp: 'Axel locking in from the States' },
+  Jackson: { boy: 'Jackson', game: 'BOS @ ANA', betType: 'prop', pick_text: 'Pavel Zacha 1+ Points', odds: '+120', chirp: 'Top line center duties' },
+  Will: { boy: 'Will', game: 'PIT @ COL', betType: 'prop', pick_text: 'Nathan MacKinnon 4+ Shots', odds: '-130', chirp: 'Puts up 6 shots easily' },
+  Alex: { boy: 'Alex', game: 'BOS @ ANA', betType: 'prop', pick_text: 'Beckett Sennecke 1+ Points', odds: '+110', chirp: 'Rookie phenom power' },
+  Ben: { boy: 'Ben', game: 'BOS @ ANA', betType: 'prop', pick_text: 'Leo Carlsson 1+ Points', odds: '-115', chirp: 'Bounce back performance' },
+  Edward: { boy: 'Edward', game: 'PIT @ COL', betType: 'prop', pick_text: 'Cale Makar 1+ Points', odds: '-135', chirp: 'Welcome Edward to the squad!' }
+};
+
 function loadLocalData(dateStr) {
-  const key = `bet_the_show_${dateStr}`;
+  const key = `bet_the_show_${dateStr}_v3`;
   const saved = localStorage.getItem(key);
   if (saved) {
     try {
@@ -1311,15 +1483,25 @@ function loadLocalData(dateStr) {
     } catch (e) {}
   }
 
-  // Blank by default for Week 2 (6 legs to build)
-  state.legs = {};
-  state.stake = 30;
-  state.isPlaced = false;
+  // Prepopulate if opening default week
+  if (dateStr === '2026-10-23') {
+    state.legs = JSON.parse(JSON.stringify(DEFAULT_OCT23_PICKS));
+    state.stake = 30;
+    state.isPlaced = false;
+  } else if (dateStr === '2026-10-16') {
+    state.legs = JSON.parse(JSON.stringify(DEFAULT_OCT16_PICKS));
+    state.stake = 30;
+    state.isPlaced = true;
+  } else {
+    state.legs = {};
+    state.stake = 30;
+    state.isPlaced = false;
+  }
   saveLocalData(dateStr);
 }
 
 function saveLocalData(dateStr) {
-  const key = `bet_the_show_${dateStr}`;
+  const key = `bet_the_show_${dateStr}_v3`;
   const payload = {
     date: dateStr,
     legs: state.legs,
@@ -1848,6 +2030,7 @@ function setupEvents() {
     state.currentFriday.setDate(state.currentFriday.getDate() - 7);
     state.currentFridayStr = formatDateISO(state.currentFriday);
     loadLocalData(state.currentFridayStr);
+    initTrackerData();
     fetchFridayNhlGames(state.currentFridayStr);
     if (state.supabase) fetchSupabaseParlay(state.currentFridayStr);
     renderAll();
@@ -1858,6 +2041,7 @@ function setupEvents() {
     state.currentFriday.setDate(state.currentFriday.getDate() + 7);
     state.currentFridayStr = formatDateISO(state.currentFriday);
     loadLocalData(state.currentFridayStr);
+    initTrackerData();
     fetchFridayNhlGames(state.currentFridayStr);
     if (state.supabase) fetchSupabaseParlay(state.currentFridayStr);
     renderAll();
@@ -1980,8 +2164,8 @@ function setupEvents() {
 
 // INITIALIZATION
 window.addEventListener('DOMContentLoaded', () => {
-  // Start on Week 2: Friday, October 16, 2026
-  state.currentFriday = new Date('2026-10-16T12:00:00Z');
+  // Automatically rollover every Sunday to the upcoming Friday:
+  state.currentFriday = getActiveFridayDate();
   state.currentFridayStr = formatDateISO(state.currentFriday);
 
   initTrackerData();

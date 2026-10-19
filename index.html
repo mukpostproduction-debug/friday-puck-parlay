@@ -20,27 +20,44 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:ital,wght@0,500;0,600;0,700;0,800;0,900;1,700&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@600;700;800&display=swap" rel="stylesheet" />
 
-  <!-- Supabase JS & Confetti -->
+  <!-- Tailwind CSS & Confetti -->
+  <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
 
-  <link rel="stylesheet" href="style.css?v=2.1" />
+  <link rel="stylesheet" href="style.css?v=2.3" />
 </head>
 <body>
   <!-- TOP GLOBAL NAVIGATION BAR (BET365 / BROADCAST DARK AESTHETIC) -->
   <header class="nhl-header">
     <div class="nhl-nav-inner">
-      <div class="brand-zone">
-        <div class="nhl-shield-badge">
-          <svg viewBox="0 0 32 36" width="22" height="25" fill="none">
-            <path d="M16 2L3 6v14c0 9 13 14 13 14s13-5 13-14V6L16 2z" fill="#0c0d10" stroke="#00ff87" stroke-width="2"/>
-            <path d="M8 12l8-4 8 4-8 16-8-16z" fill="#137a52"/>
-            <text x="16" y="19" font-family="'Barlow Semi Condensed', sans-serif" font-weight="900" font-size="10" fill="#fff" text-anchor="middle">BTS</text>
-          </svg>
+      <div class="nhl-nav-top-row">
+        <div class="brand-zone">
+          <div class="nhl-shield-badge">
+            <svg viewBox="0 0 32 36" width="22" height="25" fill="none">
+              <path d="M16 2L3 6v14c0 9 13 14 13 14s13-5 13-14V6L16 2z" fill="#0c0d10" stroke="#00ff87" stroke-width="2"/>
+              <path d="M8 12l8-4 8 4-8 16-8-16z" fill="#137a52"/>
+              <text x="16" y="19" font-family="'Barlow Semi Condensed', sans-serif" font-weight="900" font-size="10" fill="#fff" text-anchor="middle">BTS</text>
+            </svg>
+          </div>
+          <div class="brand-titles">
+            <h1 class="brand-main">BET THE SHOW</h1>
+            <span class="brand-sub">6-LEG PARLAY • $30 POOL</span>
+          </div>
         </div>
-        <div class="brand-titles">
-          <h1 class="brand-main">BET THE SHOW</h1>
-          <span class="brand-sub">FRIDAY NHL 6-LEG PARLAY • $30 POOL</span>
+
+        <div class="nhl-nav-right">
+          <!-- Live Cloud Sync Badge -->
+          <button id="syncStatusBtn" class="nhl-nav-btn sync-btn live" title="Supabase Cloud Sync is active">
+            <span class="status-dot"></span>
+            <span id="syncStatusText">Cloud Live</span>
+          </button>
+
+          <!-- Install on iPhone CTA -->
+          <button id="installAppBtn" class="nhl-nav-btn install-btn">
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="5" y="2" width="14" height="20" rx="3"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+            <span class="nav-btn-text">App</span>
+          </button>
         </div>
       </div>
 
@@ -48,32 +65,18 @@
       <nav class="view-nav-tabs">
         <button id="tabSlipBuilder" class="view-tab-btn active" data-view="slipBuilderView">
           <span class="tab-icon">📋</span>
-          <span class="tab-label">6-Leg Slip ($30)</span>
+          <span class="tab-label">Slip ($30)</span>
         </button>
         <button id="tabLiveTracker" class="view-tab-btn" data-view="liveTrackerView">
           <span class="live-dot-mini"></span>
           <span class="tab-label">Live Tracker</span>
-          <span class="live-badge-mini" id="navLiveMultiplier">10.50x</span>
+          <span class="live-badge-mini" id="navLiveMultiplier">10.5x</span>
         </button>
         <button id="tabStats" class="view-tab-btn" data-view="statsView">
           <span class="tab-icon">🏆</span>
           <span class="tab-label">Squad Stats</span>
         </button>
       </nav>
-
-      <div class="nhl-nav-right">
-        <!-- Install on iPhone CTA -->
-        <button id="installAppBtn" class="nhl-nav-btn install-btn">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="5" y="2" width="14" height="20" rx="3"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
-          <span class="nav-btn-text">iPhone App</span>
-        </button>
-
-        <!-- Live Cloud Sync Badge -->
-        <button id="syncStatusBtn" class="nhl-nav-btn sync-btn live" title="Supabase Cloud Sync is active">
-          <span class="status-dot"></span>
-          <span id="syncStatusText">Cloud Live</span>
-        </button>
-      </div>
     </div>
   </header>
 
@@ -174,17 +177,6 @@
           <div class="legs-list" id="legsCardsContainer">
             <!-- Dynamically populated for Axel, Jackson, Will, Alex, Ben, Edward -->
           </div>
-
-          <!-- Friday NHL Matchups Explorer Panel -->
-          <div class="matchups-panel b365-card">
-            <div class="matchups-panel-header">
-              <h3 class="panel-heading">FRIDAY'S NHL SCHEDULE & LINES</h3>
-              <span class="panel-sub" id="scheduleDateSubtitle">October 16, 2026</span>
-            </div>
-            <div class="matchups-list" id="matchupsList">
-              <div class="loading-state">Loading Friday games from NHL.com...</div>
-            </div>
-          </div>
         </div>
 
         <!-- RIGHT: AUTHENTIC SPORTSBOOK TICKET -->
@@ -255,6 +247,17 @@
               <!-- 6 weeks listed -->
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- Friday NHL Matchups Explorer Panel (Below workspace) -->
+      <div class="matchups-panel b365-card" style="margin-top: 20px;">
+        <div class="matchups-panel-header">
+          <h3 class="panel-heading">FRIDAY'S NHL SCHEDULE & LINES</h3>
+          <span class="panel-sub" id="scheduleDateSubtitle">October 23, 2026</span>
+        </div>
+        <div class="matchups-list" id="matchupsList">
+          <div class="loading-state">Loading Friday games from NHL.com...</div>
         </div>
       </div>
     </div>
@@ -649,6 +652,6 @@
   <div class="nhl-toast-container" id="toastContainer"></div>
 
   <!-- Main JavaScript Controller -->
-  <script src="app.js?v=2.1"></script>
+  <script src="app.js?v=2.3"></script>
 </body>
 </html>
