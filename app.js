@@ -340,11 +340,45 @@ function switchView(targetViewId, updateHash = true) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+// =============================================================================
+// BESPOKE ATHLETIC SVG ICON ENGINE
+// =============================================================================
+const ICONS = {
+  puck: `<svg class="bts-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="4" x2="16" y2="16"/><path d="M16 16l3-1a1.5 1.5 0 0 1 1.8 1.8l-1 3"/><line x1="20" y1="4" x2="8" y2="16"/><path d="M8 16l-3-1a1.5 1.5 0 0 0-1.8 1.8l1 3"/><ellipse cx="12" cy="19" rx="3" ry="1.5" fill="currentColor"/></svg>`,
+  slip: `<svg class="bts-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>`,
+  trophy: `<svg class="bts-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H3a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3"/><path d="M18 9h3a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-3"/><path d="M6 3h12v7a6 6 0 0 1-12 0V3z"/><path d="M12 16v4"/><path d="M8 20h8"/></svg>`,
+  crown: `<svg class="bts-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4l3 12h14l3-12-5 4-5-6-5 6-5-4z"/><circle cx="12" cy="18" r="1" fill="currentColor"/><circle cx="6" cy="18" r="1" fill="currentColor"/><circle cx="18" cy="18" r="1" fill="currentColor"/></svg>`,
+  check: `<svg class="bts-icon" viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
+  checkCircle: `<svg class="bts-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`,
+  cross: `<svg class="bts-icon" viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
+  clock: `<svg class="bts-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
+  quote: `<svg class="bts-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`,
+  fire: `<svg class="bts-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c.5 3 2.5 5 4.5 7.5 2 2.5 2.5 5 1.5 7.5-1 2.5-3.5 4-6 4s-5-1.5-6-4c-1-2.5-.5-5 1.5-7.5C9.5 7 11.5 5 12 2z"/><path d="M12 13c-.5 1-1.5 2-1.5 3 0 1.1.9 2 2 2s2-.9 2-2c0-1-1-2-1.5-3z" fill="currentColor"/></svg>`,
+  sniper: `<svg class="bts-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><line x1="12" y1="1" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="1" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="23" y2="12"/></svg>`,
+  frost: `<svg class="bts-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="22"/><line x1="3.34" y1="7" x2="20.66" y2="17"/><line x1="3.34" y1="17" x2="20.66" y2="7"/><polyline points="9 4 12 7 15 4"/><polyline points="9 20 12 17 15 20"/><polyline points="4 10 7 12 5 15"/><polyline points="20 14 17 12 19 9"/></svg>`,
+  rocket: `<svg class="bts-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/></svg>`,
+  shield: `<svg class="bts-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`,
+  spark: `<svg class="bts-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
+  refresh: `<svg class="bts-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>`,
+  bolt: `<svg class="bts-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" fill="currentColor"/></svg>`,
+  alert: `<svg class="bts-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+  trash: `<svg class="bts-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>`,
+  stats: `<svg class="bts-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>`,
+  chat: `<svg class="bts-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`
+};
+
+function getIcon(name, extraClass = '') {
+  const svg = ICONS[name] || ICONS.puck;
+  if (!extraClass) return svg;
+  return svg.replace('class="bts-icon"', `class="bts-icon ${extraClass}"`);
+}
+
 // TOAST NOTIFICATIONS
-function showToast(message, icon = '🏒') {
+function showToast(message, iconKey = 'puck') {
   const toast = document.createElement('div');
   toast.className = 'nhl-toast';
-  toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
+  const iconSvg = ICONS[iconKey] || (typeof iconKey === 'string' && iconKey.startsWith('<svg') ? iconKey : ICONS.puck);
+  toast.innerHTML = `<span class="nhl-toast-icon">${iconSvg}</span> <span>${message}</span>`;
   DOM.toastContainer.appendChild(toast);
   setTimeout(() => {
     toast.style.opacity = '0';
@@ -609,7 +643,7 @@ function resetOverrides() {
   state.trackerData.forEach(g => g.legs.forEach(l => l.manualDelta = 0));
   saveTrackerDeltas();
   renderTracker();
-  showToast("Manual adjustments reset", "🔄");
+  showToast("Manual adjustments reset", "refresh");
 }
 
 function loadAragonDemoSlate() {
@@ -618,7 +652,7 @@ function loadAragonDemoSlate() {
   saveTrackerDeltas();
   renderTracker();
   fetchAllLiveStats(true);
-  showToast(`Loaded ${state.currentFridayStr} 6-Leg Slate!`, "🏒");
+  showToast(`Loaded ${state.currentFridayStr} 6-Leg Slate!`, "puck");
 }
 
 // =============================================================================
@@ -683,7 +717,7 @@ function resetStatsHistory() {
     state.statsHistory = JSON.parse(JSON.stringify(DEFAULT_STATS_HISTORY));
     saveStatsHistory();
     renderStatsView();
-    showToast("Stats reset to baseline", "📊");
+    showToast("Stats reset to baseline", "stats");
   }
 }
 
@@ -854,15 +888,15 @@ function renderStatsView() {
     const isDebut = p.total === 0;
 
     if (isDebut) {
-      titlePill = '<span class="title-tag-pill" style="background:#262a2f; color:#a1a1aa; border-color:#383f47;">🆕 Week 2 Debut</span>';
+      titlePill = `<span class="title-tag-pill" style="background:#262a2f; color:#a1a1aa; border-color:#383f47;">${getIcon('spark')} Week 2 Debut</span>`;
     } else if (p.name === data.sniper?.name && p.hits > 0) {
-      titlePill = '<span class="title-tag-pill sniper">🎯 Sniper</span>';
+      titlePill = `<span class="title-tag-pill sniper">${getIcon('sniper')} Sniper</span>`;
     } else if (p.name === data.slumpKing?.name && p.misses > 0) {
-      titlePill = '<span class="title-tag-pill slump">🥶 Slump King</span>';
+      titlePill = `<span class="title-tag-pill slump">${getIcon('frost')} Slump King</span>`;
     } else if (p.name === data.longshotKing?.name && p.maxWinningOdds > 0) {
-      titlePill = '<span class="title-tag-pill hot">🚀 Longshot</span>';
+      titlePill = `<span class="title-tag-pill hot">${getIcon('rocket')} Longshot</span>`;
     } else if (p.name === data.chalkMerchant?.name) {
-      titlePill = '<span class="title-tag-pill chalk">🍦 Chalk</span>';
+      titlePill = `<span class="title-tag-pill chalk">${getIcon('shield')} Chalk</span>`;
     }
 
     const streakDisplay = isDebut ? '--' : (p.streak > 0 ? `${p.streakType}${p.streak}` : '--');
@@ -905,7 +939,7 @@ function renderStatsView() {
     const isWin = week.result === 'win';
     const isLoss = week.result === 'loss';
     const statusText = isWin
-      ? '🎉 TICKET CASHED!'
+      ? `${getIcon('checkCircle')} TICKET CASHED!`
       : (isLoss ? `PARLAY SOLD (${hitsCount}/${totalLegs} HITS)` : `IN PROGRESS (WEEK ${week.weekNum})`);
     const statusClass = isWin ? 'win' : (isLoss ? 'loss' : 'in-progress');
 
@@ -930,8 +964,8 @@ function renderStatsView() {
               <div class="h-leg-toggle-row">
                 <span class="text-[11px] text-zinc-400">Result:</span>
                 <div class="leg-grade-toggle">
-                  <button onclick="toggleLegResult(${wIdx}, ${lIdx}, 'hit')" class="grade-btn hit ${leg.result === 'hit' ? 'active' : ''}">✓ HIT</button>
-                  <button onclick="toggleLegResult(${wIdx}, ${lIdx}, 'miss')" class="grade-btn miss ${leg.result === 'miss' ? 'active' : ''}">✗ MISS</button>
+                  <button onclick="toggleLegResult(${wIdx}, ${lIdx}, 'hit')" class="grade-btn hit ${leg.result === 'hit' ? 'active' : ''}">${getIcon('check')} HIT</button>
+                  <button onclick="toggleLegResult(${wIdx}, ${lIdx}, 'miss')" class="grade-btn miss ${leg.result === 'miss' ? 'active' : ''}">${getIcon('cross')} MISS</button>
                 </div>
               </div>
             </div>
@@ -996,7 +1030,7 @@ function renderTracker() {
             <div class="tracker-leg-card ${isHit ? 'hit' : ''}">
               <div class="tracker-leg-header-row">
                 <div class="tracker-leg-person">
-                  <div class="tracker-hit-indicator">✓</div>
+                  <div class="tracker-hit-indicator">${getIcon('check')}</div>
                   <span class="tracker-boy-pill">${leg.boyName || 'SQUAD'}</span>
                   <span class="tracker-player-title">${leg.playerName}</span>
                 </div>
@@ -1054,7 +1088,7 @@ function renderTracker() {
   DOM.navLiveMultiplier.textContent = `${totalOddsMulti.toFixed(2)}x`;
 
   if (hitLegs === totalLegs && totalLegs > 0) {
-    DOM.ticketStatusBanner.textContent = `🎉 ALL ${totalLegs} LEGS HIT! PAYOUT: $${payout}`;
+    DOM.ticketStatusBanner.innerHTML = `<span class="banner-icon-wrap">${getIcon('trophy')}</span> ALL ${totalLegs} LEGS HIT! PAYOUT: $${payout}`;
     DOM.ticketStatusBanner.className = "tracker-cashout-btn all-hit";
   } else {
     DOM.ticketStatusBanner.textContent = `Cash Out $${state.stake.toFixed(2)} • ${hitLegs} of ${totalLegs} Legs Hit`;
@@ -1436,7 +1470,7 @@ function populateGameSelect(games) {
   });
   const customOpt = document.createElement('option');
   customOpt.value = 'Custom NHL Matchup';
-  customOpt.textContent = '✏️ Custom / Other NHL Game';
+  customOpt.textContent = 'Custom / Other NHL Game';
   DOM.gameSelect.appendChild(customOpt);
 }
 
@@ -1464,7 +1498,7 @@ const DEFAULT_OCT16_PICKS = {
   Jackson: { boy: 'Jackson', game: 'PIT @ COL', betType: 'prop', pick_text: 'Nathan MacKinnon 4+ Shots', odds: '-130', chirp: 'High volume night in Denver' },
   Will: { boy: 'Will', game: 'BOS @ ANA', betType: 'prop', pick_text: 'Pavel Zacha 1+ Points', odds: '+120', chirp: 'Top line center duties' },
   Alex: { boy: 'Alex', game: 'BOS @ ANA', betType: 'prop', pick_text: 'Beckett Sennecke 1+ Points', odds: '+110', chirp: 'Rookie phenom power' },
-  Ben: { boy: 'Ben', game: 'BOS @ ANA', betType: 'prop', pick_text: 'Leo Carlsson 1+ Points', odds: '-115', chirp: 'Sold the parlay 🤦‍♂️' }
+  Ben: { boy: 'Ben', game: 'BOS @ ANA', betType: 'prop', pick_text: 'Leo Carlsson 1+ Points', odds: '-115', chirp: 'Sold the parlay' }
 };
 
 function loadLocalData(dateStr) {
@@ -1571,7 +1605,7 @@ function setupSupabaseRealtime() {
           saveLocalData(state.currentFridayStr);
           playSound('lock');
           renderAll();
-          showToast(`${row.user_name} locked in their pick live!`, '🔥');
+          showToast(`${row.user_name} locked in their pick live!`, 'fire');
         }
       })
       .subscribe();
@@ -1620,7 +1654,7 @@ async function deleteLeg(userName) {
     }
   }
   renderAll();
-  showToast(`Removed ${userName}'s pick`, '🗑️');
+  showToast(`Removed ${userName}'s pick`, 'trash');
 }
 
 // =============================================================================
@@ -1664,13 +1698,13 @@ function renderSquadLegs() {
               <div>
                 <div style="display: flex; align-items: center;">
                   <span class="boy-name-text">${boy.name}</span>
-                  ${isBettor ? '<span class="bettor-tag-inline">👑 BETTOR ON DECK</span>' : ''}
+                  ${isBettor ? `<span class="bettor-tag-inline">${getIcon('crown')} BETTOR ON DECK</span>` : ''}
                 </div>
                 <div class="boy-sub-role">${leg.bet_type || 'NHL Pick'}</div>
               </div>
             </div>
 
-            <span class="leg-status-tag locked">✓ LOCKED IN</span>
+            <span class="leg-status-tag locked">${getIcon('check')} LOCKED IN</span>
           </div>
 
           <div class="leg-pick-box">
@@ -1686,7 +1720,7 @@ function renderSquadLegs() {
 
           ${leg.chirp ? `
             <div class="leg-chirp-row">
-              <span>💬</span>
+              <span class="leg-chirp-icon">${getIcon('quote')}</span>
               <span>"${escapeHTML(leg.chirp)}"</span>
             </div>
           ` : ''}
@@ -1710,13 +1744,13 @@ function renderSquadLegs() {
               <div>
                 <div style="display: flex; align-items: center;">
                   <span class="boy-name-text">${boy.name}</span>
-                  ${isBettor ? '<span class="bettor-tag-inline">👑 BETTOR ON DECK</span>' : ''}
+                  ${isBettor ? `<span class="bettor-tag-inline">${getIcon('crown')} BETTOR ON DECK</span>` : ''}
                 </div>
                 <div class="boy-sub-role">Waiting on ${boy.name}'s leg ($5 share)</div>
               </div>
             </div>
 
-            <span class="leg-status-tag waiting">⏳ PENDING</span>
+            <span class="leg-status-tag waiting">${getIcon('clock')} PENDING</span>
           </div>
 
           <div class="empty-action-row">
@@ -1767,7 +1801,7 @@ function renderBettorBanner() {
   DOM.slipProgressBar.style.width = `${(legsCount / 6) * 100}%`;
 
   if (legsCount === 6) {
-    DOM.slipStatusMsg.textContent = `🔥 All 6 legs locked in! ${bettor.name} is clear to submit the $30 ticket to the book!`;
+    DOM.slipStatusMsg.innerHTML = `<span class="msg-icon">${getIcon('fire')}</span> All 6 legs locked in! ${bettor.name} is clear to submit the $30 ticket to the book!`;
     DOM.slipStatusMsg.style.color = 'var(--b365-green)';
   } else if (legsCount === 0) {
     DOM.slipStatusMsg.textContent = `No picks locked in yet for Week 2. Let's build the $30 ticket!`;
@@ -1786,12 +1820,12 @@ function updateCountdown() {
   const diff = target - new Date();
 
   if (diff <= 0) {
-    DOM.puckDropCountdown.textContent = '🏒 Puck Drop Live / Completed';
+    DOM.puckDropCountdown.innerHTML = `<span class="msg-icon">${getIcon('puck')}</span> Puck Drop Live / Completed`;
   } else {
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    DOM.puckDropCountdown.textContent = `⏳ ${days}d ${hours}h ${mins}m until Friday puck drop`;
+    DOM.puckDropCountdown.innerHTML = `<span class="msg-icon">${getIcon('clock')}</span> ${days}d ${hours}h ${mins}m until Friday puck drop`;
   }
 }
 
@@ -1838,7 +1872,7 @@ function renderSportsbookTicket() {
   if (state.isPlaced) {
     DOM.markPlacedBtn.classList.remove('outline');
     DOM.markPlacedBtn.classList.add('b365-btn-green');
-    DOM.markPlacedText.textContent = `✓ Bet Placed • Click to View Live Tracker 🟢`;
+    DOM.markPlacedText.innerHTML = `<span class="bts-icon" style="margin-right:4px;">${getIcon('check')}</span> Bet Placed • Click to View Live Tracker <span class="placed-dot-pulsing"></span>`;
   } else {
     const bettor = getBettorForFriday(state.currentFriday);
     DOM.markPlacedBtn.classList.add('b365-btn-green');
@@ -1869,7 +1903,7 @@ function renderRotationSchedule() {
         </div>
         <div style="display: flex; align-items: center; gap: 6px;">
           <span class="rot-bettor-name">${bettor.name}</span>
-          ${isCurrent ? '<span style="color: var(--b365-green); font-weight: 800;">👑 ON DECK</span>' : ''}
+          ${isCurrent ? `<span class="on-deck-rot-tag">${getIcon('crown')} ON DECK</span>` : ''}
         </div>
       </div>
     `;
@@ -1957,29 +1991,29 @@ function copySlipForSportsbook() {
   const totals = calculateParlayTotals(legsList, state.stake);
   const dateFormatted = formatDateDisplay(state.currentFriday);
 
-  let text = `🏒 BET THE SHOW: FRIDAY NHL 6-LEGGER (${dateFormatted})\n`;
-  text += `👤 Bettor On Deck: ${bettor.name} ($${state.stake} Pool Stake • $5/Boy)\n`;
-  text += `🔥 ${totals.count}/6 Legs Locked In:\n\n`;
+  let text = `[BET THE SHOW] FRIDAY NHL 6-LEGGER (${dateFormatted})\n`;
+  text += `Bettor On Deck: ${bettor.name} ($${state.stake} Pool Stake • $5/Boy)\n`;
+  text += `${totals.count}/6 Legs Locked In:\n\n`;
 
   SQUAD.forEach((boy, idx) => {
     const leg = state.legs[boy.name];
     if (leg && leg.odds) {
       text += `${idx + 1}. ${boy.name}: ${leg.pick_text} (${leg.odds})\n`;
-      if (leg.chirp) text += `   💬 "${leg.chirp}"\n`;
+      if (leg.chirp) text += `   • "${leg.chirp}"\n`;
     } else {
       text += `${idx + 1}. ${boy.name}: [WAITING ON PICK]\n`;
     }
   });
 
   text += `\n-------------------------------\n`;
-  text += `💰 Total Combined Odds: ${totals.american} (${totals.decimal.toFixed(2)}x)\n`;
-  text += `💵 Potential Payout: $${totals.payout.toFixed(2)} (+$${totals.profit.toFixed(2)} profit)\n`;
-  text += `📱 View Live Slip: https://mukpostproduction-debug.github.io/friday-puck-parlay/\n`;
+  text += `Total Combined Odds: ${totals.american} (${totals.decimal.toFixed(2)}x)\n`;
+  text += `Potential Payout: $${totals.payout.toFixed(2)} (+$${totals.profit.toFixed(2)} profit)\n`;
+  text += `Live Slip: https://mukpostproduction-debug.github.io/friday-puck-parlay/\n`;
 
   navigator.clipboard.writeText(text).then(() => {
     playSound('triumph');
     if (window.confetti) confetti({ particleCount: 80, spread: 60, origin: { y: 0.85 } });
-    showToast('6-Leg Slip copied! Ready to paste into sportsbook or chat', '📋');
+    showToast('6-Leg Slip copied! Ready to paste into sportsbook or chat', 'slip');
   });
 }
 
@@ -1990,21 +2024,21 @@ function generateGroupChirp() {
 
   let msg = '';
   if (missing.length === 0) {
-    msg = `🚨 ALL 6 LEGS ARE LOCKED IN FOR THE SHOW! 👑 @${bettor.name} is on deck to place the $30 ticket on his sportsbook right now! Let's get that bag boys 🏒💰`;
+    msg = `[BET THE SHOW] ALL 6 LEGS ARE LOCKED IN! @${bettor.name} is on deck to place the $30 ticket on his sportsbook right now! Let's get that bag boys.`;
   } else {
     const names = missing.map(b => `@${b.name}`).join(', ');
     const insults = [
-      `Lock in your Friday leg before puck drop! 🏒⏰`,
-      `Stop sleeping and get your picks in. Don't sell our parlay! 🎯`,
-      `We need the final legs before Friday puck drop. Lock it down! 💥`
+      `Lock in your Friday leg before puck drop!`,
+      `Stop sleeping and get your picks in. Don't sell our parlay!`,
+      `We need the final legs before Friday puck drop. Lock it down!`
     ];
     const pickInsult = insults[Math.floor(Math.random() * insults.length)];
-    msg = `🏒 BET THE SHOW ALERT: ${names} — ${pickInsult} (Bettor this week: ${bettor.name})`;
+    msg = `[BET THE SHOW ALERT] ${names} — ${pickInsult} (Bettor this week: ${bettor.name})`;
   }
 
   navigator.clipboard.writeText(msg).then(() => {
     playSound('click');
-    showToast('Chirp message copied! Paste in group chat 📱', '💬');
+    showToast('Chirp message copied! Paste in group chat', 'chat');
   });
 }
 
@@ -2086,12 +2120,12 @@ function setupEvents() {
     if (state.isPlaced) {
       if (window.confetti) confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
       playSound('triumph');
-      showToast('Bet placed on sportsbook! Switching to Live Tracker 🏒🟢', '✅');
+      showToast('Bet placed on sportsbook! Switching to Live Tracker', 'checkCircle');
       setTimeout(() => {
         switchView('liveTrackerView');
       }, 350);
     } else {
-      showToast('Bet marked as unplaced', 'ℹ️');
+      showToast('Bet marked as unplaced', 'puck');
     }
   });
 
@@ -2121,7 +2155,7 @@ function setupEvents() {
     const chirp = DOM.chirpInput.value.trim();
 
     if (!userName || !pickText || !odds) {
-      showToast('Please fill in pick and odds', '⚠️');
+      showToast('Please fill in pick and odds', 'alert');
       return;
     }
 
@@ -2139,7 +2173,7 @@ function setupEvents() {
     closeLegModal();
     playSound('lock');
     renderAll();
-    showToast(`Locked in ${userName}'s leg! 🔥`, '🏒');
+    showToast(`Locked in ${userName}'s leg!`, 'fire');
 
     if (Object.keys(state.legs).length === 6 && window.confetti) {
       setTimeout(() => {
@@ -2174,7 +2208,7 @@ function setupEvents() {
       localStorage.setItem('bts_supabase_key', key);
       initSupabase();
       DOM.syncModalBackdrop.classList.remove('open');
-      showToast('Connected to Supabase!', '⚡');
+      showToast('Connected to Supabase!', 'bolt');
     }
   });
 }

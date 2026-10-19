@@ -712,7 +712,15 @@ body {
 }
 
 .section-icon {
-  font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--b365-green);
+}
+
+.section-icon svg {
+  width: 16px;
+  height: 16px;
 }
 
 .col-title {
@@ -804,6 +812,15 @@ body {
   padding: 1px 6px;
   border-radius: 4px;
   margin-left: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.bettor-tag-inline svg {
+  width: 11px;
+  height: 11px;
+  color: var(--gold-odds);
 }
 
 .leg-status-tag {
@@ -814,6 +831,14 @@ body {
   padding: 2px 7px;
   border-radius: var(--radius-xs);
   text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.leg-status-tag svg {
+  width: 10px;
+  height: 10px;
 }
 
 .leg-status-tag.locked {
@@ -1979,8 +2004,45 @@ body {
 }
 
 .trophy-icon-wrap {
-  font-size: 2rem;
-  line-height: 1;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.trophy-icon-wrap svg {
+  width: 24px;
+  height: 24px;
+}
+
+.trophy-card.sniper .trophy-icon-wrap {
+  background: rgba(0, 255, 135, 0.1);
+  border-color: rgba(0, 255, 135, 0.28);
+  color: var(--b365-green);
+}
+
+.trophy-card.slump .trophy-icon-wrap {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.28);
+  color: #ef4444;
+}
+
+.trophy-card.longshot .trophy-icon-wrap {
+  background: rgba(255, 215, 0, 0.1);
+  border-color: rgba(255, 215, 0, 0.28);
+  color: var(--gold-odds);
+}
+
+.trophy-card.chalk .trophy-icon-wrap {
+  background: rgba(56, 189, 248, 0.1);
+  border-color: rgba(56, 189, 248, 0.28);
+  color: #38bdf8;
 }
 
 .trophy-badge-label {
@@ -2166,6 +2228,14 @@ body {
   padding: 2px 8px;
   border-radius: 4px;
   text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.title-tag-pill svg {
+  width: 11px;
+  height: 11px;
 }
 
 .title-tag-pill.sniper {
@@ -2699,6 +2769,113 @@ body {
   to { transform: translateX(0); opacity: 1; }
 }
 
+.nhl-toast-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--b365-green);
+  flex-shrink: 0;
+}
+
+.nhl-toast-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ATHLETIC BESPOKE ICON SYSTEM */
+.bts-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+.tag-icon-svg {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gold-odds);
+  margin-right: 4px;
+}
+
+.share-icon-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  padding: 1px 4px;
+  color: #fff;
+  margin: 0 2px;
+}
+
+.placed-dot-pulsing {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--b365-green);
+  box-shadow: 0 0 8px var(--b365-green);
+  animation: pulseLiveDot 1.5s infinite;
+  margin-left: 5px;
+  vertical-align: middle;
+}
+
+.on-deck-rot-tag {
+  color: var(--b365-green);
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.msg-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  margin-right: 4px;
+}
+
+.msg-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.banner-icon-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+.banner-icon-wrap svg {
+  width: 18px;
+  height: 18px;
+  color: var(--gold-odds);
+}
+
+.leg-chirp-row .leg-chirp-icon {
+  display: inline-flex;
+  color: var(--gold-odds);
+  flex-shrink: 0;
+}
+
+.legend-pill svg {
+  width: 10px;
+  height: 10px;
+  margin-right: 3px;
+}
+
+.grade-btn svg {
+  width: 10px;
+  height: 10px;
+  margin-right: 3px;
+}
+
 .app-icon-preview-banner {
   display: flex;
   align-items: center;
@@ -2805,7 +2982,13 @@ body {
     gap: 3px;
   }
   .tab-icon {
-    font-size: 0.8rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .tab-icon svg {
+    width: 13px;
+    height: 13px;
   }
   .live-badge-mini {
     padding: 1px 4px;
