@@ -147,6 +147,16 @@ function formatDateDisplay(date) {
   });
 }
 
+function formatWeekDateStr(str) {
+  if (!str) return '';
+  const parts = str.split('-');
+  if (parts.length === 3) {
+    const d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+  return str;
+}
+
 // ODDS CONVERSION & PARLAY MATH
 function americanToDecimal(odds) {
   const num = parseFloat(odds);
@@ -1288,7 +1298,7 @@ function renderStatsView() {
       <div class="history-week-card">
         <div class="history-week-header">
           <div>
-            <span class="h-week-title">WEEK ${week.weekNum} • ${week.dateStr}</span>
+            <span class="h-week-title">WEEK ${week.weekNum} • ${formatWeekDateStr(week.dateStr)}</span>
             <div class="h-bettor-badge">Bettor: <strong>${week.bettor}</strong> • $${week.stake}.00 Stake • Odds: ${week.totalOdds}</div>
           </div>
           <span class="h-result-badge ${statusClass}">${statusText}</span>
