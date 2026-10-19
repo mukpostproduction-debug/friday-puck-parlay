@@ -1,45 +1,66 @@
 /* ==========================================================================
-   BET THE SHOW - BET365 / SPORTS BROADCAST DARK DESIGN SYSTEM
-   Aesthetic: Premium Bet365 Dark Sportsbook • Neon Green (#00ff87) • Crisp Athletic Cards
+   BET THE SHOW - OFFICIAL NHL APP & NHL.COM DESIGN SYSTEM
+   Aesthetic: Clean White Canvas • High-Contrast Black Typography
+   Gray Sub-Boxes & Metadata Badges • NHL League Navy & Athletic Highlights
+   Directly modeled on NHL App (Standings, Scores, Players to Watch, Stats)
    ========================================================================== */
 
 :root {
-  /* Bet365 / Dark Sportsbook Color Palette */
-  --nhl-black: #121212;
-  --nhl-dark-carbon: #16191c;
-  --nhl-card-bg: #1e2124;
-  --nhl-card-hover: #262a2f;
-  --nhl-subcard: #282c31;
-  --nhl-surface-light: #2c3239;
-  --nhl-input-bg: #14171a;
+  /* Official NHL App Light Color System */
+  --nhl-bg: #f4f5f8;
+  --nhl-black: #111418;
+  --nhl-card-bg: #ffffff;
+  --nhl-card-hover: #fafbfc;
+  --nhl-subcard: #f0f2f5;          /* Signature gray box behind black text */
+  --nhl-subcard-hover: #e6e9ee;
+  --nhl-surface-light: #e8ecf1;
+  --nhl-input-bg: #ffffff;
+  --nhl-input-border: #d0d5dd;
 
-  /* Borders */
-  --border-subtle: #2c3136;
-  --border-medium: #383f47;
-  --border-active: #00ff87;
-  --border-gold: #b45309;
+  /* Borders & Dividers */
+  --border-subtle: #e2e5ea;        /* Clean 1px card/divider borders */
+  --border-medium: #cbd2db;
+  --border-active: #111418;
+  --border-gold: #ecd499;
 
-  /* Bet365 Green & Athletic Accents */
-  --b365-green: #00ff87;
-  --b365-btn-green: #137a52;
-  --b365-btn-green-hover: #179363;
-  --green-win: #00ff87;
-  --green-win-dark: #0f5132;
-  --gold-odds: #f59e0b;
-  --nhl-blue: #0066cc;
-  --nhl-blue-bright: #38bdf8;
-  --red-alert: #ef4444;
-  --red-dark: #7f1d1d;
+  /* NHL League Blue & Brand Accents */
+  --nhl-blue: #02509e;             /* Official NHL Deep Blue */
+  --nhl-blue-bright: #0077e6;
+  --nhl-blue-subtle: #e8f1fc;      /* Soft blue pill background */
+  --nhl-blue-border: #bcd0ea;
+
+  /* Status Colors (Clean Sports Badges) */
+  --green-win: #0d8050;            /* Athletic Win Green */
+  --green-win-light: #e6f6ee;      /* Soft mint pill */
+  --green-win-border: #a3e0bf;
+  --red-alert: #d93025;            /* Athletic Loss Red */
+  --red-alert-light: #fdeeed;      /* Soft red pill */
+  --red-alert-border: #f8b4af;
+  --gold-odds: #946300;            /* Warm Trophy Gold */
+  --gold-odds-bg: #fff8e6;
+  --gold-odds-border: #ecd499;
+
+  /* Legacy variable mappings (guarantees dynamic app.js elements render perfectly) */
+  --b365-green: #0d8050;
+  --b365-btn-green: #111418;
+  --b365-btn-green-hover: #2b313a;
+  --nhl-dark-carbon: #ffffff;
 
   /* Typography */
-  --font-sports: 'Barlow Semi Condensed', -apple-system, sans-serif;
-  --font-ui: 'Inter', -apple-system, sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --font-sports: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Barlow Semi Condensed', 'Inter', sans-serif;
+  --font-ui: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
   /* Text Colors */
-  --text-main: #f1f1f1;
-  --text-secondary: #a1a1aa;
-  --text-muted: #71717a;
+  --text-main: #111418;            /* Crisp, authoritative black */
+  --text-secondary: #5f6874;       /* Clean gray subtext */
+  --text-muted: #8a94a0;           /* Muted column headers & captions */
+  --text-light: #ffffff;
+
+  /* Elevation */
+  --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+  --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-floating: 0 12px 32px rgba(0, 0, 0, 0.12);
 
   /* Layout */
   --max-width: 1260px;
@@ -47,9 +68,12 @@
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
+  --radius-pill: 9999px;
 }
 
-/* Base Reset */
+/* ==========================================================================
+   BASE RESET & CANVAS
+   ========================================================================== */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -65,7 +89,7 @@ html, body {
 
 body {
   font-family: var(--font-ui);
-  background-color: var(--nhl-black);
+  background-color: var(--nhl-bg);
   color: var(--text-main);
   min-height: 100vh;
   line-height: 1.45;
@@ -73,24 +97,27 @@ body {
   padding-bottom: max(60px, env(safe-area-inset-bottom, 20px));
 }
 
-/* Utility Bet365 Classes */
+/* ==========================================================================
+   NHL UTILITY CLASSES
+   ========================================================================== */
 .b365-card {
   background-color: var(--nhl-card-bg);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
+  box-shadow: var(--shadow-subtle);
 }
 
 .b365-subcard {
   background-color: var(--nhl-subcard);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-subtle);
 }
 
 .b365-green {
-  color: var(--b365-green) !important;
+  color: var(--green-win) !important;
 }
 
 .b365-btn-green {
-  background-color: var(--b365-btn-green);
+  background-color: var(--nhl-black);
   color: #ffffff;
   transition: all 0.15s ease;
 }
@@ -117,9 +144,9 @@ body {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background-color: var(--b365-green);
+  background-color: var(--red-alert);
   animation: pulse-dot 1.8s infinite;
-  box-shadow: 0 0 6px var(--b365-green);
+  box-shadow: 0 0 6px rgba(217, 48, 37, 0.4);
 }
 
 /* App View Containers */
@@ -133,28 +160,30 @@ body {
 }
 
 @keyframes fadeInView {
-  from { opacity: 0; transform: translateY(6px); }
+  from { opacity: 0; transform: translateY(4px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* 1. TOP GLOBAL NAVIGATION BAR */
+/* ==========================================================================
+   1. TOP GLOBAL NAVIGATION BAR (OFFICIAL NHL APP AESTHETIC)
+   ========================================================================== */
 .nhl-header {
   position: sticky;
   top: 0;
   z-index: 100;
-  background-color: #14171a;
-  border-bottom: 2px solid var(--border-subtle);
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4);
+  background-color: #ffffff;
+  border-bottom: 1px solid var(--border-subtle);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
   padding-top: 10px;
 }
 
 .nhl-nav-inner {
   max-width: var(--max-width);
   margin: 0 auto;
-  padding: 6px 14px 10px;
+  padding: 6px 16px 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .nhl-nav-top-row {
@@ -167,7 +196,7 @@ body {
 .brand-zone {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   flex-shrink: 0;
 }
 
@@ -175,6 +204,13 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.nhl-shield-badge img,
+.nhl-shield-badge svg {
+  width: 28px;
+  height: 32px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15));
 }
 
 .brand-titles {
@@ -186,88 +222,94 @@ body {
   font-family: var(--font-sports);
   font-size: 1.35rem;
   font-weight: 900;
-  font-style: italic;
-  letter-spacing: 0.5px;
-  color: #ffffff;
-  line-height: 1;
+  letter-spacing: -0.3px;
+  color: var(--nhl-black);
+  line-height: 1.05;
   text-transform: uppercase;
 }
 
 .brand-sub {
   font-family: var(--font-sports);
-  font-size: 0.65rem;
+  font-size: 0.68rem;
   font-weight: 700;
-  letter-spacing: 1px;
-  color: var(--b365-green);
+  letter-spacing: 0.6px;
+  color: var(--text-secondary);
   text-transform: uppercase;
   margin-top: 2px;
 }
 
-/* VIEW NAVIGATION TABS (SEGMENTED TABS) */
+/* Segmented View Tabs (Matching NHL App Standings & Stats Sub-Tabs) */
 .view-nav-tabs {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  display: flex;
+  align-items: center;
   width: 100%;
-  gap: 4px;
-  background: #0f1214;
-  padding: 3px;
-  border-radius: 10px;
-  border: 1px solid var(--border-subtle);
+  gap: 8px;
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  border: none;
+  border-bottom: 1px solid var(--border-subtle);
+  margin-top: 4px;
 }
 
 .view-tab-btn {
-  width: 100%;
+  flex: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  padding: 7px 4px;
-  border-radius: 7px;
+  gap: 6px;
+  padding: 10px 12px 11px;
   border: none;
+  border-bottom: 3px solid transparent;
   background: transparent;
   color: var(--text-secondary);
   font-family: var(--font-sports);
-  font-size: 0.8rem;
-  font-weight: 800;
-  letter-spacing: 0.3px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.2px;
   cursor: pointer;
   transition: all 0.15s ease;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .view-tab-btn:hover {
-  color: #ffffff;
-  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-main);
+  background: rgba(0, 0, 0, 0.02);
 }
 
 .view-tab-btn.active {
-  background: #1e2227;
-  color: #ffffff;
-  border: 1px solid var(--border-medium);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  background: transparent;
+  color: var(--text-main);
+  border-bottom: 3px solid var(--nhl-black);
+  box-shadow: none;
 }
 
 .view-tab-btn.active .tab-label {
-  color: #ffffff;
+  color: var(--text-main);
+  font-weight: 800;
 }
 
 .live-badge-mini {
-  font-size: 0.65rem;
+  font-size: 0.68rem;
   font-weight: 800;
   font-family: var(--font-mono);
-  background: rgba(0, 255, 135, 0.15);
-  color: var(--b365-green);
-  border: 1px solid rgba(0, 255, 135, 0.35);
-  padding: 1px 5px;
+  background: var(--nhl-subcard);
+  color: var(--text-main);
+  border: 1px solid var(--border-subtle);
+  padding: 2px 6px;
   border-radius: 4px;
+}
+
+.view-tab-btn.active .live-badge-mini {
+  background: var(--nhl-blue-subtle);
+  color: var(--nhl-blue);
+  border-color: var(--nhl-blue-border);
 }
 
 .nhl-nav-right {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   flex-shrink: 0;
 }
 
@@ -280,48 +322,49 @@ body {
   font-size: 0.76rem;
   font-weight: 700;
   font-family: var(--font-sports);
-  letter-spacing: 0.4px;
+  letter-spacing: 0.3px;
   cursor: pointer;
   transition: all 0.15s ease;
   border: 1px solid var(--border-subtle);
-  background: var(--nhl-card-bg);
+  background: var(--nhl-subcard);
   color: var(--text-main);
   text-transform: uppercase;
 }
 
 .nhl-nav-btn:hover {
-  background: var(--nhl-subcard);
-  border-color: var(--text-secondary);
+  background: var(--nhl-subcard-hover);
+  border-color: var(--border-medium);
 }
 
 .install-btn {
-  background: #17202c;
-  border-color: #273549;
-  color: #38bdf8;
+  background: var(--nhl-subcard);
+  border-color: var(--border-subtle);
+  color: var(--text-main);
 }
 
 .install-btn:hover {
-  background: #1f2c3d;
-  border-color: #38bdf8;
+  background: #ffffff;
+  border-color: var(--nhl-black);
 }
 
 .sync-btn {
-  background: #101c15;
-  border-color: #1a3c26;
-  color: var(--b365-green);
+  background: var(--green-win-light);
+  border-color: var(--green-win-border);
+  color: var(--green-win);
 }
 
 .sync-btn .status-dot {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background-color: var(--b365-green);
-  box-shadow: 0 0 6px var(--b365-green);
+  background-color: var(--green-win);
 }
 
-/* 2. SCOREBOARD TICKER RIBBON */
+/* ==========================================================================
+   2. SCOREBOARD TICKER RIBBON (NHL.COM SCORE STRIP)
+   ========================================================================== */
 .scoreboard-ribbon {
-  background-color: #15181b;
+  background-color: var(--nhl-subcard);
   border-bottom: 1px solid var(--border-subtle);
   display: flex;
   align-items: center;
@@ -344,7 +387,7 @@ body {
   font-family: var(--font-sports);
   font-size: 0.72rem;
   font-weight: 800;
-  color: #fff;
+  color: var(--text-main);
   letter-spacing: 0.5px;
 }
 
@@ -352,7 +395,7 @@ body {
   font-family: var(--font-mono);
   font-size: 0.65rem;
   font-weight: 700;
-  color: var(--text-muted);
+  color: var(--text-secondary);
 }
 
 .ribbon-scroll {
@@ -379,22 +422,24 @@ body {
 }
 
 .ticker-game-chip {
-  background: #1c2024;
+  background: #ffffff;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
-  padding: 5px 10px;
+  padding: 6px 12px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   white-space: nowrap;
   flex-shrink: 0;
   cursor: pointer;
   transition: all 0.15s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .ticker-game-chip:hover {
-  background: var(--nhl-subcard);
+  background: var(--nhl-card-hover);
   border-color: var(--border-medium);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
 }
 
 .ticker-teams {
@@ -403,115 +448,131 @@ body {
   gap: 2px;
 }
 
-.ticker-team-line {
+.ticker-team-row {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
 }
 
-.ticker-team-logo {
-  width: 15px;
-  height: 15px;
+.ticker-logo {
+  width: 16px;
+  height: 16px;
   object-fit: contain;
 }
 
-.ticker-team-abbrev {
+.ticker-name {
   font-family: var(--font-sports);
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 800;
-  color: #fff;
+  color: var(--text-main);
+  width: 32px;
 }
 
-.ticker-status {
-  text-align: right;
-  border-left: 1px solid rgba(255, 255, 255, 0.08);
-  padding-left: 8px;
-}
-
-.ticker-time {
+.ticker-score {
   font-family: var(--font-mono);
-  font-size: 0.7rem;
-  font-weight: 700;
-  color: var(--gold-odds);
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--text-main);
 }
 
 .ticker-state {
-  font-size: 0.62rem;
-  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  border-left: 1px solid var(--border-subtle);
+  padding-left: 10px;
+}
+
+.period-chip {
+  font-family: var(--font-sports);
+  font-size: 0.70rem;
+  font-weight: 800;
+  color: var(--text-main);
   text-transform: uppercase;
 }
 
-/* 3. MAIN WORKSPACE CONTENT */
+.period-chip.live {
+  color: var(--red-alert);
+}
+
+.period-chip.final {
+  color: var(--text-secondary);
+}
+
+.game-time-chip {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  color: var(--text-muted);
+}
+
+/* ==========================================================================
+   3. MAIN WORKSPACE CONTENT AREA
+   ========================================================================== */
 .nhl-content {
   max-width: var(--max-width);
   margin: 0 auto;
-  padding: 18px 16px 40px;
+  padding: 20px 16px 60px;
 }
 
-/* 4. WEEK NAVIGATOR */
-.week-bar {
-  margin-bottom: 18px;
+.show-workspace {
+  display: grid;
+  grid-template-columns: 1.25fr 0.75fr;
+  gap: 24px;
+  align-items: start;
 }
 
-.week-selector-card {
-  padding: 12px 18px;
+.col-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 8px;
+}
+
+.col-title-wrap {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 8px;
 }
 
-.week-nav-btn {
-  background: #16191c;
-  border: 1px solid var(--border-medium);
-  color: var(--text-secondary);
-  border-radius: var(--radius-xs);
-  width: 38px;
-  height: 38px;
-  display: flex;
+.section-icon {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
-  transition: all 0.15s ease;
+  color: var(--nhl-black);
 }
 
-.week-nav-btn:hover {
-  background: var(--nhl-subcard);
-  color: #fff;
-  border-color: #fff;
+.section-icon svg {
+  width: 16px;
+  height: 16px;
 }
 
-.week-info {
-  text-align: center;
-}
-
-.week-pill {
+.col-title {
   font-family: var(--font-sports);
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 1.5px;
-  color: var(--b365-green);
+  font-size: 1.20rem;
+  font-weight: 900;
+  letter-spacing: -0.2px;
+  color: var(--text-main);
   text-transform: uppercase;
 }
 
-.week-date-headline {
-  font-family: var(--font-sports);
-  font-size: 1.45rem;
-  font-weight: 900;
-  color: #ffffff;
-  letter-spacing: -0.2px;
-}
-
-.puck-countdown {
-  font-family: var(--font-mono);
-  font-size: 0.74rem;
+.col-caption {
+  font-size: 0.76rem;
   color: var(--text-secondary);
 }
 
-/* 5. ON DECK BETTOR SPOTLIGHT BANNER */
+/* ==========================================================================
+   4. ON DECK BETTOR SPOTLIGHT BANNER
+   ========================================================================== */
 .bettor-banner {
-  border-left: 4px solid var(--b365-green);
+  background-color: var(--nhl-card-bg);
+  border: 1px solid var(--border-subtle);
+  border-left: 4px solid var(--nhl-black);
+  border-radius: var(--radius-md);
   padding: 18px 22px;
   margin-bottom: 22px;
+  box-shadow: var(--shadow-subtle);
 }
 
 .bettor-banner-inner {
@@ -525,15 +586,15 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: rgba(0, 255, 135, 0.1);
-  border: 1px solid rgba(0, 255, 135, 0.3);
+  background: var(--nhl-subcard);
+  border: 1px solid var(--border-subtle);
   padding: 3px 10px;
   border-radius: var(--radius-xs);
   font-family: var(--font-sports);
   font-size: 0.72rem;
   font-weight: 800;
-  letter-spacing: 0.8px;
-  color: var(--b365-green);
+  letter-spacing: 0.6px;
+  color: var(--text-main);
   text-transform: uppercase;
   margin-bottom: 8px;
 }
@@ -545,20 +606,20 @@ body {
 }
 
 .bettor-jersey-badge {
-  width: 56px;
-  height: 56px;
-  background: #14171a;
-  border: 2px solid var(--b365-green);
+  width: 54px;
+  height: 54px;
+  background: var(--nhl-subcard);
+  border: 2px solid var(--nhl-black);
   border-radius: var(--radius-md);
-  color: #ffffff;
+  color: var(--nhl-black);
   font-family: var(--font-sports);
   font-weight: 900;
-  font-size: 1.5rem;
+  font-size: 1.45rem;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: 0 0 14px rgba(0, 255, 135, 0.2);
+  box-shadow: var(--shadow-subtle);
 }
 
 .bettor-headline {
@@ -569,16 +630,16 @@ body {
 
 .bettor-name-strong {
   font-family: var(--font-sports);
-  font-size: 1.9rem;
+  font-size: 1.85rem;
   font-weight: 900;
-  color: #ffffff;
+  color: var(--text-main);
   line-height: 1;
 }
 
 .bettor-role-tag {
-  background: rgba(0, 255, 135, 0.15);
-  border: 1px solid rgba(0, 255, 135, 0.4);
-  color: var(--b365-green);
+  background: var(--nhl-subcard);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-main);
   font-family: var(--font-sports);
   font-size: 0.72rem;
   font-weight: 800;
@@ -594,7 +655,7 @@ body {
 }
 
 .progress-box {
-  background: #16191c;
+  background: var(--nhl-subcard);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
   padding: 12px 14px;
@@ -611,7 +672,7 @@ body {
   font-family: var(--font-sports);
   font-size: 0.72rem;
   font-weight: 800;
-  letter-spacing: 0.8px;
+  letter-spacing: 0.6px;
   color: var(--text-secondary);
   text-transform: uppercase;
 }
@@ -620,21 +681,21 @@ body {
   font-family: var(--font-mono);
   font-size: 0.85rem;
   font-weight: 800;
-  color: var(--b365-green);
+  color: var(--text-main);
 }
 
 .progress-track {
   width: 100%;
   height: 8px;
-  background: #0f1214;
+  background: #e2e5ea;
   border-radius: 999px;
   overflow: hidden;
-  border: 1px solid var(--border-subtle);
+  border: none;
 }
 
 .progress-bar {
   height: 100%;
-  background: var(--b365-green);
+  background: var(--nhl-black);
 }
 
 .progress-note {
@@ -656,12 +717,12 @@ body {
   align-items: center;
   justify-content: center;
   gap: 7px;
-  padding: 8px 12px;
+  padding: 9px 14px;
   border-radius: var(--radius-sm);
   font-family: var(--font-sports);
-  font-size: 0.82rem;
+  font-size: 0.84rem;
   font-weight: 800;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
   cursor: pointer;
   transition: all 0.15s ease;
   border: none;
@@ -669,8 +730,9 @@ body {
 }
 
 .nhl-action-btn.primary {
-  background: var(--b365-btn-green);
+  background: var(--nhl-black);
   color: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 .nhl-action-btn.primary:hover {
@@ -678,66 +740,19 @@ body {
 }
 
 .nhl-action-btn.secondary {
-  background: #252a30;
+  background: #ffffff;
   color: var(--text-main);
   border: 1px solid var(--border-medium);
 }
 
 .nhl-action-btn.secondary:hover {
-  background: #2e343b;
-  border-color: #fff;
+  background: var(--nhl-subcard);
+  border-color: var(--nhl-black);
 }
 
-/* 6. MAIN WORKSPACE (TWO COLUMNS) */
-.show-workspace {
-  display: grid;
-  grid-template-columns: 1.25fr 0.75fr;
-  gap: 22px;
-  align-items: start;
-}
-
-.col-header {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  margin-bottom: 12px;
-  border-bottom: 1px solid var(--border-subtle);
-  padding-bottom: 8px;
-}
-
-.col-title-wrap {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.section-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--b365-green);
-}
-
-.section-icon svg {
-  width: 16px;
-  height: 16px;
-}
-
-.col-title {
-  font-family: var(--font-sports);
-  font-size: 1.15rem;
-  font-weight: 900;
-  letter-spacing: 0.5px;
-  color: #fff;
-  text-transform: uppercase;
-}
-
-.col-caption {
-  font-size: 0.75rem;
-  color: var(--text-secondary);
-}
-
-/* 7. LEGS LIST (6 BOYS) */
+/* ==========================================================================
+   5. LEGS LIST (6 BOYS / 6-LEG SQUAD SLIP)
+   ========================================================================== */
 .legs-list {
   display: flex;
   flex-direction: column;
@@ -748,19 +763,25 @@ body {
 .leg-card-nhl {
   background: var(--nhl-card-bg);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   padding: 14px 16px;
   transition: all 0.15s ease;
+  box-shadow: var(--shadow-subtle);
+}
+
+.leg-card-nhl:hover {
+  border-color: var(--border-medium);
 }
 
 .leg-card-nhl.locked {
-  border-left: 3px solid var(--b365-green);
+  border-left: 4px solid var(--nhl-black);
 }
 
 .leg-card-nhl.empty {
   border-style: dashed;
   border-color: var(--border-medium);
-  background: #191c20;
+  background: var(--nhl-subcard);
+  box-shadow: none;
 }
 
 .leg-card-top {
@@ -779,10 +800,10 @@ body {
 .boy-jersey {
   width: 32px;
   height: 32px;
-  background: #14171a;
+  background: var(--nhl-subcard);
   border: 1px solid var(--border-medium);
   border-radius: var(--radius-xs);
-  color: #ffffff;
+  color: var(--text-main);
   font-family: var(--font-sports);
   font-weight: 800;
   font-size: 0.95rem;
@@ -795,7 +816,7 @@ body {
   font-family: var(--font-sports);
   font-size: 1.05rem;
   font-weight: 800;
-  color: #ffffff;
+  color: var(--text-main);
 }
 
 .boy-sub-role {
@@ -812,7 +833,7 @@ body {
 
 .boy-stat-tag {
   font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 700;
   display: inline-flex;
   align-items: center;
@@ -820,15 +841,15 @@ body {
 }
 
 .boy-stat-tag.hit {
-  color: var(--b365-green);
+  color: var(--green-win);
 }
 
 .boy-stat-tag.miss {
-  color: #ef4444;
+  color: var(--red-alert);
 }
 
 .boy-stat-tag.debut {
-  color: #a1a1aa;
+  color: var(--text-secondary);
 }
 
 .boy-stat-divider {
@@ -842,12 +863,13 @@ body {
 }
 
 .bettor-tag-inline {
-  font-size: 0.65rem;
+  font-size: 0.68rem;
   font-weight: 800;
   font-family: var(--font-sports);
-  color: var(--b365-green);
-  background: rgba(0, 255, 135, 0.1);
-  padding: 1px 6px;
+  color: var(--text-main);
+  background: var(--nhl-subcard);
+  border: 1px solid var(--border-subtle);
+  padding: 2px 7px;
   border-radius: 4px;
   margin-left: 2px;
   display: inline-flex;
@@ -863,10 +885,10 @@ body {
 
 .leg-status-tag {
   font-family: var(--font-sports);
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 800;
-  letter-spacing: 0.5px;
-  padding: 2px 7px;
+  letter-spacing: 0.4px;
+  padding: 3px 8px;
   border-radius: var(--radius-xs);
   text-transform: uppercase;
   display: inline-flex;
@@ -880,22 +902,23 @@ body {
 }
 
 .leg-status-tag.locked {
-  background: rgba(0, 255, 135, 0.12);
-  color: var(--b365-green);
-  border: 1px solid rgba(0, 255, 135, 0.3);
+  background: var(--green-win-light);
+  color: var(--green-win);
+  border: 1px solid var(--green-win-border);
 }
 
 .leg-status-tag.waiting {
-  background: rgba(245, 158, 11, 0.1);
+  background: var(--gold-odds-bg);
   color: var(--gold-odds);
-  border: 1px solid rgba(245, 158, 11, 0.3);
+  border: 1px solid var(--gold-odds-border);
 }
 
+/* THE SIGNATURE GRAY BOX BEHIND BLACK TEXT */
 .leg-pick-box {
   background: var(--nhl-subcard);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-xs);
-  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -913,24 +936,25 @@ body {
   font-family: var(--font-ui);
   font-size: 0.95rem;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--text-main);
   margin-top: 2px;
 }
 
 .odds-pill-box {
-  background: #14171a;
+  background: #ffffff;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-xs);
   padding: 4px 10px;
   text-align: right;
   flex-shrink: 0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
 }
 
 .odds-num {
   font-family: var(--font-mono);
-  font-size: 0.9rem;
+  font-size: 0.92rem;
   font-weight: 800;
-  color: var(--b365-green);
+  color: var(--text-main);
 }
 
 .odds-dec-sub {
@@ -957,7 +981,7 @@ body {
 }
 
 .action-icon-btn {
-  background: transparent;
+  background: #ffffff;
   border: 1px solid var(--border-subtle);
   color: var(--text-secondary);
   width: 28px;
@@ -972,14 +996,14 @@ body {
 
 .action-icon-btn:hover {
   background: var(--nhl-subcard);
-  color: #fff;
-  border-color: #fff;
+  color: var(--text-main);
+  border-color: var(--border-medium);
 }
 
 .action-icon-btn.danger:hover {
-  background: var(--red-dark);
-  color: #fff;
-  border-color: var(--red-alert);
+  background: var(--red-alert-light);
+  color: var(--red-alert);
+  border-color: var(--red-alert-border);
 }
 
 .empty-action-row {
@@ -990,20 +1014,20 @@ body {
 }
 
 .empty-state-text {
-  font-size: 0.8rem;
-  color: var(--text-muted);
+  font-size: 0.82rem;
+  color: var(--text-secondary);
 }
 
 .lock-in-leg-btn {
-  background: var(--b365-btn-green);
+  background: var(--nhl-black);
   color: #fff;
   border: none;
-  padding: 6px 14px;
+  padding: 7px 14px;
   border-radius: var(--radius-xs);
   font-family: var(--font-sports);
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   font-weight: 800;
-  letter-spacing: 0.4px;
+  letter-spacing: 0.3px;
   cursor: pointer;
   transition: all 0.15s ease;
   text-transform: uppercase;
@@ -1013,9 +1037,11 @@ body {
   background: var(--b365-btn-green-hover);
 }
 
-/* 8. MATCHUPS PANEL */
+/* ==========================================================================
+   6. MATCHUPS PANEL
+   ========================================================================== */
 .matchups-panel {
-  padding: 16px;
+  padding: 18px;
 }
 
 .matchups-panel-header {
@@ -1023,20 +1049,20 @@ body {
   align-items: baseline;
   justify-content: space-between;
   border-bottom: 1px solid var(--border-subtle);
-  padding-bottom: 8px;
-  margin-bottom: 12px;
+  padding-bottom: 10px;
+  margin-bottom: 14px;
 }
 
 .panel-heading {
   font-family: var(--font-sports);
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   font-weight: 900;
-  color: #fff;
+  color: var(--text-main);
   text-transform: uppercase;
 }
 
 .panel-sub {
-  font-size: 0.72rem;
+  font-size: 0.74rem;
   color: var(--text-secondary);
 }
 
@@ -1049,12 +1075,18 @@ body {
 .matchup-row-card {
   background: var(--nhl-subcard);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-xs);
-  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  transition: all 0.15s ease;
+}
+
+.matchup-row-card:hover {
+  background: var(--nhl-subcard-hover);
+  border-color: var(--border-medium);
 }
 
 .teams-strip {
@@ -1070,16 +1102,16 @@ body {
 }
 
 .team-logo-small {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   object-fit: contain;
 }
 
 .team-name-bold {
   font-family: var(--font-sports);
-  font-size: 0.88rem;
+  font-size: 0.92rem;
   font-weight: 800;
-  color: #ffffff;
+  color: var(--text-main);
 }
 
 .vs-text {
@@ -1091,40 +1123,42 @@ body {
   font-family: var(--font-mono);
   font-size: 0.75rem;
   font-weight: 700;
-  color: var(--gold-odds);
+  color: var(--text-secondary);
 }
 
 .btn-pick-matchup {
-  background: #181c20;
+  background: #ffffff;
   border: 1px solid var(--border-medium);
-  color: var(--b365-green);
-  padding: 4px 10px;
+  color: var(--text-main);
+  padding: 5px 12px;
   border-radius: var(--radius-xs);
   font-family: var(--font-sports);
-  font-size: 0.75rem;
+  font-size: 0.78rem;
   font-weight: 800;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .btn-pick-matchup:hover {
-  background: var(--b365-btn-green);
+  background: var(--nhl-black);
   color: #fff;
-  border-color: var(--b365-btn-green);
+  border-color: var(--nhl-black);
 }
 
-/* 9. SPORTSBOOK TICKET (RIGHT COLUMN) */
+/* ==========================================================================
+   7. SPORTSBOOK TICKET (RIGHT COLUMN)
+   ========================================================================== */
 .sportsbook-ticket {
   position: sticky;
-  top: 75px;
-  padding: 18px;
-  margin-bottom: 20px;
+  top: 80px;
+  padding: 20px;
+  margin-bottom: 24px;
 }
 
 .ticket-top {
   border-bottom: 1px dashed var(--border-medium);
   padding-bottom: 12px;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
 .ticket-brand-row {
@@ -1137,25 +1171,24 @@ body {
   font-family: var(--font-sports);
   font-size: 1.25rem;
   font-weight: 900;
-  font-style: italic;
-  color: #ffffff;
+  color: var(--text-main);
 }
 
 .ticket-badge {
-  background: #14171a;
-  border: 1px solid var(--border-medium);
+  background: var(--nhl-subcard);
+  border: 1px solid var(--border-subtle);
   color: var(--text-secondary);
   font-family: var(--font-sports);
   font-size: 0.72rem;
   font-weight: 800;
-  padding: 2px 7px;
+  padding: 3px 8px;
   border-radius: var(--radius-xs);
 }
 
 .ticket-badge.ready {
-  background: rgba(0, 255, 135, 0.15);
-  border-color: var(--b365-green);
-  color: var(--b365-green);
+  background: var(--green-win-light);
+  border-color: var(--green-win-border);
+  color: var(--green-win);
 }
 
 .ticket-ref {
@@ -1181,26 +1214,27 @@ body {
 
 .ticket-leg-row {
   background: var(--nhl-subcard);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-xs);
-  padding: 7px 10px;
+  padding: 8px 10px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 0.78rem;
+  font-size: 0.80rem;
   gap: 8px;
 }
 
 .t-boy-name {
   font-family: var(--font-sports);
   font-weight: 800;
-  color: var(--b365-green);
+  color: var(--text-main);
   width: 58px;
   flex-shrink: 0;
 }
 
 .t-pick-desc {
   flex: 1;
-  color: #ffffff;
+  color: var(--text-main);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1209,15 +1243,15 @@ body {
 .t-odds {
   font-family: var(--font-mono);
   font-weight: 800;
-  color: #ffffff;
+  color: var(--text-main);
   flex-shrink: 0;
 }
 
 .ticket-math-section {
-  background: #16191c;
+  background: var(--nhl-subcard);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-xs);
-  padding: 12px;
+  padding: 14px;
   margin-bottom: 16px;
 }
 
@@ -1244,9 +1278,9 @@ body {
 
 .odds-american {
   font-family: var(--font-mono);
-  font-size: 1.15rem;
+  font-size: 1.20rem;
   font-weight: 900;
-  color: var(--b365-green);
+  color: var(--text-main);
 }
 
 .odds-decimal {
@@ -1264,7 +1298,7 @@ body {
 .stake-control {
   display: flex;
   align-items: center;
-  background: #101214;
+  background: #ffffff;
   border: 1px solid var(--border-medium);
   border-radius: var(--radius-xs);
   padding: 2px 8px;
@@ -1279,7 +1313,7 @@ body {
 .stake-field {
   background: transparent;
   border: none;
-  color: #fff;
+  color: var(--text-main);
   font-family: var(--font-mono);
   font-size: 0.95rem;
   font-weight: 800;
@@ -1289,33 +1323,34 @@ body {
 }
 
 .payout-box {
-  background: #111417;
+  background: #ffffff;
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-xs);
-  padding: 10px;
+  border-radius: var(--radius-sm);
+  padding: 12px;
   text-align: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .payout-label {
   font-family: var(--font-sports);
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 800;
   color: var(--text-secondary);
-  letter-spacing: 1px;
+  letter-spacing: 0.8px;
 }
 
 .payout-number {
   font-family: var(--font-sports);
-  font-size: 1.85rem;
+  font-size: 2.10rem;
   font-weight: 900;
-  color: var(--b365-green);
+  color: var(--text-main);
   line-height: 1.1;
-  margin: 2px 0;
+  margin: 4px 0;
 }
 
 .payout-profit-line {
   font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: 0.74rem;
   color: var(--text-secondary);
 }
 
@@ -1328,12 +1363,12 @@ body {
 
 .btn-ticket {
   width: 100%;
-  padding: 10px;
+  padding: 11px;
   border-radius: var(--radius-xs);
   font-family: var(--font-sports);
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   font-weight: 800;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.4px;
   cursor: pointer;
   transition: all 0.15s ease;
   display: inline-flex;
@@ -1345,20 +1380,20 @@ body {
 }
 
 .btn-ticket.primary {
-  background: #252a30;
-  color: #fff;
+  background: #ffffff;
+  color: var(--text-main);
   border: 1px solid var(--border-medium);
 }
 
 .btn-ticket.primary:hover {
-  background: #2f353d;
-  border-color: #fff;
+  background: var(--nhl-subcard);
+  border-color: var(--nhl-black);
 }
 
 .btn-ticket.b365-btn-green {
-  background: var(--b365-btn-green);
+  background: var(--nhl-black);
   color: #fff;
-  box-shadow: 0 4px 14px rgba(19, 122, 82, 0.4);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
 }
 
 .btn-ticket.b365-btn-green:hover {
@@ -1375,16 +1410,16 @@ body {
   height: 24px;
   background: repeating-linear-gradient(
     90deg,
-    #ffffff 0,
-    #ffffff 2px,
+    #111418 0,
+    #111418 2px,
     transparent 2px,
     transparent 4px,
-    #ffffff 4px,
-    #ffffff 5px,
+    #111418 4px,
+    #111418 5px,
     transparent 5px,
     transparent 8px
   );
-  opacity: 0.5;
+  opacity: 0.65;
   margin: 0 auto 6px;
   max-width: 180px;
 }
@@ -1396,9 +1431,11 @@ body {
   letter-spacing: 1px;
 }
 
-/* 10. ROTATION CARD (6 WEEKS) */
+/* ==========================================================================
+   8. ROTATION CARD (6 WEEKS)
+   ========================================================================== */
 .rotation-card {
-  padding: 16px;
+  padding: 18px;
 }
 
 .rot-card-header {
@@ -1411,14 +1448,14 @@ body {
   font-family: var(--font-sports);
   font-size: 0.95rem;
   font-weight: 900;
-  color: #fff;
+  color: var(--text-main);
   text-transform: uppercase;
   display: block;
 }
 
 .rot-subtitle {
   font-size: 0.72rem;
-  color: var(--b365-green);
+  color: var(--text-secondary);
 }
 
 .rot-list {
@@ -1431,15 +1468,16 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 6px 10px;
+  padding: 7px 12px;
   border-radius: var(--radius-xs);
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   background: var(--nhl-subcard);
+  border: 1px solid transparent;
 }
 
 .rot-row.current-week {
-  background: rgba(0, 255, 135, 0.12);
-  border: 1px solid rgba(0, 255, 135, 0.4);
+  background: var(--nhl-blue-subtle);
+  border: 1px solid var(--nhl-blue-border);
 }
 
 .rot-week-label {
@@ -1451,32 +1489,32 @@ body {
 .rot-bettor-name {
   font-family: var(--font-sports);
   font-weight: 800;
-  color: #ffffff;
+  color: var(--text-main);
 }
 
-/* =====================================================================
-   VIEW 2: LIVE BET TRACKER SPECIFIC STYLES (BET365 GLASSMORPHIC ENGINE)
-   ===================================================================== */
+/* ==========================================================================
+   9. VIEW 2: LIVE BET TRACKER (NHL APP GAME & SCORECARD ENGINE)
+   ========================================================================== */
 .live-tracker-wrap {
-  max-width: 580px;
+  max-width: 600px;
   width: 100%;
   margin: 0 auto;
   box-sizing: border-box;
 }
 
 .tracker-card {
-  background: #181b1e;
+  background: #ffffff;
   border: 1px solid var(--border-subtle);
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65);
+  box-shadow: var(--shadow-card);
   width: 100%;
   box-sizing: border-box;
 }
 
 .tracker-header {
-  padding: 12px 14px;
-  background: #14171a;
+  padding: 14px 18px;
+  background: #ffffff;
   border-bottom: 1px solid var(--border-subtle);
   display: flex;
   align-items: center;
@@ -1495,13 +1533,13 @@ body {
 
 .tracker-header-title {
   font-family: var(--font-sports);
-  font-size: 1.05rem;
+  font-size: 1.15rem;
   font-weight: 900;
-  letter-spacing: 0.5px;
-  color: #ffffff;
+  letter-spacing: -0.2px;
+  color: var(--text-main);
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   line-height: 1.1;
   flex-wrap: wrap;
 }
@@ -1510,16 +1548,16 @@ body {
   font-family: var(--font-mono);
   font-size: 0.72rem;
   font-weight: 800;
-  padding: 2px 6px;
+  padding: 2px 8px;
   border-radius: 4px;
-  background: rgba(0, 255, 135, 0.12);
-  color: var(--b365-green);
-  border: 1px solid rgba(0, 255, 135, 0.35);
+  background: var(--nhl-subcard);
+  color: var(--text-main);
+  border: 1px solid var(--border-subtle);
   display: inline-block;
 }
 
 .tracker-header-sub {
-  font-size: 0.68rem;
+  font-size: 0.72rem;
   color: var(--text-secondary);
   margin-top: 2px;
   white-space: nowrap;
@@ -1538,13 +1576,13 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 5px 10px;
-  border-radius: 8px;
-  background: #252b32;
-  border: 1px solid #3d4653;
-  color: #f1f1f1;
+  padding: 6px 12px;
+  border-radius: 6px;
+  background: var(--nhl-subcard);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-main);
   font-family: var(--font-sports);
-  font-size: 0.74rem;
+  font-size: 0.76rem;
   font-weight: 800;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -1552,13 +1590,13 @@ body {
 }
 
 .tracker-sync-btn:hover {
-  background: #313842;
-  border-color: var(--b365-green);
+  background: var(--nhl-subcard-hover);
+  border-color: var(--border-medium);
 }
 
 .tracker-progress-banner {
-  padding: 10px 14px;
-  background: #191d21;
+  padding: 12px 18px;
+  background: var(--nhl-subcard);
   border-bottom: 1px solid var(--border-subtle);
   display: flex;
   flex-direction: column;
@@ -1575,30 +1613,29 @@ body {
 
 .tracker-legs-hit-text {
   font-family: var(--font-sports);
-  font-size: 0.82rem;
+  font-size: 0.85rem;
   font-weight: 800;
   color: var(--text-secondary);
   white-space: nowrap;
 }
 
 .tracker-legs-hit-text strong {
-  color: #ffffff;
-  font-size: 1rem;
+  color: var(--text-main);
+  font-size: 1.05rem;
 }
 
 .tracker-overall-track {
   width: 100%;
   height: 8px;
   border-radius: 999px;
-  background: #0d0f11;
+  background: #e2e5ea;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: none;
 }
 
 .tracker-overall-bar {
   height: 100%;
-  background: var(--b365-green);
-  box-shadow: 0 0 10px rgba(0, 255, 135, 0.5);
+  background: var(--nhl-black);
   transition: width 0.4s ease;
 }
 
@@ -1607,31 +1644,30 @@ body {
   align-items: center;
   gap: 5px;
   font-family: var(--font-sports);
-  font-size: 0.65rem;
+  font-size: 0.68rem;
   font-weight: 800;
-  letter-spacing: 0.5px;
-  color: var(--b365-green);
-  background: rgba(0, 255, 135, 0.08);
-  border: 1px solid rgba(0, 255, 135, 0.25);
+  letter-spacing: 0.4px;
+  color: var(--text-main);
+  background: #ffffff;
+  border: 1px solid var(--border-subtle);
   padding: 3px 8px;
   border-radius: 4px;
   text-transform: uppercase;
 }
 
 .tracker-games-area {
-  padding: 12px;
+  padding: 14px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
   box-sizing: border-box;
 }
 
-/* Empty / Awaiting Bet Lock-In State */
 .tracker-empty-card {
-  background: #14171a;
-  border: 1px dashed rgba(255, 255, 255, 0.15);
-  border-radius: 14px;
-  padding: 24px 18px;
+  background: var(--nhl-subcard);
+  border: 1px dashed var(--border-medium);
+  border-radius: var(--radius-md);
+  padding: 28px 18px;
   text-align: center;
   display: flex;
   flex-direction: column;
@@ -1643,452 +1679,44 @@ body {
   width: 52px;
   height: 52px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #ffffff;
+  border: 1px solid var(--border-subtle);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-secondary);
   margin-bottom: 12px;
-}
-
-.tracker-empty-badge {
-  font-family: var(--font-sports);
-  font-size: 0.68rem;
-  font-weight: 900;
-  letter-spacing: 0.5px;
-  color: #fbbf24;
-  background: rgba(245, 158, 11, 0.12);
-  border: 1px solid rgba(245, 158, 11, 0.3);
-  padding: 3px 8px;
-  border-radius: 4px;
-  text-transform: uppercase;
-  margin-bottom: 8px;
+  color: var(--text-secondary);
 }
 
 .tracker-empty-title {
   font-family: var(--font-sports);
   font-size: 1.15rem;
   font-weight: 900;
-  letter-spacing: 0.5px;
-  color: #ffffff;
-  margin-bottom: 6px;
+  color: var(--text-main);
+  text-transform: uppercase;
+  margin-bottom: 4px;
 }
 
 .tracker-empty-desc {
-  font-size: 0.80rem;
+  font-size: 0.82rem;
   color: var(--text-secondary);
-  line-height: 1.45;
-  max-width: 440px;
-  margin: 0 auto 16px;
+  max-width: 380px;
 }
 
-.tracker-empty-slip-preview {
-  width: 100%;
-  background: #0f1214;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 10px;
-  padding: 12px;
-  margin-bottom: 16px;
-  box-sizing: border-box;
-  text-align: left;
-}
-
-.tracker-empty-preview-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-family: var(--font-sports);
-  font-size: 0.70rem;
-  font-weight: 800;
-  letter-spacing: 0.5px;
-  color: var(--text-secondary);
-  margin-bottom: 10px;
-  padding-bottom: 6px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.tracker-empty-ready-count {
-  color: var(--b365-green);
-}
-
-.tracker-empty-preview-list {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.tracker-empty-pick-pill {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: #181c20;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 6px;
-  padding: 6px 10px;
-  font-size: 0.76rem;
-}
-
-.tracker-empty-pick-pill.ready {
-  border-left: 3px solid var(--b365-green);
-}
-
-.tracker-empty-pick-pill.empty {
-  opacity: 0.5;
-  border-left: 3px solid #4b5563;
-}
-
-.tracker-empty-boy-tag {
-  font-family: var(--font-sports);
-  font-weight: 900;
-  font-size: 0.70rem;
-  color: var(--b365-green);
-  width: 60px;
-  flex-shrink: 0;
-}
-
-.tracker-empty-pick-name {
-  color: #ffffff;
-  font-weight: 600;
-  flex: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin: 0 8px;
-}
-
-.tracker-empty-pick-status {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--b365-green);
-  font-size: 0.75rem;
-  flex-shrink: 0;
-}
-
-.tracker-empty-actions {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  width: 100%;
-  flex-wrap: wrap;
-}
-
-.tracker-cashout-btn.pending {
-  background: #20252b;
-  color: #9ca3af;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  cursor: default;
-}
-
-.tracker-game-block {
-  background: #14171a;
-  border: 1px solid var(--border-subtle);
-  border-radius: 12px;
-  padding: 14px;
-}
-
-.tracker-game-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-bottom: 10px;
-  margin-bottom: 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.tracker-game-tag {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-family: var(--font-sports);
-  font-size: 0.75rem;
-  font-weight: 900;
-  letter-spacing: 0.8px;
-  color: #ffffff;
-}
-
-.tracker-game-mult {
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  font-weight: 800;
-  color: #a1a1aa;
-}
-
-.tracker-game-state-badge {
-  font-size: 0.68rem;
-  font-weight: 700;
-  padding: 3px 8px;
-  border-radius: 4px;
-  background: #252b32;
-  color: #d1d5db;
-  border: 1px solid #374151;
-}
-
-.tracker-leg-card {
-  background: #1c2126;
-  border: 1px solid #2d343c;
-  border-radius: 10px;
-  padding: 10px 12px;
-  margin-bottom: 8px;
-  transition: all 0.2s ease;
-  box-sizing: border-box;
-  width: 100%;
-}
-
-.tracker-leg-card:last-child {
-  margin-bottom: 0;
-}
-
-.tracker-leg-card.hit {
-  background: rgba(0, 255, 135, 0.08);
-  border-color: rgba(0, 255, 135, 0.45);
-}
-
-.tracker-leg-header-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.tracker-leg-person {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  min-width: 0;
-  flex: 1;
-}
-
-.tracker-hit-indicator {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  font-weight: 900;
-  flex-shrink: 0;
-  border: 1.5px solid #4b5563;
-  color: transparent;
-}
-
-.tracker-leg-card.hit .tracker-hit-indicator {
-  background: var(--b365-green);
-  border-color: var(--b365-green);
-  color: #0c0d10;
-}
-
-.tracker-boy-pill {
-  font-family: var(--font-sports);
-  font-size: 0.68rem;
-  font-weight: 900;
-  padding: 1px 6px;
-  border-radius: 4px;
-  background: rgba(0, 255, 135, 0.12);
-  color: var(--b365-green);
-  border: 1px solid rgba(0, 255, 135, 0.28);
-  flex-shrink: 0;
-}
-
-.tracker-player-title {
-  font-size: 0.86rem;
-  font-weight: 800;
-  color: #ffffff;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  min-width: 0;
-}
-
-.tracker-target-odds {
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: #d1d5db;
-  flex-shrink: 0;
-  white-space: nowrap;
-  text-align: right;
-}
-
-.tracker-leg-card.hit .tracker-target-odds {
-  color: var(--b365-green);
-}
-
-.tracker-leg-action-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 8px;
-  gap: 8px;
-}
-
-.tracker-leg-stats-detail {
-  font-size: 0.70rem;
-  color: var(--text-secondary);
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  flex-wrap: wrap;
-  min-width: 0;
-  flex: 1;
-}
-
-.tracker-stat-box,
-.tracker-current-box {
-  display: inline-flex;
-  align-items: baseline;
-  justify-content: center;
-  gap: 2px;
-  padding: 4px 10px;
-  background: #0d1114;
-  border: 1px solid #242c35;
-  border-radius: 6px;
-  font-family: var(--font-sports);
-  white-space: nowrap;
-  flex-shrink: 0;
-  transition: all 0.2s ease;
-}
-
-.tracker-current-num {
-  font-size: 1.05rem;
-  font-weight: 900;
-  color: #ffffff;
-  line-height: 1;
-}
-
-.tracker-target-num {
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: var(--text-secondary);
-  line-height: 1;
-}
-
-.tracker-leg-card.hit .tracker-stat-box,
-.tracker-leg-card.hit .tracker-current-box {
-  background: rgba(0, 255, 135, 0.10);
-  border-color: rgba(0, 255, 135, 0.45);
-  box-shadow: 0 0 10px rgba(0, 255, 135, 0.15);
-}
-
-.tracker-leg-card.hit .tracker-current-num {
-  color: var(--b365-green);
-  text-shadow: 0 0 8px rgba(0, 255, 135, 0.35);
-}
-
-.tracker-leg-card.hit .tracker-target-num {
-  color: rgba(0, 255, 135, 0.85);
-}
-
-.tracker-progress-track {
-  width: 100%;
-  height: 6px;
-  border-radius: 999px;
-  background: #0f1214;
-  overflow: hidden;
-  margin-top: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.04);
-}
-
-.tracker-progress-fill {
-  height: 100%;
-  border-radius: 999px;
-  background: #f59e0b;
-  transition: width 0.35s ease;
-}
-
-.tracker-leg-card.hit .tracker-progress-fill {
-  background: var(--b365-green);
-  box-shadow: 0 0 8px rgba(0, 255, 135, 0.5);
-}
-
-.tracker-matchup-bar {
-  background: #1a1e22;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
-  padding: 8px 12px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 0.75rem;
-  color: #d1d5db;
-  margin-top: 4px;
-}
-
-.tracker-footer-card {
-  padding: 16px;
-  background: #14171a;
-  border-top: 1px solid var(--border-subtle);
-}
-
-.tracker-footer-metrics {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  margin-bottom: 14px;
-}
-
-.tracker-metric-label {
-  font-size: 0.72rem;
-  color: var(--text-secondary);
-}
-
-.tracker-metric-val {
-  font-family: var(--font-sports);
-  font-size: 1.45rem;
-  font-weight: 900;
-  color: #ffffff;
-  line-height: 1;
-}
-
-.tracker-metric-val.green {
-  color: var(--b365-green);
-  text-shadow: 0 0 10px rgba(0, 255, 135, 0.3);
-}
-
-.tracker-cashout-btn {
-  width: 100%;
-  padding: 12px;
-  border-radius: 8px;
-  font-family: var(--font-sports);
-  font-size: 0.95rem;
-  font-weight: 900;
-  letter-spacing: 0.5px;
-  text-align: center;
-  border: none;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.tracker-cashout-btn.active {
-  background: var(--b365-btn-green);
-  color: #ffffff;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
-}
-
-.tracker-cashout-btn.active:hover {
-  background: var(--b365-btn-green-hover);
-}
-
-.tracker-cashout-btn.all-hit {
-  background: var(--b365-green);
-  color: #0c0d10;
-  box-shadow: 0 0 16px rgba(0, 255, 135, 0.4);
-}
-
-/* =====================================================================
-   VIEW 3: SQUAD STATS SPECIFIC STYLES
-   ===================================================================== */
+/* ==========================================================================
+   10. VIEW 3: SQUAD STATS (NHL APP STANDINGS & LEAGUE LEADERS ENGINE)
+   ========================================================================== */
 .stats-hub-wrap {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 22px;
 }
 
 .stats-hero-banner {
+  background: #ffffff;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-subtle);
   padding: 22px 24px;
   display: flex;
   align-items: center;
@@ -2100,21 +1728,23 @@ body {
   font-family: var(--font-sports);
   font-size: 0.75rem;
   font-weight: 800;
-  color: var(--gold-odds);
-  letter-spacing: 1px;
-  margin-bottom: 6px;
+  color: var(--text-secondary);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
 }
 
 .stats-hero-title {
   font-family: var(--font-sports);
-  font-size: 1.85rem;
+  font-size: 1.95rem;
   font-weight: 900;
-  color: #ffffff;
+  color: var(--text-main);
+  letter-spacing: -0.3px;
   line-height: 1.1;
 }
 
 .stats-hero-desc {
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   color: var(--text-secondary);
   margin-top: 4px;
   max-width: 500px;
@@ -2122,15 +1752,16 @@ body {
 
 .stats-hero-meta {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   flex-wrap: wrap;
 }
 
+/* Gray Meta Box behind text */
 .meta-stat-pill {
   background: var(--nhl-subcard);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
-  padding: 10px 14px;
+  padding: 10px 16px;
   text-align: center;
   min-width: 105px;
 }
@@ -2146,22 +1777,21 @@ body {
 
 .meta-val {
   font-family: var(--font-sports);
-  font-size: 1.40rem;
+  font-size: 1.55rem;
   font-weight: 900;
-  color: #fff;
+  color: var(--text-main);
   line-height: 1.1;
   margin-top: 2px;
   display: block;
 }
 
 .meta-val.red {
-  color: #f87171;
-  text-shadow: 0 0 10px rgba(239, 68, 68, 0.25);
+  color: var(--red-alert);
 }
 
 .meta-sub {
   font-family: var(--font-sports);
-  font-size: 0.65rem;
+  font-size: 0.68rem;
   font-weight: 700;
   color: var(--text-secondary);
   display: block;
@@ -2169,7 +1799,7 @@ body {
   white-space: nowrap;
 }
 
-/* Trophies Grid */
+/* Trophies Grid (Matching Screenshot 4 "By The Numbers" Cards) */
 .trophies-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -2177,105 +1807,118 @@ body {
 }
 
 .trophy-card {
+  background: #ffffff;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-subtle);
   padding: 16px;
   display: flex;
   align-items: flex-start;
   gap: 14px;
   position: relative;
   overflow: hidden;
+  transition: all 0.15s ease;
+}
+
+.trophy-card:hover {
+  border-color: var(--border-medium);
+  box-shadow: var(--shadow-card);
 }
 
 .trophy-card.sniper {
-  border-top: 3px solid var(--b365-green);
+  border-top: 4px solid var(--green-win);
 }
 
 .trophy-card.slump {
-  border-top: 3px solid #ef4444;
+  border-top: 4px solid var(--red-alert);
 }
 
 .trophy-card.longshot {
-  border-top: 3px solid var(--gold-odds);
+  border-top: 4px solid var(--gold-odds);
 }
 
 .trophy-card.chalk {
-  border-top: 3px solid #38bdf8;
+  border-top: 4px solid var(--nhl-blue);
 }
 
 .trophy-icon-wrap {
   width: 44px;
   height: 44px;
-  border-radius: 12px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: var(--nhl-subcard);
+  border: 1px solid var(--border-subtle);
   flex-shrink: 0;
-  transition: all 0.2s ease;
 }
 
 .trophy-icon-wrap svg {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
 }
 
 .trophy-card.sniper .trophy-icon-wrap {
-  background: rgba(0, 255, 135, 0.1);
-  border-color: rgba(0, 255, 135, 0.28);
-  color: var(--b365-green);
+  background: var(--green-win-light);
+  border-color: var(--green-win-border);
+  color: var(--green-win);
 }
 
 .trophy-card.slump .trophy-icon-wrap {
-  background: rgba(239, 68, 68, 0.1);
-  border-color: rgba(239, 68, 68, 0.28);
-  color: #ef4444;
+  background: var(--red-alert-light);
+  border-color: var(--red-alert-border);
+  color: var(--red-alert);
 }
 
 .trophy-card.longshot .trophy-icon-wrap {
-  background: rgba(255, 215, 0, 0.1);
-  border-color: rgba(255, 215, 0, 0.28);
+  background: var(--gold-odds-bg);
+  border-color: var(--gold-odds-border);
   color: var(--gold-odds);
 }
 
 .trophy-card.chalk .trophy-icon-wrap {
-  background: rgba(56, 189, 248, 0.1);
-  border-color: rgba(56, 189, 248, 0.28);
-  color: #38bdf8;
+  background: var(--nhl-blue-subtle);
+  border-color: var(--nhl-blue-border);
+  color: var(--nhl-blue);
 }
 
 .trophy-badge-label {
   font-family: var(--font-sports);
-  font-size: 0.7rem;
+  font-size: 0.70rem;
   font-weight: 800;
-  letter-spacing: 0.8px;
+  letter-spacing: 0.6px;
   color: var(--text-muted);
   text-transform: uppercase;
 }
 
 .trophy-winner-name {
   font-family: var(--font-sports);
-  font-size: 1.25rem;
+  font-size: 1.30rem;
   font-weight: 900;
-  color: #fff;
+  color: var(--text-main);
   line-height: 1.1;
   margin: 3px 0 2px;
 }
 
 .trophy-stat-line {
   font-family: var(--font-mono);
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--b365-green);
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--text-main);
 }
 
 .trophy-note {
-  font-size: 0.7rem;
-  color: var(--text-muted);
+  font-size: 0.72rem;
+  color: var(--text-secondary);
   margin-top: 4px;
 }
 
-/* Leaderboard Section */
+/* Leaderboard Section (Official NHL App Standings Table Replica) */
 .leaderboard-section {
+  background: #ffffff;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-subtle);
   padding: 18px 20px;
 }
 
@@ -2290,14 +1933,15 @@ body {
 
 .section-title {
   font-family: var(--font-sports);
-  font-size: 1.15rem;
+  font-size: 1.25rem;
   font-weight: 900;
-  color: #fff;
+  letter-spacing: -0.2px;
+  color: var(--text-main);
   text-transform: uppercase;
 }
 
 .section-subtitle {
-  font-size: 0.74rem;
+  font-size: 0.76rem;
   color: var(--text-secondary);
 }
 
@@ -2307,20 +1951,22 @@ body {
 }
 
 .legend-pill {
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 700;
-  padding: 2px 8px;
+  padding: 3px 8px;
   border-radius: 4px;
 }
 
 .legend-pill.hit {
-  background: rgba(0, 255, 135, 0.15);
-  color: var(--b365-green);
+  background: var(--green-win-light);
+  color: var(--green-win);
+  border: 1px solid var(--green-win-border);
 }
 
 .legend-pill.miss {
-  background: rgba(239, 68, 68, 0.15);
-  color: #ef4444;
+  background: var(--red-alert-light);
+  color: var(--red-alert);
+  border: 1px solid var(--red-alert-border);
 }
 
 .table-responsive {
@@ -2331,52 +1977,54 @@ body {
   width: 100%;
   border-collapse: collapse;
   text-align: left;
-  font-size: 0.84rem;
+  font-size: 0.88rem;
 }
 
 .squad-table th {
+  background: var(--nhl-subcard);
   font-family: var(--font-sports);
   font-size: 0.72rem;
   font-weight: 800;
-  letter-spacing: 0.8px;
+  letter-spacing: 0.6px;
   color: var(--text-muted);
-  padding: 10px 12px;
+  padding: 10px 14px;
   border-bottom: 1px solid var(--border-subtle);
   text-transform: uppercase;
 }
 
 .squad-table td {
-  padding: 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 14px;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-main);
 }
 
 .squad-table tr:hover td {
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--nhl-card-hover);
 }
 
 .rank-badge {
   font-family: var(--font-mono);
   font-weight: 800;
-  font-size: 0.85rem;
-  color: var(--text-muted);
+  font-size: 0.88rem;
+  color: var(--text-secondary);
   width: 24px;
   display: inline-block;
 }
 
-.rank-1 { color: #f59e0b; }
-.rank-2 { color: #e2e8f0; }
-.rank-3 { color: #cd7f32; }
+.rank-1 { color: #d97706; }
+.rank-2 { color: #64748b; }
+.rank-3 { color: #b45309; }
 
 .table-player-cell {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .player-avatar-small {
-  width: 30px;
-  height: 30px;
-  background: #14171a;
+  width: 32px;
+  height: 32px;
+  background: var(--nhl-subcard);
   border: 1px solid var(--border-medium);
   border-radius: var(--radius-xs);
   display: flex;
@@ -2384,46 +2032,47 @@ body {
   justify-content: center;
   font-family: var(--font-sports);
   font-weight: 800;
-  font-size: 0.85rem;
-  color: #fff;
+  font-size: 0.88rem;
+  color: var(--text-main);
 }
 
 .player-name-link {
-  font-weight: 700;
-  color: #fff;
+  font-weight: 800;
+  color: var(--text-main);
 }
 
 .hit-rate-cell {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .rate-num {
   font-family: var(--font-mono);
   font-weight: 800;
-  color: var(--b365-green);
-  width: 44px;
+  color: var(--nhl-blue);
+  width: 48px;
 }
 
 .rate-bar-track {
   width: 70px;
   height: 6px;
-  background: #14171a;
+  background: #e2e5ea;
   border-radius: 999px;
   overflow: hidden;
 }
 
 .rate-bar-fill {
   height: 100%;
-  background: var(--b365-green);
+  background: var(--nhl-blue);
 }
 
+/* Gray Box Badges for Titles (Sniper, Ice Master, Puck Magnet) */
 .title-tag-pill {
   font-family: var(--font-sports);
-  font-size: 0.68rem;
+  font-size: 0.70rem;
   font-weight: 800;
-  padding: 2px 7px;
+  padding: 3px 8px;
   border-radius: 4px;
   text-transform: uppercase;
   display: inline-flex;
@@ -2431,6 +2080,9 @@ body {
   gap: 4px;
   letter-spacing: 0.3px;
   white-space: nowrap;
+  background: var(--nhl-subcard);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-main);
 }
 
 .title-tag-pill svg {
@@ -2439,49 +2091,53 @@ body {
 }
 
 .title-tag-pill.sniper {
-  background: rgba(0, 255, 135, 0.14);
-  color: var(--b365-green);
-  border: 1px solid rgba(0, 255, 135, 0.28);
+  background: var(--green-win-light);
+  color: var(--green-win);
+  border-color: var(--green-win-border);
 }
 
 .title-tag-pill.slump {
-  background: rgba(239, 68, 68, 0.14);
-  color: #ef4444;
-  border: 1px solid rgba(239, 68, 68, 0.28);
+  background: var(--red-alert-light);
+  color: var(--red-alert);
+  border-color: var(--red-alert-border);
 }
 
 .title-tag-pill.chalk {
-  background: rgba(56, 189, 248, 0.14);
-  color: #38bdf8;
-  border: 1px solid rgba(56, 189, 248, 0.28);
+  background: var(--nhl-blue-subtle);
+  color: var(--nhl-blue);
+  border-color: var(--nhl-blue-border);
 }
 
 .title-tag-pill.hot {
-  background: rgba(245, 158, 11, 0.14);
-  color: #f59e0b;
-  border: 1px solid rgba(245, 158, 11, 0.28);
+  background: var(--gold-odds-bg);
+  color: var(--gold-odds);
+  border-color: var(--gold-odds-border);
 }
 
 .title-tag-pill.value {
-  background: rgba(234, 179, 8, 0.14);
-  color: #facc15;
-  border: 1px solid rgba(234, 179, 8, 0.3);
+  background: var(--gold-odds-bg);
+  color: var(--gold-odds);
+  border-color: var(--gold-odds-border);
 }
 
 .title-tag-pill.debut {
-  background: rgba(161, 161, 170, 0.12);
-  color: #d4d4d8;
-  border: 1px solid rgba(161, 161, 170, 0.25);
+  background: var(--nhl-subcard);
+  color: var(--text-secondary);
+  border-color: var(--border-subtle);
 }
 
 .title-tag-pill.contender {
-  background: rgba(255, 255, 255, 0.06);
-  color: #a1a1aa;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: var(--nhl-subcard);
+  color: var(--text-secondary);
+  border-color: var(--border-subtle);
 }
 
 /* History Section */
 .history-section {
+  background: #ffffff;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-subtle);
   padding: 18px 20px;
 }
 
@@ -2494,28 +2150,28 @@ body {
 .history-week-card {
   background: var(--nhl-subcard);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  padding: 16px;
 }
 
 .history-week-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  padding-bottom: 8px;
-  margin-bottom: 12px;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 10px;
+  margin-bottom: 14px;
 }
 
 .h-week-title {
   font-family: var(--font-sports);
-  font-size: 1.05rem;
+  font-size: 1.10rem;
   font-weight: 800;
-  color: #fff;
+  color: var(--text-main);
 }
 
 .h-bettor-badge {
-  font-size: 0.75rem;
+  font-size: 0.78rem;
   color: var(--text-secondary);
 }
 
@@ -2523,40 +2179,44 @@ body {
   font-family: var(--font-sports);
   font-size: 0.75rem;
   font-weight: 800;
-  padding: 2px 8px;
+  padding: 3px 8px;
   border-radius: 4px;
 }
 
 .h-result-badge.win {
-  background: rgba(0, 255, 135, 0.15);
-  color: var(--b365-green);
+  background: var(--green-win-light);
+  color: var(--green-win);
+  border: 1px solid var(--green-win-border);
 }
 
 .h-result-badge.loss {
-  background: rgba(239, 68, 68, 0.15);
-  color: #ef4444;
+  background: var(--red-alert-light);
+  color: var(--red-alert);
+  border: 1px solid var(--red-alert-border);
 }
 
 .h-result-badge.in-progress {
-  background: rgba(245, 158, 11, 0.15);
-  color: #f59e0b;
+  background: var(--gold-odds-bg);
+  color: var(--gold-odds);
+  border: 1px solid var(--gold-odds-border);
 }
 
 .history-legs-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
+  gap: 12px;
 }
 
 .history-leg-card {
-  background: #1e2124;
+  background: #ffffff;
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-xs);
-  padding: 10px;
+  border-radius: var(--radius-sm);
+  padding: 12px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   gap: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
 }
 
 .h-leg-top {
@@ -2568,20 +2228,20 @@ body {
 .h-leg-boy {
   font-family: var(--font-sports);
   font-weight: 800;
-  font-size: 0.85rem;
-  color: #fff;
+  font-size: 0.90rem;
+  color: var(--text-main);
 }
 
 .h-leg-odds {
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: 0.78rem;
   color: var(--text-secondary);
 }
 
 .h-leg-pick {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-main);
   line-height: 1.25;
 }
 
@@ -2589,8 +2249,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-top: 6px;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 8px;
+  border-top: 1px solid var(--border-subtle);
 }
 
 .leg-grade-toggle {
@@ -2599,10 +2259,10 @@ body {
 }
 
 .grade-btn {
-  background: #14171a;
+  background: var(--nhl-subcard);
   border: 1px solid var(--border-subtle);
-  color: var(--text-muted);
-  font-size: 0.7rem;
+  color: var(--text-secondary);
+  font-size: 0.70rem;
   font-weight: 800;
   padding: 3px 8px;
   border-radius: 4px;
@@ -2611,26 +2271,26 @@ body {
 }
 
 .grade-btn.hit.active {
-  background: var(--b365-btn-green);
-  color: #fff;
-  border-color: var(--b365-green);
+  background: var(--green-win-light);
+  color: var(--green-win);
+  border-color: var(--green-win-border);
 }
 
 .grade-btn.miss.active {
-  background: var(--red-dark);
-  color: #fff;
-  border-color: var(--red-alert);
+  background: var(--red-alert-light);
+  color: var(--red-alert);
+  border-color: var(--red-alert-border);
 }
 
-/* =====================================================================
+/* ==========================================================================
    11. MODAL DIALOGS
-   ===================================================================== */
+   ========================================================================== */
 .nhl-modal-backdrop {
   position: fixed;
   inset: 0;
   z-index: 200;
-  background: rgba(0, 0, 0, 0.82);
-  backdrop-filter: blur(4px);
+  background: rgba(17, 20, 24, 0.60);
+  backdrop-filter: blur(8px);
   display: none;
   align-items: center;
   justify-content: center;
@@ -2647,13 +2307,16 @@ body {
   max-height: 90vh;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding: 22px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7);
+  padding: 24px;
+  background: #ffffff;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-floating);
   animation: modalScale 0.18s ease-out;
 }
 
 @keyframes modalScale {
-  from { transform: scale(0.95); opacity: 0; }
+  from { transform: scale(0.96); opacity: 0; }
   to { transform: scale(1); opacity: 1; }
 }
 
@@ -2668,18 +2331,19 @@ body {
 
 .modal-tag {
   font-family: var(--font-sports);
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 800;
-  color: var(--b365-green);
-  letter-spacing: 1px;
+  color: var(--text-secondary);
+  letter-spacing: 0.8px;
   text-transform: uppercase;
 }
 
 .modal-title {
   font-family: var(--font-sports);
-  font-size: 1.45rem;
+  font-size: 1.55rem;
   font-weight: 900;
-  color: #fff;
+  color: var(--text-main);
+  letter-spacing: -0.2px;
 }
 
 .modal-close {
@@ -2692,7 +2356,7 @@ body {
 }
 
 .modal-close:hover {
-  color: #fff;
+  color: var(--text-main);
 }
 
 .form-group {
@@ -2702,17 +2366,17 @@ body {
 .form-label {
   display: block;
   font-family: var(--font-sports);
-  font-size: 0.72rem;
+  font-size: 0.74rem;
   font-weight: 800;
-  letter-spacing: 0.8px;
-  color: var(--text-secondary);
+  letter-spacing: 0.5px;
+  color: var(--text-main);
   text-transform: uppercase;
   margin-bottom: 6px;
 }
 
 .optional-note {
   font-weight: 400;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   text-transform: none;
 }
 
@@ -2724,13 +2388,13 @@ body {
 }
 
 .boy-pick-btn {
-  background: #14171a;
-  border: 1px solid var(--border-medium);
+  background: var(--nhl-subcard);
+  border: 1px solid var(--border-subtle);
   color: var(--text-secondary);
   border-radius: var(--radius-xs);
   padding: 8px 4px;
   font-family: var(--font-sports);
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   font-weight: 800;
   cursor: pointer;
   text-align: center;
@@ -2738,32 +2402,32 @@ body {
 }
 
 .boy-pick-btn:hover {
-  background: var(--nhl-subcard);
-  color: #fff;
+  background: var(--nhl-subcard-hover);
+  color: var(--text-main);
 }
 
 .boy-pick-btn.active {
-  background: var(--b365-btn-green);
-  border-color: var(--b365-green);
+  background: var(--nhl-black);
+  border-color: var(--nhl-black);
   color: #fff;
-  box-shadow: 0 0 10px rgba(0, 255, 135, 0.3);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 .nhl-select, .nhl-input {
   width: 100%;
-  background: var(--nhl-input-bg);
+  background: #ffffff;
   border: 1px solid var(--border-medium);
   border-radius: var(--radius-xs);
-  padding: 9px 12px;
-  color: #fff;
+  padding: 10px 12px;
+  color: var(--text-main);
   font-family: var(--font-ui);
-  font-size: 0.88rem;
+  font-size: 0.90rem;
   outline: none;
   transition: border-color 0.15s ease;
 }
 
 .nhl-select:focus, .nhl-input:focus {
-  border-color: var(--b365-green);
+  border-color: var(--nhl-black);
 }
 
 .text-mono {
@@ -2777,20 +2441,20 @@ body {
 }
 
 .bet-type-btn {
-  background: #14171a;
-  border: 1px solid var(--border-medium);
+  background: var(--nhl-subcard);
+  border: 1px solid var(--border-subtle);
   color: var(--text-secondary);
   border-radius: var(--radius-xs);
-  padding: 5px 10px;
-  font-size: 0.76rem;
+  padding: 6px 12px;
+  font-size: 0.78rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 
 .bet-type-btn.active {
-  background: #252a30;
-  border-color: var(--b365-green);
+  background: var(--nhl-black);
+  border-color: var(--nhl-black);
   color: #fff;
 }
 
@@ -2816,16 +2480,16 @@ body {
   gap: 10px;
   margin-top: 20px;
   border-top: 1px solid var(--border-subtle);
-  padding-top: 14px;
+  padding-top: 16px;
 }
 
 .nhl-btn {
-  padding: 8px 18px;
+  padding: 9px 18px;
   border-radius: var(--radius-xs);
   font-family: var(--font-sports);
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   font-weight: 800;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.4px;
   cursor: pointer;
   transition: all 0.15s ease;
   border: none;
@@ -2833,8 +2497,9 @@ body {
 }
 
 .nhl-btn.primary {
-  background: var(--b365-btn-green);
+  background: var(--nhl-black);
   color: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 .nhl-btn.primary:hover {
@@ -2842,27 +2507,29 @@ body {
 }
 
 .nhl-btn.outline {
-  background: transparent;
+  background: #ffffff;
   border: 1px solid var(--border-medium);
-  color: var(--text-secondary);
+  color: var(--text-main);
 }
 
 .nhl-btn.outline:hover {
-  border-color: #fff;
-  color: #fff;
+  border-color: var(--nhl-black);
+  background: var(--nhl-subcard);
 }
 
 .nhl-btn.full-width {
   width: 100%;
 }
 
-/* 12. IPHONE INSTALL MODAL SPECIFIC */
+/* ==========================================================================
+   12. IPHONE INSTALL MODAL
+   ========================================================================== */
 .install-body {
   padding: 10px 0;
 }
 
 .install-intro {
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   color: var(--text-secondary);
   margin-bottom: 16px;
 }
@@ -2881,18 +2548,18 @@ body {
   background: var(--nhl-subcard);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
-  padding: 10px 12px;
+  padding: 12px 14px;
 }
 
 .step-num {
   width: 26px;
   height: 26px;
-  background: var(--b365-btn-green);
+  background: var(--nhl-black);
   color: #fff;
   border-radius: 50%;
   font-family: var(--font-sports);
   font-weight: 900;
-  font-size: 0.9rem;
+  font-size: 0.90rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2900,13 +2567,13 @@ body {
 }
 
 .step-content strong {
-  font-size: 0.88rem;
-  color: #fff;
+  font-size: 0.90rem;
+  color: var(--text-main);
   display: block;
 }
 
 .step-content p {
-  font-size: 0.78rem;
+  font-size: 0.80rem;
   color: var(--text-secondary);
   margin-top: 2px;
 }
@@ -2914,10 +2581,11 @@ body {
 .share-icon-pill {
   display: inline-flex;
   align-items: center;
-  background: #252a30;
+  background: #ffffff;
+  border: 1px solid var(--border-medium);
   border-radius: 4px;
   padding: 2px 4px;
-  color: var(--b365-green);
+  color: var(--text-main);
   vertical-align: middle;
 }
 
@@ -2925,12 +2593,13 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 16px;
-  height: 16px;
-  background: #252a30;
+  width: 18px;
+  height: 18px;
+  background: #ffffff;
+  border: 1px solid var(--border-medium);
   border-radius: 4px;
   font-weight: 900;
-  color: var(--b365-green);
+  color: var(--text-main);
   vertical-align: middle;
 }
 
@@ -2940,25 +2609,26 @@ body {
   gap: 12px;
   padding: 10px 14px;
   border-radius: var(--radius-sm);
-  font-size: 0.8rem;
+  font-size: 0.82rem;
 }
 
 .db-status-banner.connected {
-  background: #0e2016;
-  border: 1px solid #164e2d;
-  color: #d1fae5;
+  background: var(--green-win-light);
+  border: 1px solid var(--green-win-border);
+  color: var(--green-win);
 }
 
 .status-dot-lg {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background-color: var(--b365-green);
-  box-shadow: 0 0 8px var(--b365-green);
+  background-color: var(--green-win);
   flex-shrink: 0;
 }
 
-/* 13. TOAST NOTIFICATIONS */
+/* ==========================================================================
+   13. TOAST NOTIFICATIONS
+   ========================================================================== */
 .nhl-toast-container {
   position: fixed;
   bottom: 20px;
@@ -2971,17 +2641,18 @@ body {
 }
 
 .nhl-toast {
-  background: #1a1e22;
-  border: 1px solid var(--b365-green);
+  background: #ffffff;
+  border: 1px solid var(--border-medium);
+  border-left: 4px solid var(--nhl-black);
   border-radius: var(--radius-sm);
-  padding: 10px 16px;
-  color: #fff;
-  font-size: 0.85rem;
-  font-weight: 600;
+  padding: 12px 18px;
+  color: var(--text-main);
+  font-size: 0.88rem;
+  font-weight: 700;
   display: flex;
   align-items: center;
   gap: 10px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
   pointer-events: auto;
   animation: slideToast 0.2s ease;
 }
@@ -2995,7 +2666,7 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: var(--b365-green);
+  color: var(--nhl-black);
   flex-shrink: 0;
 }
 
@@ -3004,144 +2675,50 @@ body {
   height: 16px;
 }
 
-/* ATHLETIC BESPOKE ICON SYSTEM */
-.bts-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  vertical-align: middle;
-  flex-shrink: 0;
-}
-
-.tag-icon-svg {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--gold-odds);
-  margin-right: 4px;
-}
-
-.share-icon-pill {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  vertical-align: middle;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-  padding: 1px 4px;
-  color: #fff;
-  margin: 0 2px;
-}
-
-.placed-dot-pulsing {
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--b365-green);
-  box-shadow: 0 0 8px var(--b365-green);
-  animation: pulseLiveDot 1.5s infinite;
-  margin-left: 5px;
-  vertical-align: middle;
-}
-
-.on-deck-rot-tag {
-  color: var(--b365-green);
-  font-weight: 800;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.msg-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  vertical-align: middle;
-  margin-right: 4px;
-}
-
-.msg-icon svg {
-  width: 14px;
-  height: 14px;
-}
-
-.banner-icon-wrap {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  vertical-align: middle;
-  margin-right: 6px;
-}
-
-.banner-icon-wrap svg {
-  width: 18px;
-  height: 18px;
-  color: var(--gold-odds);
-}
-
-.leg-chirp-row .leg-chirp-icon {
-  display: inline-flex;
-  color: var(--gold-odds);
-  flex-shrink: 0;
-}
-
-.legend-pill svg {
-  width: 10px;
-  height: 10px;
-  margin-right: 3px;
-}
-
-.grade-btn svg {
-  width: 10px;
-  height: 10px;
-  margin-right: 3px;
-}
-
+/* App Icon Preview Banner in Modal */
 .app-icon-preview-banner {
   display: flex;
   align-items: center;
-  gap: 12px;
-  background: #14171a;
-  border: 1px solid var(--border-medium);
+  gap: 14px;
+  background: var(--nhl-subcard);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
-  padding: 10px 12px;
+  padding: 12px 14px;
   margin-bottom: 14px;
 }
 
 .app-icon-preview-img {
-  width: 50px;
-  height: 50px;
-  border-radius: 10px;
+  width: 52px;
+  height: 52px;
+  border-radius: 11px;
   object-fit: cover;
-  border: 1px solid rgba(0, 255, 135, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .app-icon-preview-title {
   font-family: var(--font-sports);
   font-size: 1.15rem;
   font-weight: 900;
-  color: #fff;
+  color: var(--text-main);
   line-height: 1.1;
 }
 
 .app-icon-preview-sub {
-  font-size: 0.72rem;
-  color: var(--b365-green);
+  font-size: 0.74rem;
+  color: var(--text-secondary);
   margin-top: 2px;
 }
 
-/* RESPONSIVE DESIGN & IPHONE SAFE-AREA */
+/* ==========================================================================
+   14. RESPONSIVE DESIGN & MOBILE IPHONE OPTIMIZATIONS
+   ========================================================================== */
 @media (max-width: 960px) {
   .show-workspace {
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: 20px;
   }
-  .lineup-col {
-    width: 100%;
-  }
-  .ticket-col {
+  .lineup-col, .ticket-col {
     width: 100%;
   }
   .bettor-banner-inner {
@@ -3169,78 +2746,72 @@ body {
 }
 
 @media (max-width: 680px) {
-  /* Push down below iPhone Dynamic Island / Notch */
   .nhl-header {
-    padding-top: max(54px, env(safe-area-inset-top, 54px));
+    padding-top: max(44px, env(safe-area-inset-top, 44px));
     padding-left: max(10px, env(safe-area-inset-left, 10px));
     padding-right: max(10px, env(safe-area-inset-right, 10px));
   }
   .nhl-nav-inner {
-    padding: 6px 4px 8px;
+    padding: 6px 4px 0;
     gap: 8px;
   }
   .brand-main {
-    font-size: 1.15rem;
+    font-size: 1.18rem;
   }
   .brand-sub {
-    font-size: 0.58rem;
-    letter-spacing: 0.8px;
+    font-size: 0.60rem;
+    letter-spacing: 0.6px;
   }
+  .nhl-shield-badge img,
   .nhl-shield-badge svg {
-    width: 20px;
-    height: 23px;
+    width: 24px;
+    height: 28px;
   }
   .nhl-nav-btn {
-    padding: 4px 8px;
+    padding: 5px 10px;
     font-size: 0.72rem;
   }
   .view-nav-tabs {
-    gap: 3px;
-    padding: 3px;
+    gap: 4px;
   }
   .view-tab-btn {
-    padding: 7px 2px;
-    font-size: 0.76rem;
-    gap: 3px;
-  }
-  .tab-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    padding: 9px 4px 10px;
+    font-size: 0.82rem;
+    gap: 4px;
   }
   .tab-icon svg {
-    width: 13px;
-    height: 13px;
+    width: 14px;
+    height: 14px;
   }
   .live-badge-mini {
     padding: 1px 4px;
     font-size: 0.62rem;
   }
   .nhl-content {
-    padding: 12px 10px 40px;
+    padding: 14px 12px 50px;
   }
   .bettor-banner {
     padding: 14px;
     margin-bottom: 16px;
   }
   .bettor-jersey-badge {
-    width: 44px;
-    height: 44px;
-    font-size: 1.2rem;
+    width: 46px;
+    height: 46px;
+    font-size: 1.25rem;
   }
   .bettor-name-strong {
-    font-size: 1.5rem;
+    font-size: 1.55rem;
   }
   .bettor-actions {
     flex-direction: column;
   }
   .stats-hero-banner {
-    padding: 14px;
+    padding: 16px;
     flex-direction: column;
     align-items: flex-start;
   }
   .stats-hero-title {
-    font-size: 1.45rem;
+    font-size: 1.55rem;
   }
   .stats-hero-meta {
     width: 100%;
@@ -3248,10 +2819,11 @@ body {
   }
   .meta-stat-pill {
     flex: 1;
-    padding: 8px 4px;
+    padding: 8px 6px;
+    min-width: 0;
   }
   .meta-val {
-    font-size: 1.25rem;
+    font-size: 1.30rem;
   }
   .trophies-grid {
     grid-template-columns: 1fr;
@@ -3266,8 +2838,8 @@ body {
 
 @media (max-width: 390px) {
   .view-tab-btn {
-    font-size: 0.70rem;
-    padding: 6px 2px;
+    font-size: 0.76rem;
+    padding: 8px 2px 9px;
   }
   .live-badge-mini {
     display: none;
@@ -3276,6 +2848,6 @@ body {
     font-size: 1.05rem;
   }
   .brand-sub {
-    font-size: 0.52rem;
+    font-size: 0.54rem;
   }
 }

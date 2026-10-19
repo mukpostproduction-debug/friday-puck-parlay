@@ -2155,7 +2155,7 @@ function renderSquadLegs() {
                 </div>
               </div>
             </div>
-            <span class="leg-status-tag" style="background:#262a2f; color:#a1a1aa; border-color:#383f47;">N/A (Joined W2)</span>
+            <span class="leg-status-tag" style="background:var(--nhl-subcard); color:var(--text-secondary); border:1px solid var(--border-subtle);">N/A (Joined W2)</span>
           </div>
         </div>
       `;
