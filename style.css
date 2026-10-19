@@ -563,16 +563,96 @@ body {
 }
 
 /* ==========================================================================
-   4. ON DECK BETTOR SPOTLIGHT BANNER
+   4. FRIDAY DATE NAVIGATOR & WEEK SELECTOR
+   ========================================================================== */
+.week-bar {
+  margin-bottom: 16px;
+}
+
+.week-selector-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px;
+  background: #ffffff;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-subtle);
+}
+
+.week-nav-btn {
+  background: var(--nhl-subcard);
+  border: 1px solid var(--border-subtle);
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.week-nav-btn:hover {
+  background: var(--nhl-subcard-hover);
+  border-color: var(--border-medium);
+}
+
+.week-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 2px;
+}
+
+.week-pill {
+  font-family: var(--font-sports);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+
+.week-date-headline {
+  font-family: var(--font-sports);
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: var(--text-main);
+}
+
+.puck-countdown {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+/* ==========================================================================
+   5. ON DECK BETTOR SPOTLIGHT BANNER
    ========================================================================== */
 .bettor-banner {
   background-color: var(--nhl-card-bg);
   border: 1px solid var(--border-subtle);
-  border-left: 4px solid var(--nhl-black);
   border-radius: var(--radius-md);
   padding: 18px 22px;
   margin-bottom: 22px;
   box-shadow: var(--shadow-subtle);
+  position: relative;
+  overflow: hidden;
+}
+
+.bettor-banner::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--nhl-black);
 }
 
 .bettor-banner-inner {
@@ -2789,6 +2869,23 @@ body {
   }
   .nhl-content {
     padding: 14px 12px 50px;
+  }
+  .week-selector-card {
+    padding: 10px 14px;
+  }
+  .week-date-headline {
+    font-size: 1.02rem;
+  }
+  .col-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  .col-title {
+    font-size: 1.10rem;
+  }
+  .col-caption {
+    font-size: 0.72rem;
   }
   .bettor-banner {
     padding: 14px;
