@@ -1,33 +1,35 @@
 /* ==========================================================================
-   BET THE SHOW - NHL.COM SPORTS BROADCAST DESIGN SYSTEM
-   Aesthetic: Official NHL Broadcast & Scoreboard Graphic Style
-   Authentic, Crisp, Athletic - Non-AI Dark Sports Layout
+   BET THE SHOW - BET365 / SPORTS BROADCAST DARK DESIGN SYSTEM
+   Aesthetic: Premium Bet365 Dark Sportsbook • Neon Green (#00ff87) • Crisp Athletic Cards
    ========================================================================== */
 
 :root {
-  /* Official NHL & Sports Lounge Palette */
-  --nhl-black: #0b0c0e;
-  --nhl-dark-carbon: #121418;
-  --nhl-card-bg: #161920;
-  --nhl-card-hover: #1c202a;
-  --nhl-surface-light: #222734;
-  --nhl-input-bg: #0e1015;
+  /* Bet365 / Dark Sportsbook Color Palette */
+  --nhl-black: #121212;
+  --nhl-dark-carbon: #16191c;
+  --nhl-card-bg: #1e2124;
+  --nhl-card-hover: #262a2f;
+  --nhl-subcard: #282c31;
+  --nhl-surface-light: #2c3239;
+  --nhl-input-bg: #14171a;
 
-  /* Crisp Sports Borders (Clean & Non-Blurry) */
-  --border-subtle: #242935;
-  --border-medium: #313848;
-  --border-active: #0066cc;
+  /* Borders */
+  --border-subtle: #2c3136;
+  --border-medium: #383f47;
+  --border-active: #00ff87;
   --border-gold: #b45309;
 
-  /* Authentic Athletic Accents */
-  --nhl-blue: #00529b;
-  --nhl-blue-bright: #0066cc;
-  --nhl-silver: #9ca3af;
-  --nhl-silver-light: #e5e7eb;
-  --green-win: #10b981;
-  --green-win-dark: #065f46;
+  /* Bet365 Green & Athletic Accents */
+  --b365-green: #00ff87;
+  --b365-btn-green: #137a52;
+  --b365-btn-green-hover: #179363;
+  --green-win: #00ff87;
+  --green-win-dark: #0f5132;
   --gold-odds: #f59e0b;
+  --nhl-blue: #0066cc;
+  --nhl-blue-bright: #38bdf8;
   --red-alert: #ef4444;
+  --red-dark: #7f1d1d;
 
   /* Typography */
   --font-sports: 'Barlow Semi Condensed', -apple-system, sans-serif;
@@ -35,16 +37,16 @@
   --font-mono: 'JetBrains Mono', monospace;
 
   /* Text Colors */
-  --text-main: #ffffff;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
+  --text-main: #f1f1f1;
+  --text-secondary: #a1a1aa;
+  --text-muted: #71717a;
 
   /* Layout */
   --max-width: 1260px;
   --radius-xs: 4px;
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
 }
 
 /* Base Reset */
@@ -65,13 +67,78 @@ body {
   padding-bottom: 60px;
 }
 
-/* 1. TOP GLOBAL NAVIGATION BAR (NHL.COM STYLE) */
+/* Utility Bet365 Classes */
+.b365-card {
+  background-color: var(--nhl-card-bg);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+}
+
+.b365-subcard {
+  background-color: var(--nhl-subcard);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.b365-green {
+  color: var(--b365-green) !important;
+}
+
+.b365-btn-green {
+  background-color: var(--b365-btn-green);
+  color: #ffffff;
+  transition: all 0.15s ease;
+}
+
+.b365-btn-green:hover {
+  background-color: var(--b365-btn-green-hover);
+}
+
+.progress-bar-fill {
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(0.85); }
+}
+
+.live-dot {
+  animation: pulse-dot 1.8s infinite;
+}
+
+.live-dot-mini {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: var(--b365-green);
+  animation: pulse-dot 1.8s infinite;
+  box-shadow: 0 0 6px var(--b365-green);
+}
+
+/* App View Containers */
+.app-view {
+  display: none;
+}
+
+.app-view.active {
+  display: block;
+  animation: fadeInView 0.2s ease-out;
+}
+
+@keyframes fadeInView {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* 1. TOP GLOBAL NAVIGATION BAR */
 .nhl-header {
   position: sticky;
   top: 0;
   z-index: 100;
-  background-color: #08090b;
-  border-bottom: 2px solid #1f242e;
+  background-color: #14171a;
+  border-bottom: 2px solid var(--border-subtle);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4);
 }
 
 .nhl-nav-inner {
@@ -81,12 +148,14 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 16px;
 }
 
 .brand-zone {
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-shrink: 0;
 }
 
 .nhl-shield-badge {
@@ -115,69 +184,126 @@ body {
   font-family: var(--font-sports);
   font-size: 0.68rem;
   font-weight: 700;
-  letter-spacing: 1.2px;
-  color: var(--gold-odds);
+  letter-spacing: 1px;
+  color: var(--b365-green);
   text-transform: uppercase;
   margin-top: 2px;
+}
+
+/* VIEW NAVIGATION TABS (SEGMENTED TABS) */
+.view-nav-tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #0f1214;
+  padding: 4px;
+  border-radius: 10px;
+  border: 1px solid var(--border-subtle);
+}
+
+.view-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 7px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-sports);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.view-tab-btn:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.view-tab-btn.active {
+  background: #1e2227;
+  color: #ffffff;
+  border: 1px solid var(--border-medium);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.view-tab-btn.active .tab-label {
+  color: #ffffff;
+}
+
+.live-badge-mini {
+  font-size: 0.65rem;
+  font-weight: 800;
+  font-family: var(--font-mono);
+  background: rgba(0, 255, 135, 0.15);
+  color: var(--b365-green);
+  border: 1px solid rgba(0, 255, 135, 0.35);
+  padding: 1px 5px;
+  border-radius: 4px;
 }
 
 .nhl-nav-right {
   display: flex;
   align-items: center;
   gap: 10px;
+  flex-shrink: 0;
 }
 
 .nhl-nav-btn {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  padding: 6px 14px;
+  gap: 6px;
+  padding: 6px 12px;
   border-radius: var(--radius-sm);
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   font-weight: 700;
   font-family: var(--font-sports);
-  letter-spacing: 0.5px;
+  letter-spacing: 0.4px;
   cursor: pointer;
   transition: all 0.15s ease;
-  border: 1px solid var(--border-medium);
+  border: 1px solid var(--border-subtle);
   background: var(--nhl-card-bg);
   color: var(--text-main);
   text-transform: uppercase;
 }
 
 .nhl-nav-btn:hover {
-  background: var(--nhl-surface-light);
-  border-color: var(--nhl-silver);
+  background: var(--nhl-subcard);
+  border-color: var(--text-secondary);
 }
 
 .install-btn {
-  background: #172033;
-  border-color: #2b3a58;
+  background: #17202c;
+  border-color: #273549;
   color: #38bdf8;
 }
 
 .install-btn:hover {
-  background: #1e2c47;
+  background: #1f2c3d;
   border-color: #38bdf8;
 }
 
 .sync-btn {
-  background: #0f1712;
-  border-color: #173824;
-  color: var(--green-win);
+  background: #101c15;
+  border-color: #1a3c26;
+  color: var(--b365-green);
 }
 
 .sync-btn .status-dot {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background-color: var(--green-win);
-  box-shadow: 0 0 6px var(--green-win);
+  background-color: var(--b365-green);
+  box-shadow: 0 0 6px var(--b365-green);
 }
 
-/* 2. SCOREBOARD TICKER RIBBON (NHL.COM SCORES RIBBON) */
+/* 2. SCOREBOARD TICKER RIBBON */
 .scoreboard-ribbon {
-  background-color: #11141a;
+  background-color: #15181b;
   border-bottom: 1px solid var(--border-subtle);
   display: flex;
   align-items: center;
@@ -186,7 +312,7 @@ body {
 }
 
 .ribbon-label {
-  padding: 10px 14px 10px 0;
+  padding: 8px 12px 8px 0;
   border-right: 1px solid var(--border-subtle);
   display: flex;
   flex-direction: column;
@@ -195,7 +321,7 @@ body {
 
 .ribbon-label span:first-child {
   font-family: var(--font-sports);
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 800;
   color: #fff;
   letter-spacing: 0.5px;
@@ -211,9 +337,9 @@ body {
 .ribbon-scroll {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   overflow-x: auto;
-  padding: 8px 12px;
+  padding: 6px 12px;
   scrollbar-width: none;
 }
 
@@ -229,13 +355,13 @@ body {
 }
 
 .ticker-game-chip {
-  background: #171b23;
+  background: #1c2024;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
-  padding: 6px 12px;
+  padding: 5px 10px;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   white-space: nowrap;
   flex-shrink: 0;
   cursor: pointer;
@@ -243,7 +369,7 @@ body {
 }
 
 .ticker-game-chip:hover {
-  background: var(--nhl-surface-light);
+  background: var(--nhl-subcard);
   border-color: var(--border-medium);
 }
 
@@ -256,18 +382,18 @@ body {
 .ticker-team-line {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
 }
 
 .ticker-team-logo {
-  width: 16px;
-  height: 16px;
+  width: 15px;
+  height: 15px;
   object-fit: contain;
 }
 
 .ticker-team-abbrev {
   font-family: var(--font-sports);
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 800;
   color: #fff;
 }
@@ -275,18 +401,18 @@ body {
 .ticker-status {
   text-align: right;
   border-left: 1px solid rgba(255, 255, 255, 0.08);
-  padding-left: 10px;
+  padding-left: 8px;
 }
 
 .ticker-time {
   font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 700;
   color: var(--gold-odds);
 }
 
 .ticker-state {
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   color: var(--text-muted);
   text-transform: uppercase;
 }
@@ -295,18 +421,15 @@ body {
 .nhl-content {
   max-width: var(--max-width);
   margin: 0 auto;
-  padding: 20px 16px 40px;
+  padding: 18px 16px 40px;
 }
 
 /* 4. WEEK NAVIGATOR */
 .week-bar {
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 }
 
 .week-selector-card {
-  background: var(--nhl-card-bg);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
   padding: 12px 18px;
   display: flex;
   align-items: center;
@@ -314,7 +437,7 @@ body {
 }
 
 .week-nav-btn {
-  background: #11141a;
+  background: #16191c;
   border: 1px solid var(--border-medium);
   color: var(--text-secondary);
   border-radius: var(--radius-xs);
@@ -328,7 +451,7 @@ body {
 }
 
 .week-nav-btn:hover {
-  background: var(--nhl-surface-light);
+  background: var(--nhl-subcard);
   color: #fff;
   border-color: #fff;
 }
@@ -342,7 +465,7 @@ body {
   font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 1.5px;
-  color: var(--gold-odds);
+  color: var(--b365-green);
   text-transform: uppercase;
 }
 
@@ -356,24 +479,21 @@ body {
 
 .puck-countdown {
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: 0.74rem;
   color: var(--text-secondary);
 }
 
 /* 5. ON DECK BETTOR SPOTLIGHT BANNER */
 .bettor-banner {
-  background: #131720;
-  border: 1px solid var(--border-medium);
-  border-left: 4px solid var(--gold-odds);
-  border-radius: var(--radius-md);
-  padding: 20px 24px;
-  margin-bottom: 24px;
+  border-left: 4px solid var(--b365-green);
+  padding: 18px 22px;
+  margin-bottom: 22px;
 }
 
 .bettor-banner-inner {
   display: grid;
   grid-template-columns: 1.15fr 0.85fr;
-  gap: 24px;
+  gap: 22px;
   align-items: center;
 }
 
@@ -381,17 +501,17 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: rgba(245, 158, 11, 0.12);
-  border: 1px solid var(--border-gold);
+  background: rgba(0, 255, 135, 0.1);
+  border: 1px solid rgba(0, 255, 135, 0.3);
   padding: 3px 10px;
   border-radius: var(--radius-xs);
   font-family: var(--font-sports);
   font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.8px;
-  color: var(--gold-odds);
+  color: var(--b365-green);
   text-transform: uppercase;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .bettor-profile-row {
@@ -401,19 +521,20 @@ body {
 }
 
 .bettor-jersey-badge {
-  width: 58px;
-  height: 58px;
-  background: #0f131a;
-  border: 2px solid var(--gold-odds);
+  width: 56px;
+  height: 56px;
+  background: #14171a;
+  border: 2px solid var(--b365-green);
   border-radius: var(--radius-md);
   color: #ffffff;
   font-family: var(--font-sports);
   font-weight: 900;
-  font-size: 1.6rem;
+  font-size: 1.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  box-shadow: 0 0 14px rgba(0, 255, 135, 0.2);
 }
 
 .bettor-headline {
@@ -424,16 +545,16 @@ body {
 
 .bettor-name-strong {
   font-family: var(--font-sports);
-  font-size: 2rem;
+  font-size: 1.9rem;
   font-weight: 900;
   color: #ffffff;
   line-height: 1;
 }
 
 .bettor-role-tag {
-  background: #1e293b;
-  border: 1px solid #334155;
-  color: #e2e8f0;
+  background: rgba(0, 255, 135, 0.15);
+  border: 1px solid rgba(0, 255, 135, 0.4);
+  color: var(--b365-green);
   font-family: var(--font-sports);
   font-size: 0.72rem;
   font-weight: 800;
@@ -448,110 +569,106 @@ body {
   margin-top: 4px;
 }
 
-.bettor-banner-right {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
 .progress-box {
-  background: #0c0e13;
+  background: #16191c;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
-  padding: 12px 16px;
+  padding: 12px 14px;
 }
 
 .progress-labels {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 6px;
+  justify-content: space-between;
+  margin-bottom: 8px;
 }
 
 .progress-title {
   font-family: var(--font-sports);
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.8px;
   color: var(--text-secondary);
+  text-transform: uppercase;
 }
 
 .progress-fraction {
   font-family: var(--font-mono);
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: var(--gold-odds);
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--b365-green);
 }
 
 .progress-track {
   width: 100%;
   height: 8px;
-  background: #1e2330;
-  border-radius: 4px;
+  background: #0f1214;
+  border-radius: 999px;
   overflow: hidden;
+  border: 1px solid var(--border-subtle);
 }
 
 .progress-bar {
   height: 100%;
-  background: linear-gradient(90deg, var(--gold-odds), var(--green-win));
-  border-radius: 4px;
-  transition: width 0.3s ease;
+  background: var(--b365-green);
 }
 
 .progress-note {
-  font-size: 0.75rem;
-  color: var(--text-muted);
+  font-size: 0.76rem;
+  color: var(--text-secondary);
   margin-top: 6px;
 }
 
 .bettor-actions {
   display: flex;
+  align-items: center;
   gap: 10px;
+  margin-top: 12px;
 }
 
 .nhl-action-btn {
+  flex: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 7px;
-  padding: 9px 16px;
+  padding: 8px 12px;
   border-radius: var(--radius-sm);
   font-family: var(--font-sports);
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 800;
   letter-spacing: 0.5px;
-  text-transform: uppercase;
   cursor: pointer;
-  border: 1px solid transparent;
   transition: all 0.15s ease;
-  flex: 1;
+  border: none;
+  text-transform: uppercase;
 }
 
 .nhl-action-btn.primary {
-  background: var(--nhl-blue-bright);
+  background: var(--b365-btn-green);
   color: #fff;
-  border-color: #1e6acc;
 }
 
 .nhl-action-btn.primary:hover {
-  background: #1177e6;
+  background: var(--b365-btn-green-hover);
 }
 
 .nhl-action-btn.secondary {
-  background: #171b24;
-  border-color: var(--border-medium);
-  color: #fff;
+  background: #252a30;
+  color: var(--text-main);
+  border: 1px solid var(--border-medium);
 }
 
 .nhl-action-btn.secondary:hover {
-  background: var(--nhl-surface-light);
+  background: #2e343b;
+  border-color: #fff;
 }
 
-/* 6. MAIN SHOW WORKSPACE GRID */
+/* 6. MAIN WORKSPACE (TWO COLUMNS) */
 .show-workspace {
   display: grid;
-  grid-template-columns: 1.35fr 0.85fr;
-  gap: 24px;
+  grid-template-columns: 1.25fr 0.75fr;
+  gap: 22px;
   align-items: start;
 }
 
@@ -559,8 +676,8 @@ body {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  margin-bottom: 14px;
-  border-bottom: 2px solid var(--border-subtle);
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--border-subtle);
   padding-bottom: 8px;
 }
 
@@ -571,12 +688,12 @@ body {
 }
 
 .section-icon {
-  font-size: 1.1rem;
+  font-size: 1rem;
 }
 
 .col-title {
   font-family: var(--font-sports);
-  font-size: 1.25rem;
+  font-size: 1.15rem;
   font-weight: 900;
   letter-spacing: 0.5px;
   color: #fff;
@@ -585,43 +702,40 @@ body {
 
 .col-caption {
   font-size: 0.75rem;
-  color: var(--text-muted);
+  color: var(--text-secondary);
 }
 
-/* 7. LEGS LIST (NHL ROSTER / LINE SHEET STYLE) */
+/* 7. LEGS LIST (6 BOYS) */
 .legs-list {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  margin-bottom: 30px;
+  margin-bottom: 22px;
 }
 
 .leg-card-nhl {
   background: var(--nhl-card-bg);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  padding: 14px 18px;
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
   transition: all 0.15s ease;
 }
 
-.leg-card-nhl:hover {
-  background: var(--nhl-card-hover);
-  border-color: var(--border-medium);
-}
-
 .leg-card-nhl.locked {
-  border-left: 4px solid var(--green-win);
+  border-left: 3px solid var(--b365-green);
 }
 
 .leg-card-nhl.empty {
-  border: 1px dashed var(--border-medium);
-  background: #11141b;
+  border-style: dashed;
+  border-color: var(--border-medium);
+  background: #191c20;
 }
 
 .leg-card-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-bottom: 10px;
 }
 
 .boy-info-group {
@@ -631,75 +745,70 @@ body {
 }
 
 .boy-jersey {
-  width: 34px;
-  height: 34px;
-  background: #1e2430;
+  width: 32px;
+  height: 32px;
+  background: #14171a;
   border: 1px solid var(--border-medium);
   border-radius: var(--radius-xs);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  color: #ffffff;
   font-family: var(--font-sports);
   font-weight: 800;
   font-size: 0.95rem;
-  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .boy-name-text {
   font-family: var(--font-sports);
-  font-size: 1.15rem;
-  font-weight: 900;
-  color: #fff;
-  line-height: 1;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #ffffff;
 }
 
 .boy-sub-role {
-  font-size: 0.72rem;
-  color: var(--text-muted);
+  font-size: 0.74rem;
+  color: var(--text-secondary);
 }
 
 .bettor-tag-inline {
-  background: rgba(245, 158, 11, 0.15);
-  border: 1px solid var(--border-gold);
-  color: var(--gold-odds);
-  font-family: var(--font-sports);
   font-size: 0.65rem;
   font-weight: 800;
-  padding: 2px 6px;
-  border-radius: 3px;
+  font-family: var(--font-sports);
+  color: var(--b365-green);
+  background: rgba(0, 255, 135, 0.1);
+  padding: 1px 6px;
+  border-radius: 4px;
   margin-left: 6px;
-  text-transform: uppercase;
 }
 
 .leg-status-tag {
   font-family: var(--font-sports);
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 800;
-  padding: 3px 8px;
-  border-radius: 3px;
   letter-spacing: 0.5px;
+  padding: 2px 7px;
+  border-radius: var(--radius-xs);
   text-transform: uppercase;
 }
 
 .leg-status-tag.locked {
-  background: rgba(16, 185, 129, 0.15);
-  border: 1px solid var(--green-win-dark);
-  color: var(--green-win);
+  background: rgba(0, 255, 135, 0.12);
+  color: var(--b365-green);
+  border: 1px solid rgba(0, 255, 135, 0.3);
 }
 
 .leg-status-tag.waiting {
-  background: #181d26;
-  border: 1px solid var(--border-subtle);
-  color: var(--text-muted);
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--gold-odds);
+  border: 1px solid rgba(245, 158, 11, 0.3);
 }
 
-/* Pick Details Box */
 .leg-pick-box {
-  background: #0d0f15;
+  background: var(--nhl-subcard);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  padding: 10px 14px;
-  margin-top: 10px;
+  border-radius: var(--radius-xs);
+  padding: 10px 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -707,10 +816,9 @@ body {
 }
 
 .matchup-tag {
-  font-family: var(--font-sports);
   font-size: 0.72rem;
-  font-weight: 800;
-  color: var(--nhl-silver);
+  color: var(--text-secondary);
+  font-weight: 600;
   text-transform: uppercase;
 }
 
@@ -719,35 +827,35 @@ body {
   font-size: 0.95rem;
   font-weight: 700;
   color: #ffffff;
+  margin-top: 2px;
 }
 
 .odds-pill-box {
-  background: #171b24;
-  border: 1px solid var(--border-medium);
+  background: #14171a;
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-xs);
-  padding: 4px 8px;
+  padding: 4px 10px;
   text-align: right;
   flex-shrink: 0;
 }
 
 .odds-num {
   font-family: var(--font-mono);
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 800;
-  color: var(--gold-odds);
+  color: var(--b365-green);
 }
 
 .odds-dec-sub {
-  font-family: var(--font-mono);
   font-size: 0.65rem;
   color: var(--text-muted);
 }
 
 .leg-chirp-row {
-  font-size: 0.78rem;
-  color: #c084fc;
-  font-style: italic;
   margin-top: 8px;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  font-style: italic;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -757,188 +865,179 @@ body {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 6px;
+  gap: 8px;
   margin-top: 8px;
 }
 
 .action-icon-btn {
   background: transparent;
-  border: none;
-  color: var(--text-muted);
-  cursor: pointer;
-  padding: 4px;
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  width: 28px;
+  height: 28px;
   border-radius: var(--radius-xs);
-  display: flex;
+  display: inline-flex;
   align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
 }
 
 .action-icon-btn:hover {
+  background: var(--nhl-subcard);
   color: #fff;
-  background: var(--nhl-surface-light);
+  border-color: #fff;
 }
 
 .action-icon-btn.danger:hover {
-  color: var(--red-alert);
+  background: var(--red-dark);
+  color: #fff;
+  border-color: var(--red-alert);
 }
 
-/* Empty leg row */
 .empty-action-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 10px;
+  margin-top: 6px;
 }
 
 .empty-state-text {
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   color: var(--text-muted);
 }
 
 .lock-in-leg-btn {
-  background: var(--nhl-blue-bright);
-  border: 1px solid #1e6acc;
+  background: var(--b365-btn-green);
   color: #fff;
-  font-family: var(--font-sports);
-  font-size: 0.78rem;
-  font-weight: 800;
+  border: none;
   padding: 6px 14px;
   border-radius: var(--radius-xs);
+  font-family: var(--font-sports);
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.4px;
   cursor: pointer;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
   transition: all 0.15s ease;
+  text-transform: uppercase;
 }
 
 .lock-in-leg-btn:hover {
-  background: #1177e6;
+  background: var(--b365-btn-green-hover);
 }
 
-/* 8. MATCHUPS PANEL (UNDER THE 5 LEGS) */
+/* 8. MATCHUPS PANEL */
 .matchups-panel {
-  background: var(--nhl-card-bg);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  padding: 16px 20px;
+  padding: 16px;
 }
 
 .matchups-panel-header {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  margin-bottom: 12px;
   border-bottom: 1px solid var(--border-subtle);
   padding-bottom: 8px;
+  margin-bottom: 12px;
 }
 
 .panel-heading {
   font-family: var(--font-sports);
-  font-size: 1rem;
-  font-weight: 800;
+  font-size: 0.95rem;
+  font-weight: 900;
   color: #fff;
   text-transform: uppercase;
 }
 
 .panel-sub {
-  font-size: 0.75rem;
-  color: var(--text-muted);
+  font-size: 0.72rem;
+  color: var(--text-secondary);
 }
 
 .matchups-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .matchup-row-card {
-  background: #0f1217;
+  background: var(--nhl-subcard);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  padding: 10px 14px;
+  border-radius: var(--radius-xs);
+  padding: 10px 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  transition: all 0.15s ease;
-}
-
-.matchup-row-card:hover {
-  border-color: var(--border-medium);
-  background: #141820;
 }
 
 .teams-strip {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 8px;
 }
 
 .team-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .team-logo-small {
-  width: 22px;
-  height: 22px;
+  width: 18px;
+  height: 18px;
   object-fit: contain;
 }
 
 .team-name-bold {
   font-family: var(--font-sports);
-  font-size: 0.95rem;
+  font-size: 0.88rem;
   font-weight: 800;
-  color: #fff;
+  color: #ffffff;
 }
 
 .vs-text {
-  font-family: var(--font-sports);
   font-size: 0.72rem;
   color: var(--text-muted);
-  font-weight: 700;
 }
 
 .matchup-time-box {
-  text-align: right;
   font-family: var(--font-mono);
-  font-size: 0.78rem;
-  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--gold-odds);
 }
 
 .btn-pick-matchup {
-  background: #181d26;
+  background: #181c20;
   border: 1px solid var(--border-medium);
-  color: #fff;
+  color: var(--b365-green);
+  padding: 4px 10px;
+  border-radius: var(--radius-xs);
   font-family: var(--font-sports);
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 800;
-  padding: 5px 10px;
-  border-radius: 3px;
   cursor: pointer;
-  text-transform: uppercase;
   transition: all 0.15s ease;
 }
 
 .btn-pick-matchup:hover {
-  background: var(--nhl-blue-bright);
-  border-color: var(--nhl-blue-bright);
+  background: var(--b365-btn-green);
+  color: #fff;
+  border-color: var(--b365-btn-green);
 }
 
 /* 9. SPORTSBOOK TICKET (RIGHT COLUMN) */
 .sportsbook-ticket {
   position: sticky;
   top: 75px;
-  background: #11141b;
-  border: 2px solid var(--border-medium);
-  border-radius: var(--radius-md);
-  padding: 20px;
-  margin-bottom: 24px;
+  padding: 18px;
+  margin-bottom: 20px;
 }
 
 .ticket-top {
-  border-bottom: 2px dashed #2a3140;
+  border-bottom: 1px dashed var(--border-medium);
   padding-bottom: 12px;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
 
 .ticket-brand-row {
@@ -949,89 +1048,89 @@ body {
 
 .ticket-logo {
   font-family: var(--font-sports);
-  font-size: 1.15rem;
+  font-size: 1.25rem;
   font-weight: 900;
   font-style: italic;
-  color: #fff;
-  letter-spacing: 0.5px;
+  color: #ffffff;
 }
 
 .ticket-badge {
+  background: #14171a;
+  border: 1px solid var(--border-medium);
+  color: var(--text-secondary);
   font-family: var(--font-sports);
   font-size: 0.72rem;
   font-weight: 800;
-  background: #1e2636;
-  color: #38bdf8;
-  border: 1px solid #2b3952;
-  padding: 2px 8px;
-  border-radius: 3px;
-  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: var(--radius-xs);
 }
 
 .ticket-badge.ready {
-  background: #0f2e1e;
-  color: var(--green-win);
-  border-color: #175435;
+  background: rgba(0, 255, 135, 0.15);
+  border-color: var(--b365-green);
+  color: var(--b365-green);
 }
 
 .ticket-ref {
   font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   color: var(--text-muted);
   margin-top: 4px;
 }
 
 .ticket-date-line {
-  font-size: 0.78rem;
+  font-size: 0.74rem;
   color: var(--text-secondary);
 }
 
 .ticket-legs-box {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
   margin-bottom: 16px;
+  max-height: 280px;
+  overflow-y: auto;
 }
 
 .ticket-leg-row {
+  background: var(--nhl-subcard);
+  border-radius: var(--radius-xs);
+  padding: 7px 10px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 0.8rem;
-  padding: 3px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  font-size: 0.78rem;
+  gap: 8px;
 }
 
 .t-boy-name {
-  font-weight: 700;
-  color: #fff;
-  width: 70px;
+  font-family: var(--font-sports);
+  font-weight: 800;
+  color: var(--b365-green);
+  width: 58px;
+  flex-shrink: 0;
 }
 
 .t-pick-desc {
-  color: var(--text-secondary);
-  font-size: 0.75rem;
   flex: 1;
-  white-space: nowrap;
+  color: #ffffff;
   overflow: hidden;
   text-overflow: ellipsis;
-  padding: 0 8px;
+  white-space: nowrap;
 }
 
 .t-odds {
   font-family: var(--font-mono);
-  font-weight: 700;
-  color: var(--gold-odds);
+  font-weight: 800;
+  color: #ffffff;
+  flex-shrink: 0;
 }
 
 .ticket-math-section {
-  background: #0a0c10;
+  background: #16191c;
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  padding: 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  border-radius: var(--radius-xs);
+  padding: 12px;
   margin-bottom: 16px;
 }
 
@@ -1039,11 +1138,12 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-bottom: 10px;
 }
 
 .math-label {
   font-family: var(--font-sports);
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   font-weight: 800;
   color: var(--text-secondary);
   letter-spacing: 0.5px;
@@ -1052,14 +1152,14 @@ body {
 .math-odds-wrap {
   display: flex;
   align-items: baseline;
-  gap: 8px;
+  gap: 6px;
 }
 
 .odds-american {
   font-family: var(--font-mono);
-  font-size: 1.25rem;
+  font-size: 1.15rem;
   font-weight: 900;
-  color: var(--gold-odds);
+  color: var(--b365-green);
 }
 
 .odds-decimal {
@@ -1068,20 +1168,25 @@ body {
   color: var(--text-muted);
 }
 
+.stake-row {
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 10px;
+  margin-bottom: 12px;
+}
+
 .stake-control {
   display: flex;
   align-items: center;
-  background: #141822;
+  background: #101214;
   border: 1px solid var(--border-medium);
   border-radius: var(--radius-xs);
   padding: 2px 8px;
 }
 
 .dollar-sign {
-  font-family: var(--font-mono);
-  color: var(--text-muted);
-  font-weight: 700;
-  margin-right: 4px;
+  color: var(--text-secondary);
+  font-weight: 800;
+  font-size: 0.9rem;
 }
 
 .stake-field {
@@ -1089,45 +1194,42 @@ body {
   border: none;
   color: #fff;
   font-family: var(--font-mono);
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 800;
   width: 60px;
-  outline: none;
   text-align: right;
+  outline: none;
 }
 
 .payout-box {
-  background: #0f2319;
-  border: 1px solid #184730;
+  background: #111417;
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-xs);
-  padding: 12px;
+  padding: 10px;
   text-align: center;
 }
 
 .payout-label {
   font-family: var(--font-sports);
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 800;
+  color: var(--text-secondary);
   letter-spacing: 1px;
-  color: var(--green-win);
-  text-transform: uppercase;
 }
 
 .payout-number {
   font-family: var(--font-sports);
-  font-size: 2.2rem;
+  font-size: 1.85rem;
   font-weight: 900;
-  color: #ffffff;
+  color: var(--b365-green);
   line-height: 1.1;
-  letter-spacing: -0.5px;
+  margin: 2px 0;
 }
 
 .payout-profit-line {
   font-family: var(--font-mono);
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: #34d399;
-  margin-top: 2px;
+  font-size: 0.72rem;
+  color: var(--text-secondary);
 }
 
 .ticket-actions-group {
@@ -1138,47 +1240,47 @@ body {
 }
 
 .btn-ticket {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 10px 14px;
+  width: 100%;
+  padding: 10px;
   border-radius: var(--radius-xs);
   font-family: var(--font-sports);
   font-size: 0.85rem;
   font-weight: 800;
   letter-spacing: 0.5px;
-  text-transform: uppercase;
   cursor: pointer;
-  border: 1px solid transparent;
   transition: all 0.15s ease;
-  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  text-transform: uppercase;
 }
 
 .btn-ticket.primary {
-  background: var(--gold-odds);
-  color: #000;
-  border-color: #d97706;
+  background: #252a30;
+  color: #fff;
+  border: 1px solid var(--border-medium);
 }
 
 .btn-ticket.primary:hover {
-  background: #fbbf24;
-}
-
-.btn-ticket.outline {
-  background: transparent;
-  border-color: var(--border-medium);
-  color: var(--text-secondary);
-}
-
-.btn-ticket.outline:hover {
+  background: #2f353d;
   border-color: #fff;
+}
+
+.btn-ticket.b365-btn-green {
+  background: var(--b365-btn-green);
   color: #fff;
+  box-shadow: 0 4px 14px rgba(19, 122, 82, 0.4);
+}
+
+.btn-ticket.b365-btn-green:hover {
+  background: var(--b365-btn-green-hover);
 }
 
 .ticket-barcode {
-  border-top: 2px dashed #2a3140;
-  padding-top: 10px;
+  border-top: 1px dashed var(--border-medium);
+  padding-top: 12px;
   text-align: center;
 }
 
@@ -1186,31 +1288,29 @@ body {
   height: 24px;
   background: repeating-linear-gradient(
     90deg,
-    #fff 0,
-    #fff 2px,
+    #ffffff 0,
+    #ffffff 2px,
     transparent 2px,
     transparent 4px,
-    #fff 4px,
-    #fff 7px,
-    transparent 7px,
-    transparent 9px
+    #ffffff 4px,
+    #ffffff 5px,
+    transparent 5px,
+    transparent 8px
   );
-  opacity: 0.35;
-  margin-bottom: 4px;
+  opacity: 0.5;
+  margin: 0 auto 6px;
+  max-width: 180px;
 }
 
 .barcode-text {
   font-family: var(--font-mono);
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   color: var(--text-muted);
   letter-spacing: 1px;
 }
 
-/* 10. ROTATION CARD */
+/* 10. ROTATION CARD (6 WEEKS) */
 .rotation-card {
-  background: var(--nhl-card-bg);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
   padding: 16px;
 }
 
@@ -1222,17 +1322,16 @@ body {
 
 .rot-title {
   font-family: var(--font-sports);
-  font-size: 0.85rem;
-  font-weight: 800;
+  font-size: 0.95rem;
+  font-weight: 900;
   color: #fff;
-  letter-spacing: 0.5px;
   text-transform: uppercase;
   display: block;
 }
 
 .rot-subtitle {
   font-size: 0.72rem;
-  color: var(--text-muted);
+  color: var(--b365-green);
 }
 
 .rot-list {
@@ -1245,40 +1344,503 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 10px;
+  padding: 6px 10px;
   border-radius: var(--radius-xs);
-  font-size: 0.82rem;
-  background: #101319;
+  font-size: 0.8rem;
+  background: var(--nhl-subcard);
 }
 
 .rot-row.current-week {
-  background: #1f2716;
-  border: 1px solid var(--border-gold);
+  background: rgba(0, 255, 135, 0.12);
+  border: 1px solid rgba(0, 255, 135, 0.4);
 }
 
 .rot-week-label {
   font-family: var(--font-mono);
   font-size: 0.72rem;
-  font-weight: 700;
-  color: var(--text-muted);
+  color: var(--text-secondary);
 }
 
 .rot-bettor-name {
   font-family: var(--font-sports);
   font-weight: 800;
-  font-size: 0.95rem;
+  color: #ffffff;
+}
+
+/* =====================================================================
+   VIEW 2: LIVE BET TRACKER SPECIFIC STYLES
+   ===================================================================== */
+.live-tracker-wrap {
+  max-width: 620px;
+  margin: 0 auto;
+}
+
+/* =====================================================================
+   VIEW 3: SQUAD STATS SPECIFIC STYLES
+   ===================================================================== */
+.stats-hub-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.stats-hero-banner {
+  padding: 22px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.stats-hero-tag {
+  font-family: var(--font-sports);
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--gold-odds);
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+
+.stats-hero-title {
+  font-family: var(--font-sports);
+  font-size: 1.85rem;
+  font-weight: 900;
+  color: #ffffff;
+  line-height: 1.1;
+}
+
+.stats-hero-desc {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-top: 4px;
+  max-width: 500px;
+}
+
+.stats-hero-meta {
+  display: flex;
+  gap: 12px;
+}
+
+.meta-stat-pill {
+  background: var(--nhl-subcard);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 10px 16px;
+  text-align: center;
+}
+
+.meta-label {
+  font-family: var(--font-sports);
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  display: block;
+}
+
+.meta-val {
+  font-family: var(--font-sports);
+  font-size: 1.45rem;
+  font-weight: 900;
+  color: #fff;
+  line-height: 1.1;
+  margin-top: 2px;
+  display: block;
+}
+
+/* Trophies Grid */
+.trophies-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+.trophy-card {
+  padding: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  position: relative;
+  overflow: hidden;
+}
+
+.trophy-card.sniper {
+  border-top: 3px solid var(--b365-green);
+}
+
+.trophy-card.slump {
+  border-top: 3px solid #ef4444;
+}
+
+.trophy-card.longshot {
+  border-top: 3px solid var(--gold-odds);
+}
+
+.trophy-card.chalk {
+  border-top: 3px solid #38bdf8;
+}
+
+.trophy-icon-wrap {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.trophy-badge-label {
+  font-family: var(--font-sports);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.trophy-winner-name {
+  font-family: var(--font-sports);
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: #fff;
+  line-height: 1.1;
+  margin: 3px 0 2px;
+}
+
+.trophy-stat-line {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--b365-green);
+}
+
+.trophy-note {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+/* Leaderboard Section */
+.leaderboard-section {
+  padding: 18px 20px;
+}
+
+.section-title-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 12px;
+  margin-bottom: 14px;
+}
+
+.section-title {
+  font-family: var(--font-sports);
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: #fff;
+  text-transform: uppercase;
+}
+
+.section-subtitle {
+  font-size: 0.74rem;
+  color: var(--text-secondary);
+}
+
+.legend-pills {
+  display: flex;
+  gap: 8px;
+}
+
+.legend-pill {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.legend-pill.hit {
+  background: rgba(0, 255, 135, 0.15);
+  color: var(--b365-green);
+}
+
+.legend-pill.miss {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+.table-responsive {
+  overflow-x: auto;
+}
+
+.squad-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.84rem;
+}
+
+.squad-table th {
+  font-family: var(--font-sports);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  color: var(--text-muted);
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border-subtle);
+  text-transform: uppercase;
+}
+
+.squad-table td {
+  padding: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.squad-table tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.rank-badge {
+  font-family: var(--font-mono);
+  font-weight: 800;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  width: 24px;
+  display: inline-block;
+}
+
+.rank-1 { color: #f59e0b; }
+.rank-2 { color: #e2e8f0; }
+.rank-3 { color: #cd7f32; }
+
+.table-player-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.player-avatar-small {
+  width: 30px;
+  height: 30px;
+  background: #14171a;
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-xs);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-sports);
+  font-weight: 800;
+  font-size: 0.85rem;
   color: #fff;
 }
 
-/* 11. MODALS (AUTHENTIC CLEAN SPORTS BROADCAST STYLE) */
+.player-name-link {
+  font-weight: 700;
+  color: #fff;
+}
+
+.hit-rate-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rate-num {
+  font-family: var(--font-mono);
+  font-weight: 800;
+  color: var(--b365-green);
+  width: 44px;
+}
+
+.rate-bar-track {
+  width: 70px;
+  height: 6px;
+  background: #14171a;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.rate-bar-fill {
+  height: 100%;
+  background: var(--b365-green);
+}
+
+.title-tag-pill {
+  font-family: var(--font-sports);
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.title-tag-pill.sniper {
+  background: rgba(0, 255, 135, 0.15);
+  color: var(--b365-green);
+}
+
+.title-tag-pill.slump {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+.title-tag-pill.chalk {
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+}
+
+.title-tag-pill.hot {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+}
+
+/* History Section */
+.history-section {
+  padding: 18px 20px;
+}
+
+.history-weeks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.history-week-card {
+  background: var(--nhl-subcard);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+}
+
+.history-week-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+}
+
+.h-week-title {
+  font-family: var(--font-sports);
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.h-bettor-badge {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.h-result-badge {
+  font-family: var(--font-sports);
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.h-result-badge.win {
+  background: rgba(0, 255, 135, 0.15);
+  color: var(--b365-green);
+}
+
+.h-result-badge.loss {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+.h-result-badge.in-progress {
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+}
+
+.history-legs-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.history-leg-card {
+  background: #1e2124;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xs);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.h-leg-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.h-leg-boy {
+  font-family: var(--font-sports);
+  font-weight: 800;
+  font-size: 0.85rem;
+  color: #fff;
+}
+
+.h-leg-odds {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.h-leg-pick {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #fff;
+  line-height: 1.25;
+}
+
+.h-leg-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.leg-grade-toggle {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.grade-btn {
+  background: #14171a;
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.grade-btn.hit.active {
+  background: var(--b365-btn-green);
+  color: #fff;
+  border-color: var(--b365-green);
+}
+
+.grade-btn.miss.active {
+  background: var(--red-dark);
+  color: #fff;
+  border-color: var(--red-alert);
+}
+
+/* =====================================================================
+   11. MODAL DIALOGS
+   ===================================================================== */
 .nhl-modal-backdrop {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.85);
+  inset: 0;
   z-index: 200;
+  background: rgba(0, 0, 0, 0.82);
+  backdrop-filter: blur(4px);
   display: none;
   align-items: center;
   justify-content: center;
@@ -1287,157 +1849,132 @@ body {
 
 .nhl-modal-backdrop.open {
   display: flex;
-  animation: fadeIn 0.15s ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
 }
 
 .nhl-modal-card {
-  background: #11141b;
-  border: 2px solid var(--border-medium);
-  border-radius: var(--radius-md);
-  max-width: 520px;
   width: 100%;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.9);
+  max-width: 520px;
+  padding: 22px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7);
+  animation: modalScale 0.18s ease-out;
+}
+
+@keyframes modalScale {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
 }
 
 .modal-top {
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--border-subtle);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  background: #0c0e14;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 12px;
+  margin-bottom: 16px;
 }
 
 .modal-tag {
   font-family: var(--font-sports);
-  font-size: 0.68rem;
+  font-size: 0.7rem;
   font-weight: 800;
+  color: var(--b365-green);
   letter-spacing: 1px;
-  color: var(--nhl-blue-bright);
   text-transform: uppercase;
 }
 
 .modal-title {
   font-family: var(--font-sports);
-  font-size: 1.25rem;
+  font-size: 1.45rem;
   font-weight: 900;
   color: #fff;
-  text-transform: uppercase;
 }
 
 .modal-close {
   background: transparent;
   border: none;
   color: var(--text-muted);
-  font-size: 1.5rem;
-  cursor: pointer;
+  font-size: 1.6rem;
   line-height: 1;
-  padding: 4px;
+  cursor: pointer;
 }
 
 .modal-close:hover {
   color: #fff;
 }
 
-.modal-form {
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
 .form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
+  margin-bottom: 14px;
 }
-
-.form-cols {
-  display: flex;
-  gap: 10px;
-}
-
-.flex-1 { flex: 1; }
-.flex-2 { flex: 2; }
 
 .form-label {
+  display: block;
   font-family: var(--font-sports);
   font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.8px;
   color: var(--text-secondary);
   text-transform: uppercase;
+  margin-bottom: 6px;
 }
 
 .optional-note {
-  color: var(--text-muted);
   font-weight: 400;
-  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: none;
 }
 
+/* 6 Boys Selector Grid in Modal */
 .boys-selector-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   gap: 6px;
 }
 
 .boy-pick-btn {
-  background: #171b24;
-  border: 1px solid var(--border-subtle);
+  background: #14171a;
+  border: 1px solid var(--border-medium);
+  color: var(--text-secondary);
   border-radius: var(--radius-xs);
   padding: 8px 4px;
-  color: var(--text-secondary);
   font-family: var(--font-sports);
+  font-size: 0.85rem;
   font-weight: 800;
-  font-size: 0.88rem;
   cursor: pointer;
   text-align: center;
   transition: all 0.15s ease;
 }
 
 .boy-pick-btn:hover {
-  background: var(--nhl-surface-light);
+  background: var(--nhl-subcard);
   color: #fff;
 }
 
 .boy-pick-btn.active {
-  background: var(--nhl-blue-bright);
-  border-color: #1e6acc;
+  background: var(--b365-btn-green);
+  border-color: var(--b365-green);
   color: #fff;
+  box-shadow: 0 0 10px rgba(0, 255, 135, 0.3);
 }
 
 .nhl-select, .nhl-input {
+  width: 100%;
   background: var(--nhl-input-bg);
   border: 1px solid var(--border-medium);
   border-radius: var(--radius-xs);
-  color: #fff;
   padding: 9px 12px;
-  font-size: 0.9rem;
+  color: #fff;
   font-family: var(--font-ui);
+  font-size: 0.88rem;
   outline: none;
-  width: 100%;
+  transition: border-color 0.15s ease;
 }
 
 .nhl-select:focus, .nhl-input:focus {
-  border-color: var(--nhl-blue-bright);
+  border-color: var(--b365-green);
 }
 
 .text-mono {
-  font-family: var(--font-mono);
-}
-
-.odds-preview-sub {
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  color: var(--text-muted);
-  margin-top: 2px;
+  font-family: var(--font-mono) !important;
 }
 
 .bet-types-row {
@@ -1447,27 +1984,36 @@ body {
 }
 
 .bet-type-btn {
-  background: #161b24;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-xs);
-  padding: 6px 12px;
-  font-family: var(--font-sports);
-  font-size: 0.78rem;
-  font-weight: 800;
+  background: #14171a;
+  border: 1px solid var(--border-medium);
   color: var(--text-secondary);
+  border-radius: var(--radius-xs);
+  padding: 5px 10px;
+  font-size: 0.76rem;
+  font-weight: 700;
   cursor: pointer;
-  text-transform: uppercase;
   transition: all 0.15s ease;
 }
 
-.bet-type-btn:hover {
+.bet-type-btn.active {
+  background: #252a30;
+  border-color: var(--b365-green);
   color: #fff;
 }
 
-.bet-type-btn.active {
-  background: var(--nhl-blue-bright);
-  border-color: #1e6acc;
-  color: #fff;
+.form-cols {
+  display: flex;
+  gap: 12px;
+}
+
+.flex-1 { flex: 1; }
+.flex-2 { flex: 2; }
+
+.odds-preview-sub {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  display: block;
+  margin-top: 4px;
 }
 
 .modal-bottom {
@@ -1475,35 +2021,42 @@ body {
   align-items: center;
   justify-content: flex-end;
   gap: 10px;
-  padding-top: 8px;
+  margin-top: 20px;
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 14px;
 }
 
 .nhl-btn {
-  padding: 9px 16px;
+  padding: 8px 18px;
   border-radius: var(--radius-xs);
   font-family: var(--font-sports);
   font-size: 0.85rem;
   font-weight: 800;
   letter-spacing: 0.5px;
-  text-transform: uppercase;
   cursor: pointer;
-  border: 1px solid transparent;
   transition: all 0.15s ease;
+  border: none;
+  text-transform: uppercase;
 }
 
 .nhl-btn.primary {
-  background: var(--nhl-blue-bright);
+  background: var(--b365-btn-green);
   color: #fff;
 }
 
 .nhl-btn.primary:hover {
-  background: #1177e6;
+  background: var(--b365-btn-green-hover);
 }
 
 .nhl-btn.outline {
   background: transparent;
-  border-color: var(--border-medium);
+  border: 1px solid var(--border-medium);
   color: var(--text-secondary);
+}
+
+.nhl-btn.outline:hover {
+  border-color: #fff;
+  color: #fff;
 }
 
 .nhl-btn.full-width {
@@ -1512,11 +2065,11 @@ body {
 
 /* 12. IPHONE INSTALL MODAL SPECIFIC */
 .install-body {
-  padding: 20px;
+  padding: 10px 0;
 }
 
 .install-intro {
-  font-size: 0.88rem;
+  font-size: 0.85rem;
   color: var(--text-secondary);
   margin-bottom: 16px;
 }
@@ -1524,29 +2077,29 @@ body {
 .install-steps {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-bottom: 20px;
+  gap: 10px;
+  margin-bottom: 18px;
 }
 
 .install-step-card {
   display: flex;
   align-items: flex-start;
-  gap: 14px;
-  background: #161b24;
+  gap: 12px;
+  background: var(--nhl-subcard);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
-  padding: 12px 14px;
+  padding: 10px 12px;
 }
 
 .step-num {
-  width: 28px;
-  height: 28px;
-  background: var(--nhl-blue-bright);
+  width: 26px;
+  height: 26px;
+  background: var(--b365-btn-green);
   color: #fff;
   border-radius: 50%;
   font-family: var(--font-sports);
   font-weight: 900;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1554,13 +2107,13 @@ body {
 }
 
 .step-content strong {
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   color: #fff;
   display: block;
 }
 
 .step-content p {
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: var(--text-secondary);
   margin-top: 2px;
 }
@@ -1568,10 +2121,10 @@ body {
 .share-icon-pill {
   display: inline-flex;
   align-items: center;
-  background: #252e3e;
+  background: #252a30;
   border-radius: 4px;
   padding: 2px 4px;
-  color: #38bdf8;
+  color: var(--b365-green);
   vertical-align: middle;
 }
 
@@ -1581,21 +2134,20 @@ body {
   justify-content: center;
   width: 16px;
   height: 16px;
-  background: #252e3e;
+  background: #252a30;
   border-radius: 4px;
   font-weight: 900;
-  color: #38bdf8;
+  color: var(--b365-green);
   vertical-align: middle;
 }
 
-/* Database Status */
 .db-status-banner {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 14px;
+  padding: 10px 14px;
   border-radius: var(--radius-sm);
-  font-size: 0.82rem;
+  font-size: 0.8rem;
 }
 
 .db-status-banner.connected {
@@ -1608,8 +2160,8 @@ body {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background-color: var(--green-win);
-  box-shadow: 0 0 8px var(--green-win);
+  background-color: var(--b365-green);
+  box-shadow: 0 0 8px var(--b365-green);
   flex-shrink: 0;
 }
 
@@ -1626,8 +2178,8 @@ body {
 }
 
 .nhl-toast {
-  background: #161b24;
-  border: 1px solid var(--nhl-blue-bright);
+  background: #1a1e22;
+  border: 1px solid var(--b365-green);
   border-radius: var(--radius-sm);
   padding: 10px 16px;
   color: #fff;
@@ -1646,25 +2198,23 @@ body {
   to { transform: translateX(0); opacity: 1; }
 }
 
-/* App Icon Preview inside Install Modal */
 .app-icon-preview-banner {
   display: flex;
   align-items: center;
-  gap: 14px;
-  background: #0f1218;
+  gap: 12px;
+  background: #14171a;
   border: 1px solid var(--border-medium);
   border-radius: var(--radius-sm);
-  padding: 10px 14px;
-  margin-bottom: 16px;
+  padding: 10px 12px;
+  margin-bottom: 14px;
 }
 
 .app-icon-preview-img {
-  width: 54px;
-  height: 54px;
-  border-radius: 12px;
+  width: 50px;
+  height: 50px;
+  border-radius: 10px;
   object-fit: cover;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(0, 255, 135, 0.3);
 }
 
 .app-icon-preview-title {
@@ -1676,48 +2226,68 @@ body {
 }
 
 .app-icon-preview-sub {
-  font-size: 0.75rem;
-  color: #38bdf8;
-  font-weight: 500;
+  font-size: 0.72rem;
+  color: var(--b365-green);
   margin-top: 2px;
 }
 
-/* RESPONSIVE LAYOUT */
-@media (max-width: 900px) {
+/* RESPONSIVE DESIGN */
+@media (max-width: 960px) {
   .show-workspace {
     grid-template-columns: 1fr;
   }
   .bettor-banner-inner {
     grid-template-columns: 1fr;
-    gap: 18px;
+    gap: 16px;
   }
   .sportsbook-ticket {
     position: static;
   }
+  .trophies-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .history-legs-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
-@media (max-width: 600px) {
-  .nhl-content {
-    padding: 14px 10px 60px;
+@media (max-width: 680px) {
+  .nhl-nav-inner {
+    flex-wrap: wrap;
+    padding: 8px 12px;
   }
-  .brand-main {
-    font-size: 1.25rem;
+  .view-nav-tabs {
+    order: 3;
+    width: 100%;
+    justify-content: space-around;
+    margin-top: 4px;
   }
-  .bettor-banner {
-    padding: 16px;
+  .view-tab-btn {
+    padding: 6px 8px;
+    font-size: 0.78rem;
   }
-  .bettor-jersey-badge {
-    width: 48px;
-    height: 48px;
-    font-size: 1.3rem;
+  .nav-btn-text {
+    display: none;
   }
-  .bettor-name-strong {
-    font-size: 1.6rem;
+  .trophies-grid {
+    grid-template-columns: 1fr;
   }
-  .bettor-actions {
+  .stats-hero-banner {
     flex-direction: column;
+    align-items: flex-start;
+  }
+  .stats-hero-meta {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .meta-stat-pill {
+    flex: 1;
+    padding: 8px;
+  }
+  .history-legs-grid {
+    grid-template-columns: 1fr;
   }
   .boys-selector-grid {
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(3, 1fr);
   }
 }

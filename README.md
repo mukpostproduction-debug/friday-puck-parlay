@@ -1,7 +1,7 @@
 # 🏒 Bet the Show
 
-> **5 Boys. 5 Legs. Every Friday NHL.**  
-> The official betting pool, 5-leg parlay builder, and weekly bettor rotation for **Alex, Will, Jackson, Axel, and Ben**.
+> **6 Boys. 6 Legs. Every Friday NHL • $30 Pool.**  
+> The official betting pool, 6-leg parlay builder, live SGP+ tracker, and season stats leaderboard for **Axel, Jackson, Will, Alex, Ben, and Edward**.
 
 Live on GitHub Pages: **[https://mukpostproduction-debug.github.io/friday-puck-parlay/](https://mukpostproduction-debug.github.io/friday-puck-parlay/)**
 
@@ -9,10 +9,30 @@ Live on GitHub Pages: **[https://mukpostproduction-debug.github.io/friday-puck-p
 
 ## ⚡ Current Season Status: WEEK 2
 
-- **Week 1**: Placed by **Will** (Completed).
-- **Week 2 (Oct 16, 2026)**: 👑 **JACKSON** is ON DECK to place this week's 5-leg ticket on his sportsbook!
-- **Rotation Order**: Will → Jackson → Alex → Axel → Ben (repeats every 5 weeks; Will bets at the end of each cycle).
-- **Slip Status**: Completely blank for Week 2 (`0 / 5 Legs Locked`). Everyone inputs 1 leg before Friday puck drop.
+- **Week 1 (Oct 9, 2026)**: Placed by **Axel** ($30 Wager • 5/6 Legs Hit).
+- **Week 2 (Oct 16, 2026)**: 👑 **JACKSON** is ON DECK to place this week's 6-leg ticket ($30 total stake, $5 per boy) on his sportsbook!
+- **6-Week Rotation Order**: Axel → Jackson → Will → Alex → Ben → Edward (repeats every 6 weeks).
+- **Slip Status**: Week 2 open for picks (`0 / 6 Legs Locked`). Each of the 6 boys inputs 1 leg before Friday puck drop.
+
+---
+
+## 🟢 Live SGP+ Bet Tracker (Bet365 Dark UI)
+
+- **Real-Time Boxscore Sync**: Automatically fetches live NHL player and game boxscore summaries from the official ESPN & NHL APIs every 20 seconds.
+- **In-Game Stat Tracking**: Real-time progress bars and checkmarks for Points, Goals, Assists, and Shots on Goal (SOG).
+- **Manual Overrides**: Instant `[-]` and `[+]` counter adjustments directly on each leg for barroom/couch verification.
+- **Automatic Live Transition**: The moment Jackson confirms the bet has been placed on his sportsbook ("Mark as Placed by Jackson"), the app fires celebratory confetti, plays triumph audio, and switches automatically to the live tracker feed!
+
+---
+
+## 🏆 Squad Stats & Betting Hall of Fame
+
+- 🎯 **The Sniper**: Highest Hit Rate & most winning legs.
+- 🥶 **The Slump King**: Most missed picks (responsible for selling the parlay).
+- 🚀 **The Longshot King**: Highest odds leg ever cashed.
+- 🍦 **The Chalk Merchant**: Lowest average odds (safest bettor).
+- 🔥 **Active Win Streaks**: Real-time streak indicators (`W2`, `L1`, etc.).
+- **Interactive Weekly Log & Grader**: Tap `[✓ HIT]` or `[✗ MISS]` on any leg in past or current weeks to recalculate leaderboards on the fly!
 
 ---
 
@@ -22,7 +42,7 @@ Live on GitHub Pages: **[https://mukpostproduction-debug.github.io/friday-puck-p
 2. Tap the **Share** button at the bottom (square with upward arrow `[↑]`).
 3. Scroll down and tap **"Add to Home Screen"** (`[+]`).
 4. Tap **"Add"** in the top-right corner.
-5. The official **Bet the Show** icon (the boys in their Toronto Maple Leafs dresses) will appear right on your home screen and open in standalone full-screen mode!
+5. The official **Bet the Show** icon will appear on your home screen and open in standalone full-screen mode!
 
 ---
 
@@ -30,5 +50,5 @@ Live on GitHub Pages: **[https://mukpostproduction-debug.github.io/friday-puck-p
 
 Connected directly to Jackson's Supabase backend (`lumncqjfpdxaygbvtagi`):
 - Whenever any of the boys submit or change a pick on their phone, everyone's slip updates live without reloading.
-- Automatically calculates total combined odds and potential payout based on the weekly stake ($25 default).
-- One-click **"Copy Bet Slip"** button formats the entire ticket ready to paste into Bet365, FanDuel, DraftKings, or the group chat.
+- Automatically calculates total combined odds and potential payout based on the weekly stake ($30 default, $5 per boy).
+- One-click **"Copy Bet Slip"** button formats the entire 6-leg ticket ready to paste into Bet365, FanDuel, DraftKings, or the group chat.

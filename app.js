@@ -1,23 +1,26 @@
 /**
  * BET THE SHOW - Official Core Application Logic
- * 5 Boys. 5 Legs. Every Friday NHL.
+ * 6 Boys. 6 Legs. Every Friday NHL • $30 Pool.
+ * Axel, Jackson, Will, Alex, Ben, and Edward.
  */
 
-// SQUAD CONFIGURATION & ROTATION ORDER
-// Week 1 was Friday, October 9, 2026 (Will placed the bet)
-// Week 2 is Friday, October 16, 2026 (Jackson - On Deck this week)
-// Will bets at the end of the 5-week cycle
+// =============================================================================
+// 1. SQUAD CONFIGURATION & 6-WEEK BETTOR ROTATION
+// =============================================================================
+// Week 1 was Friday, October 9, 2026 (Axel placed the bet from the States)
+// Week 2 is Friday, October 16, 2026 (Jackson is ON DECK this week)
+// 6-week cycle: Axel -> Jackson -> Will -> Alex -> Ben -> Edward (repeats)
 const SQUAD = [
-  { id: 'will', name: 'Will', initials: 'WI', role: 'Week 1 Bettor' },
-  { id: 'jackson', name: 'Jackson', initials: 'JA', role: 'Week 2 Bettor (On Deck)' },
-  { id: 'alex', name: 'Alex', initials: 'AL', role: 'Week 3 Bettor' },
-  { id: 'axel', name: 'Axel', initials: 'AX', role: 'Week 4 Bettor' },
-  { id: 'ben', name: 'Ben', initials: 'BE', role: 'Week 5 Bettor' }
+  { id: 'axel', name: 'Axel', initials: 'AX', color: '#f59e0b', defaultRole: 'Week 1 Bettor' },
+  { id: 'jackson', name: 'Jackson', initials: 'JA', color: '#00ff87', defaultRole: 'Week 2 Bettor (On Deck)' },
+  { id: 'will', name: 'Will', initials: 'WI', color: '#38bdf8', defaultRole: 'Week 3 Bettor' },
+  { id: 'alex', name: 'Alex', initials: 'AL', color: '#a855f7', defaultRole: 'Week 4 Bettor' },
+  { id: 'ben', name: 'Ben', initials: 'BE', color: '#ec4899', defaultRole: 'Week 5 Bettor' },
+  { id: 'edward', name: 'Edward', initials: 'ED', color: '#fb923c', defaultRole: 'Week 6 Bettor' }
 ];
 
 // REFERENCE START DATE FOR ROTATION
-// Week 1 was Friday, October 9, 2026 (Will placed the bet)
-// Week 2 is Friday, October 16, 2026 (Jackson)
+// Week 1 was Friday, October 9, 2026 (Axel placed the bet)
 const ROTATION_START_FRIDAY = new Date('2026-10-09T12:00:00Z');
 
 // PRE-CONFIGURED SUPABASE CREDENTIALS (Jackson's live Supabase instance)
@@ -26,20 +29,27 @@ const DEFAULT_SUPABASE_CONFIG = {
   key: 'sb_publishable_gBk1KIAlEaspZL6Im2p0lA_g1rSdRQ-'
 };
 
-// APPLICATION STATE
+// =============================================================================
+// 2. APPLICATION STATE
+// =============================================================================
 const state = {
   currentFriday: null,        // Date object (defaults to Oct 16, 2026)
   currentFridayStr: '',       // 'YYYY-MM-DD'
   weekNumber: 2,              // Week 2
-  legs: {},                   // Map of boyName -> leg object (blank by default for Week 2)
+  legs: {},                   // Map of boyName -> leg object
   games: [],                  // Friday's NHL matchups
-  stake: 25,                  // Default $25 pool stake
+  stake: 30,                  // Default $30 pool stake ($5 per boy)
   isPlaced: false,
   supabase: null,
-  isLiveSync: false
+  isLiveSync: false,
+  currentView: 'slipBuilderView',
+  // Live tracker parlay data (Aragon's template + 6th leg for Edward)
+  trackerData: [],
+  // Stats & Leaderboard historical data
+  statsHistory: []
 };
 
-// AUDIO SYNTHESIZER (Pure Web Audio API)
+// AUDIO SYNTHESIZER (Web Audio API)
 const audioCtx = (window.AudioContext || window.webkitAudioContext) ? new (window.AudioContext || window.webkitAudioContext)() : null;
 
 function playSound(type = 'click') {
@@ -85,7 +95,9 @@ function playSound(type = 'click') {
   } catch (e) {}
 }
 
-// DATE & ROTATION ENGINE
+// =============================================================================
+// 3. DATE & 6-WEEK ROTATION ENGINE
+// =============================================================================
 function getFridayDiffWeeks(fridayDate) {
   const msPerWeek = 7 * 24 * 60 * 60 * 1000;
   const diffMs = fridayDate.getTime() - ROTATION_START_FRIDAY.getTime();
@@ -166,18 +178,32 @@ function calculateParlayTotals(legsList, stakeAmount) {
   };
 }
 
-// DOM ELEMENTS
+// =============================================================================
+// 4. DOM ELEMENTS
+// =============================================================================
 const DOM = {
+  // Navigation tabs
+  tabSlipBuilder: document.getElementById('tabSlipBuilder'),
+  tabLiveTracker: document.getElementById('tabLiveTracker'),
+  tabStats: document.getElementById('tabStats'),
+  navLiveMultiplier: document.getElementById('navLiveMultiplier'),
+  // Header controls
   installAppBtn: document.getElementById('installAppBtn'),
   syncStatusBtn: document.getElementById('syncStatusBtn'),
   syncStatusText: document.getElementById('syncStatusText'),
   tickerGamesCount: document.getElementById('tickerGamesCount'),
   gamesTicker: document.getElementById('gamesTicker'),
+  // Views
+  slipBuilderView: document.getElementById('slipBuilderView'),
+  liveTrackerView: document.getElementById('liveTrackerView'),
+  statsView: document.getElementById('statsView'),
+  // Week navigation
   prevWeekBtn: document.getElementById('prevWeekBtn'),
   nextWeekBtn: document.getElementById('nextWeekBtn'),
   weekPill: document.getElementById('weekPill'),
   currentFridayDisplay: document.getElementById('currentFridayDisplay'),
   puckDropCountdown: document.getElementById('puckDropCountdown'),
+  // Bettor Banner
   bettorName: document.getElementById('bettorName'),
   bettorAvatar: document.getElementById('bettorAvatar'),
   bettorDesc: document.getElementById('bettorDesc'),
@@ -186,6 +212,7 @@ const DOM = {
   slipStatusMsg: document.getElementById('slipStatusMsg'),
   quickChirpBtn: document.getElementById('quickChirpBtn'),
   copySportsbookSlipBtn: document.getElementById('copySportsbookSlipBtn'),
+  // Lineup & Ticket
   legsCardsContainer: document.getElementById('legsCardsContainer'),
   matchupsList: document.getElementById('matchupsList'),
   scheduleDateSubtitle: document.getElementById('scheduleDateSubtitle'),
@@ -202,6 +229,18 @@ const DOM = {
   markPlacedBtn: document.getElementById('markPlacedBtn'),
   markPlacedText: document.getElementById('markPlacedText'),
   rotationList: document.getElementById('rotationList'),
+  // Live Tracker elements
+  trackerGamesContainer: document.getElementById('gamesContainer'),
+  trackerTotalOddsBadge: document.getElementById('trackerTotalOddsBadge'),
+  syncStatus: document.getElementById('syncStatus'),
+  refreshBtn: document.getElementById('refreshBtn'),
+  refreshIcon: document.getElementById('refreshIcon'),
+  legsHitCount: document.getElementById('legsHitCount'),
+  overallProgressBar: document.getElementById('overallProgressBar'),
+  trackerWagerDisplay: document.getElementById('trackerWagerDisplay'),
+  trackerReturnDisplay: document.getElementById('trackerReturnDisplay'),
+  ticketStatusBanner: document.getElementById('ticketStatusBanner'),
+  autoPollToggle: document.getElementById('autoPollToggle'),
   // Modals
   legModalBackdrop: document.getElementById('legModalBackdrop'),
   closeModalBtn: document.getElementById('closeModalBtn'),
@@ -228,8 +267,50 @@ const DOM = {
   supabaseUrlInput: document.getElementById('supabaseUrlInput'),
   supabaseAnonKeyInput: document.getElementById('supabaseAnonKeyInput'),
   saveSyncBtn: document.getElementById('saveSyncBtn'),
-  toastContainer: document.getElementById('toastContainer')
+  toastContainer: document.getElementById('toastContainer'),
+  // Stats View
+  statsTotalWagered: document.getElementById('statsTotalWagered'),
+  statsTotalLegs: document.getElementById('statsTotalLegs'),
+  statsSquadWinRate: document.getElementById('statsSquadWinRate'),
+  trophySniperName: document.getElementById('trophySniperName'),
+  trophySniperStat: document.getElementById('trophySniperStat'),
+  trophySlumpName: document.getElementById('trophySlumpName'),
+  trophySlumpStat: document.getElementById('trophySlumpStat'),
+  trophyLongshotName: document.getElementById('trophyLongshotName'),
+  trophyLongshotStat: document.getElementById('trophyLongshotStat'),
+  trophyChalkName: document.getElementById('trophyChalkName'),
+  trophyChalkStat: document.getElementById('trophyChalkStat'),
+  leaderboardTbody: document.getElementById('leaderboardTbody'),
+  historyWeeksContainer: document.getElementById('historyWeeksContainer')
 };
+
+// =============================================================================
+// 5. VIEW SWITCHER
+// =============================================================================
+function switchView(targetViewId) {
+  state.currentView = targetViewId;
+
+  // Views
+  DOM.slipBuilderView.classList.toggle('active', targetViewId === 'slipBuilderView');
+  DOM.liveTrackerView.classList.toggle('active', targetViewId === 'liveTrackerView');
+  DOM.statsView.classList.toggle('active', targetViewId === 'statsView');
+
+  // Nav buttons
+  DOM.tabSlipBuilder.classList.toggle('active', targetViewId === 'slipBuilderView');
+  DOM.tabLiveTracker.classList.toggle('active', targetViewId === 'liveTrackerView');
+  DOM.tabStats.classList.toggle('active', targetViewId === 'statsView');
+
+  if (targetViewId === 'liveTrackerView') {
+    renderTracker();
+    fetchAllLiveStats(false);
+  } else if (targetViewId === 'statsView') {
+    renderStatsView();
+  } else {
+    renderAll();
+  }
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
 
 // TOAST NOTIFICATIONS
 function showToast(message, icon = '🏒') {
@@ -241,12 +322,799 @@ function showToast(message, icon = '🏒') {
     toast.style.opacity = '0';
     toast.style.transform = 'translateY(10px)';
     setTimeout(() => toast.remove(), 250);
-  }, 3000);
+  }, 3200);
 }
 
-// FETCH FRIDAY NHL GAMES (OFFICIAL NHL API)
+// =============================================================================
+// 6. DEFAULT 6-LEG LIVE PARLAY DATA (ARAGON'S OCT 16 SLATE + 6TH LEG FOR EDWARD)
+// =============================================================================
+const DEFAULT_OCT16_SLATE = [
+  {
+    gameId: "PIT_COL",
+    title: "SAME GAME PARLAY",
+    odds: "2.80",
+    awayTeam: "PIT",
+    awayName: "PIT Penguins",
+    homeTeam: "COL",
+    homeName: "COL Avalanche",
+    startTime: "Fri Oct 16 • 8:07 PM",
+    gameStateText: "Scheduled • 8:07 PM",
+    legs: [
+      {
+        id: "nelson_pts",
+        boyName: "Axel",
+        playerName: "Brock Nelson",
+        team: "COL",
+        marketLabel: "1+ Points",
+        statType: "points",
+        target: 1,
+        apiStat: 0,
+        manualDelta: 0,
+        subDetail: "0G, 0A • 0 SOG"
+      },
+      {
+        id: "mackinnon_sog",
+        boyName: "Will",
+        playerName: "Nathan MacKinnon",
+        team: "COL",
+        marketLabel: "4+ Shots on Goal",
+        statType: "shots",
+        target: 4,
+        apiStat: 0,
+        manualDelta: 0,
+        subDetail: "0 SOG • 0G, 0A"
+      },
+      {
+        id: "makar_pts",
+        boyName: "Edward",
+        playerName: "Cale Makar",
+        team: "COL",
+        marketLabel: "1+ Points",
+        statType: "points",
+        target: 1,
+        apiStat: 0,
+        manualDelta: 0,
+        subDetail: "0G, 0A • 0 SOG"
+      }
+    ]
+  },
+  {
+    gameId: "BOS_ANA",
+    title: "SAME GAME PARLAY",
+    odds: "3.75",
+    awayTeam: "BOS",
+    awayName: "BOS Bruins",
+    homeTeam: "ANA",
+    homeName: "ANA Ducks",
+    startTime: "Fri Oct 16 • 9:07 PM",
+    gameStateText: "Scheduled • 9:07 PM",
+    legs: [
+      {
+        id: "zacha_pts",
+        boyName: "Jackson",
+        playerName: "Pavel Zacha",
+        team: "BOS",
+        marketLabel: "1+ Points",
+        statType: "points",
+        target: 1,
+        apiStat: 0,
+        manualDelta: 0,
+        subDetail: "0G, 0A • 0 SOG"
+      },
+      {
+        id: "sennecke_pts",
+        boyName: "Alex",
+        playerName: "Beckett Sennecke",
+        team: "ANA",
+        marketLabel: "1+ Points",
+        statType: "points",
+        target: 1,
+        apiStat: 0,
+        manualDelta: 0,
+        subDetail: "0G, 0A • 0 SOG"
+      },
+      {
+        id: "carlsson_pts",
+        boyName: "Ben",
+        playerName: "Leo Carlsson",
+        team: "ANA",
+        marketLabel: "1+ Points",
+        statType: "points",
+        target: 1,
+        apiStat: 0,
+        manualDelta: 0,
+        subDetail: "0G, 0A • 0 SOG"
+      }
+    ]
+  }
+];
+
+// Initialize Tracker Data from LocalStorage or Default
+const TRACKER_STORAGE_KEY = "b365_sgp_tracker_data_v2";
+const OVERRIDES_STORAGE_KEY = "b365_sgp_manual_overrides_v2";
+
+function initTrackerData() {
+  const saved = localStorage.getItem(TRACKER_STORAGE_KEY);
+  if (saved) {
+    try {
+      state.trackerData = JSON.parse(saved);
+    } catch (e) {
+      state.trackerData = JSON.parse(JSON.stringify(DEFAULT_OCT16_SLATE));
+    }
+  } else {
+    state.trackerData = JSON.parse(JSON.stringify(DEFAULT_OCT16_SLATE));
+  }
+
+  // Restore manual deltas
+  const savedDeltas = JSON.parse(localStorage.getItem(OVERRIDES_STORAGE_KEY) || "{}");
+  state.trackerData.forEach(g => {
+    g.legs.forEach(leg => {
+      if (typeof savedDeltas[leg.id] === "number") {
+        leg.manualDelta = savedDeltas[leg.id];
+      }
+    });
+  });
+}
+
+function saveTrackerDeltas() {
+  const map = {};
+  state.trackerData.forEach(g => g.legs.forEach(l => map[l.id] = l.manualDelta || 0));
+  localStorage.setItem(OVERRIDES_STORAGE_KEY, JSON.stringify(map));
+  localStorage.setItem(TRACKER_STORAGE_KEY, JSON.stringify(state.trackerData));
+}
+
+function adjustManual(legId, amount) {
+  state.trackerData.forEach(g => {
+    g.legs.forEach(leg => {
+      if (leg.id === legId) {
+        const currentTotal = Math.max(0, (leg.apiStat || 0) + (leg.manualDelta || 0));
+        if (currentTotal + amount >= 0) {
+          leg.manualDelta = (leg.manualDelta || 0) + amount;
+        }
+      }
+    });
+  });
+  saveTrackerDeltas();
+  renderTracker();
+}
+
+function resetOverrides() {
+  state.trackerData.forEach(g => g.legs.forEach(l => l.manualDelta = 0));
+  saveTrackerDeltas();
+  renderTracker();
+  showToast("Manual adjustments reset", "🔄");
+}
+
+function loadAragonDemoSlate() {
+  state.trackerData = JSON.parse(JSON.stringify(DEFAULT_OCT16_SLATE));
+  localStorage.removeItem(OVERRIDES_STORAGE_KEY);
+  saveTrackerDeltas();
+  renderTracker();
+  fetchAllLiveStats(true);
+  showToast("Loaded Oct 16 6-Leg Slate!", "🏒");
+}
+
+// =============================================================================
+// 7. SQUAD STATS & LEADERBOARD HISTORICAL ENGINE
+// =============================================================================
+const STATS_STORAGE_KEY = "bts_squad_stats_history_v2";
+
+const DEFAULT_STATS_HISTORY = [
+  {
+    weekNum: 1,
+    dateStr: '2026-10-09',
+    bettor: 'Axel',
+    stake: 30,
+    totalOdds: '+1250',
+    result: 'loss', // 5 of 6 hit!
+    notes: 'Axel placed from the States. 5 of 6 hit — Ben missed Bedard 1+ pts and sold the parlay!',
+    legs: [
+      { boy: 'Axel', pick: 'Nathan MacKinnon 1+ Points', odds: '-150', result: 'hit' },
+      { boy: 'Jackson', pick: 'Auston Matthews 1+ Goal', odds: '+115', result: 'hit' },
+      { boy: 'Will', pick: 'NY Rangers Moneyline', odds: '-135', result: 'hit' },
+      { boy: 'Alex', pick: 'David Pastrnak 4+ Shots', odds: '-120', result: 'hit' },
+      { boy: 'Edward', pick: 'Quinn Hughes 1+ Points', odds: '-140', result: 'hit' },
+      { boy: 'Ben', pick: 'Connor Bedard 1+ Points', odds: '-130', result: 'miss' }
+    ]
+  },
+  {
+    weekNum: 2,
+    dateStr: '2026-10-16',
+    bettor: 'Jackson',
+    stake: 30,
+    totalOdds: '+1050',
+    result: 'pending',
+    notes: 'Jackson on deck! $30 pool ticket.',
+    legs: [
+      { boy: 'Axel', pick: 'Brock Nelson 1+ Points', odds: '-140', result: 'pending' },
+      { boy: 'Jackson', pick: 'Pavel Zacha 1+ Points', odds: '+120', result: 'pending' },
+      { boy: 'Will', pick: 'Nathan MacKinnon 4+ SOG', odds: '-130', result: 'pending' },
+      { boy: 'Alex', pick: 'Beckett Sennecke 1+ Points', odds: '+110', result: 'pending' },
+      { boy: 'Ben', pick: 'Leo Carlsson 1+ Points', odds: '-115', result: 'pending' },
+      { boy: 'Edward', pick: 'Cale Makar 1+ Points', odds: '-135', result: 'pending' }
+    ]
+  }
+];
+
+function initStatsHistory() {
+  const saved = localStorage.getItem(STATS_STORAGE_KEY);
+  if (saved) {
+    try {
+      state.statsHistory = JSON.parse(saved);
+      return;
+    } catch (e) {}
+  }
+  state.statsHistory = JSON.parse(JSON.stringify(DEFAULT_STATS_HISTORY));
+  saveStatsHistory();
+}
+
+function saveStatsHistory() {
+  localStorage.setItem(STATS_STORAGE_KEY, JSON.stringify(state.statsHistory));
+}
+
+function resetStatsHistory() {
+  if (confirm("Reset squad stats to official season baseline?")) {
+    state.statsHistory = JSON.parse(JSON.stringify(DEFAULT_STATS_HISTORY));
+    saveStatsHistory();
+    renderStatsView();
+    showToast("Stats reset to baseline", "📊");
+  }
+}
+
+function toggleLegResult(weekIndex, legIndex, targetResult) {
+  const week = state.statsHistory[weekIndex];
+  if (!week || !week.legs[legIndex]) return;
+
+  week.legs[legIndex].result = targetResult;
+
+  // Auto-evaluate week result
+  const hits = week.legs.filter(l => l.result === 'hit').length;
+  const misses = week.legs.filter(l => l.result === 'miss').length;
+  const pending = week.legs.filter(l => l.result === 'pending').length;
+
+  if (pending > 0) {
+    week.result = 'pending';
+  } else if (misses > 0) {
+    week.result = 'loss';
+  } else {
+    week.result = 'win';
+  }
+
+  saveStatsHistory();
+  renderStatsView();
+  playSound('lock');
+}
+
+// Compute All Squad Analytics
+function computeSquadAnalytics() {
+  const playerStats = {};
+  SQUAD.forEach(boy => {
+    playerStats[boy.name] = {
+      name: boy.name,
+      initials: boy.initials,
+      color: boy.color,
+      total: 0,
+      hits: 0,
+      misses: 0,
+      pending: 0,
+      streak: 0,
+      streakType: '',
+      oddsList: [],
+      maxWinningOdds: 0,
+      maxWinningOddsStr: '--'
+    };
+  });
+
+  // Iterate chronologically through all weeks
+  const sortedWeeks = [...state.statsHistory].sort((a, b) => a.weekNum - b.weekNum);
+
+  sortedWeeks.forEach(w => {
+    w.legs.forEach(leg => {
+      const p = playerStats[leg.boy];
+      if (!p) return;
+
+      const dec = americanToDecimal(leg.odds);
+      p.oddsList.push(dec);
+
+      if (leg.result === 'hit') {
+        p.total++;
+        p.hits++;
+        if (dec > p.maxWinningOdds) {
+          p.maxWinningOdds = dec;
+          p.maxWinningOddsStr = leg.odds;
+        }
+        if (p.streakType === 'W') {
+          p.streak++;
+        } else {
+          p.streakType = 'W';
+          p.streak = 1;
+        }
+      } else if (leg.result === 'miss') {
+        p.total++;
+        p.misses++;
+        if (p.streakType === 'L') {
+          p.streak++;
+        } else {
+          p.streakType = 'L';
+          p.streak = 1;
+        }
+      } else {
+        p.pending++;
+      }
+    });
+  });
+
+  // Calculate percentages and titles
+  const list = Object.values(playerStats).map(p => {
+    const rate = p.total > 0 ? Math.round((p.hits / p.total) * 100) : 0;
+    const avgDec = p.oddsList.length > 0 ? (p.oddsList.reduce((a, b) => a + b, 0) / p.oddsList.length) : 1.8;
+    const avgAmerican = decimalToAmerican(avgDec);
+    return {
+      ...p,
+      rate,
+      avgDec,
+      avgAmerican
+    };
+  });
+
+  // Rank by win rate descending, then hits descending
+  list.sort((a, b) => {
+    if (b.rate !== a.rate) return b.rate - a.rate;
+    if (b.hits !== a.hits) return b.hits - a.hits;
+    return a.misses - b.misses;
+  });
+
+  // Find Trophy Winners
+  // Sniper: highest rate (with min 1 hit)
+  const qualifiedHitters = [...list].filter(p => p.hits > 0).sort((a, b) => b.rate - a.rate || b.hits - a.hits);
+  const sniper = qualifiedHitters[0] || list[0];
+
+  // Slump King: most misses
+  const slumpSorted = [...list].sort((a, b) => b.misses - a.misses || a.rate - b.rate);
+  const slumpKing = slumpSorted[0] && slumpSorted[0].misses > 0 ? slumpSorted[0] : { name: 'Nobody (Clean Slip!)', misses: 0, hits: 0 };
+
+  // Longshot King: highest maxWinningOdds
+  const longshotSorted = [...list].sort((a, b) => b.maxWinningOdds - a.maxWinningOdds);
+  const longshotKing = longshotSorted[0] && longshotSorted[0].maxWinningOdds > 0 ? longshotSorted[0] : list[0];
+
+  // Chalk Merchant: lowest avgDec
+  const chalkSorted = [...list].sort((a, b) => a.avgDec - b.avgDec);
+  const chalkMerchant = chalkSorted[0] || list[0];
+
+  // Group totals
+  let totalWagered = state.statsHistory.length * 30;
+  let totalLegsCount = list.reduce((acc, p) => acc + p.total, 0);
+  let totalHitsCount = list.reduce((acc, p) => acc + p.hits, 0);
+  let squadWinRate = totalLegsCount > 0 ? ((totalHitsCount / totalLegsCount) * 100).toFixed(1) : "0.0";
+
+  return {
+    players: list,
+    sniper,
+    slumpKing,
+    longshotKing,
+    chalkMerchant,
+    totalWagered,
+    totalLegsCount,
+    squadWinRate
+  };
+}
+
+function renderStatsView() {
+  const data = computeSquadAnalytics();
+
+  // Hero numbers
+  DOM.statsTotalWagered.textContent = `$${data.totalWagered.toFixed(2)}`;
+  DOM.statsTotalLegs.textContent = data.totalLegsCount;
+  DOM.statsSquadWinRate.textContent = `${data.squadWinRate}%`;
+
+  // Trophies
+  DOM.trophySniperName.textContent = data.sniper ? data.sniper.name : 'TBD';
+  DOM.trophySniperStat.textContent = data.sniper ? `${data.sniper.rate}% Hit Rate (${data.sniper.hits} Hits)` : '--';
+
+  DOM.trophySlumpName.textContent = data.slumpKing ? data.slumpKing.name : 'Nobody (Clean)';
+  DOM.trophySlumpStat.textContent = data.slumpKing ? `${data.slumpKing.misses} Miss${data.slumpKing.misses === 1 ? '' : 'es'} Recorded` : '0 Misses';
+
+  DOM.trophyLongshotName.textContent = data.longshotKing ? data.longshotKing.name : 'TBD';
+  DOM.trophyLongshotStat.textContent = data.longshotKing ? `${data.longshotKing.maxWinningOddsStr} Cashed` : '--';
+
+  DOM.trophyChalkName.textContent = data.chalkMerchant ? data.chalkMerchant.name : 'TBD';
+  DOM.trophyChalkStat.textContent = data.chalkMerchant ? `${data.chalkMerchant.avgAmerican} Avg Odds` : '--';
+
+  // Leaderboard table
+  DOM.leaderboardTbody.innerHTML = data.players.map((p, idx) => {
+    let titlePill = '<span class="title-tag-pill">Contender</span>';
+    if (p.name === data.sniper?.name && p.hits > 0) {
+      titlePill = '<span class="title-tag-pill sniper">🎯 Sniper</span>';
+    } else if (p.name === data.slumpKing?.name && p.misses > 0) {
+      titlePill = '<span class="title-tag-pill slump">🥶 Slump King</span>';
+    } else if (p.name === data.longshotKing?.name && p.maxWinningOdds > 0) {
+      titlePill = '<span class="title-tag-pill hot">🚀 Longshot</span>';
+    } else if (p.name === data.chalkMerchant?.name) {
+      titlePill = '<span class="title-tag-pill chalk">🍦 Chalk</span>';
+    }
+
+    const streakDisplay = p.streak > 0 ? `${p.streakType}${p.streak}` : '--';
+    const rankClass = idx === 0 ? 'rank-1' : (idx === 1 ? 'rank-2' : (idx === 2 ? 'rank-3' : ''));
+
+    return `
+      <tr>
+        <td><span class="rank-badge ${rankClass}">#${idx + 1}</span></td>
+        <td>
+          <div class="table-player-cell">
+            <div class="player-avatar-small">${p.initials}</div>
+            <span class="player-name-link">${p.name}</span>
+          </div>
+        </td>
+        <td>
+          <div class="hit-rate-cell">
+            <span class="rate-num">${p.rate}%</span>
+            <div class="rate-bar-track">
+              <div class="rate-bar-fill" style="width: ${p.rate}%"></div>
+            </div>
+          </div>
+        </td>
+        <td class="font-mono font-bold">${p.hits}-${p.misses}</td>
+        <td class="b365-green font-mono font-bold">${p.hits}</td>
+        <td class="text-red-400 font-mono font-bold">${p.misses}</td>
+        <td class="font-mono font-bold">${streakDisplay}</td>
+        <td class="font-mono text-zinc-300">${p.avgAmerican}</td>
+        <td>${titlePill}</td>
+      </tr>
+    `;
+  }).join('');
+
+  // Weekly History logs
+  DOM.historyWeeksContainer.innerHTML = state.statsHistory.map((week, wIdx) => {
+    const hitsCount = week.legs.filter(l => l.result === 'hit').length;
+    const isWin = week.result === 'win';
+    const isLoss = week.result === 'loss';
+    const statusText = isWin
+      ? '🎉 TICKET CAShed!'
+      : (isLoss ? `PARLAY SOLD (${hitsCount}/6 HITS)` : 'IN PROGRESS (OCT 16)');
+    const statusClass = isWin ? 'win' : (isLoss ? 'loss' : 'in-progress');
+
+    return `
+      <div class="history-week-card">
+        <div class="history-week-header">
+          <div>
+            <span class="h-week-title">WEEK ${week.weekNum} • ${week.dateStr}</span>
+            <div class="h-bettor-badge">Bettor: <strong>${week.bettor}</strong> • $${week.stake}.00 Stake • Odds: ${week.totalOdds}</div>
+          </div>
+          <span class="h-result-badge ${statusClass}">${statusText}</span>
+        </div>
+
+        <div class="history-legs-grid">
+          ${week.legs.map((leg, lIdx) => `
+            <div class="history-leg-card">
+              <div class="h-leg-top">
+                <span class="h-leg-boy">${leg.boy}</span>
+                <span class="h-leg-odds">${leg.odds}</span>
+              </div>
+              <div class="h-leg-pick">${escapeHTML(leg.pick)}</div>
+              <div class="h-leg-toggle-row">
+                <span class="text-[11px] text-zinc-400">Result:</span>
+                <div class="leg-grade-toggle">
+                  <button onclick="toggleLegResult(${wIdx}, ${lIdx}, 'hit')" class="grade-btn hit ${leg.result === 'hit' ? 'active' : ''}">✓ HIT</button>
+                  <button onclick="toggleLegResult(${wIdx}, ${lIdx}, 'miss')" class="grade-btn miss ${leg.result === 'miss' ? 'active' : ''}">✗ MISS</button>
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// =============================================================================
+// 8. LIVE BET TRACKER ENGINE (BET365 UI WITH ESPN/NHL BOXSCORE INTEGRATION)
+// =============================================================================
+function normalizeName(str) {
+  return (str || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z\s]/g, "")
+    .trim();
+}
+
+function renderTracker() {
+  if (!DOM.trackerGamesContainer) return;
+  DOM.trackerGamesContainer.innerHTML = "";
+
+  let totalLegs = 0;
+  let hitLegs = 0;
+
+  state.trackerData.forEach(game => {
+    const gameCard = document.createElement("div");
+    gameCard.className = "rounded-xl bg-[#181b1e] border border-zinc-800/90 p-4 space-y-3.5";
+
+    let allGameLegsHit = true;
+    game.legs.forEach(l => {
+      totalLegs++;
+      const val = Math.max(0, (l.apiStat || 0) + (l.manualDelta || 0));
+      if (val >= l.target) hitLegs++;
+      else allGameLegsHit = false;
+    });
+
+    gameCard.innerHTML = `
+      <div class="flex items-center justify-between border-b border-zinc-800 pb-2.5">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full ${allGameLegsHit ? 'bg-[#00ff87]' : 'border-2 border-zinc-500'}"></span>
+          <span class="text-xs font-extrabold tracking-wider text-white">SAME GAME <span class="b365-green">PARLAY</span></span>
+          <span class="text-xs font-bold text-zinc-200 ml-1">${game.odds}x</span>
+        </div>
+        <span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 border border-zinc-700">
+          ${game.gameStateText}
+        </span>
+      </div>
+
+      <div class="space-y-3">
+        ${game.legs.map(leg => {
+          const currentVal = Math.max(0, (leg.apiStat || 0) + (leg.manualDelta || 0));
+          const pct = Math.min(100, Math.round((currentVal / leg.target) * 100));
+          const isHit = currentVal >= leg.target;
+          const unitLabel = leg.statType === "shots" ? "SOG" : "PTS";
+
+          return `
+            <div class="p-3 rounded-lg bg-[#202428] border ${isHit ? 'border-[#00ff87]/50 bg-emerald-950/15' : 'border-zinc-800'} transition">
+              <div class="flex justify-between items-start gap-2">
+                <div class="flex items-start gap-2.5">
+                  <div class="mt-0.5 w-4 h-4 rounded-full flex items-center justify-center ${isHit ? 'bg-[#00ff87] text-black' : 'border border-zinc-500 text-transparent'} text-[10px] font-black shrink-0">
+                    ✓
+                  </div>
+                  <div>
+                    <div class="text-sm font-bold text-white leading-tight">
+                      <span class="text-xs font-bold text-[#00ff87] mr-1.5">[${leg.boyName || 'SQUAD'}]</span>
+                      ${leg.playerName}: <span class="${isHit ? 'b365-green' : 'text-zinc-100'}">${leg.marketLabel}</span>
+                    </div>
+                    <div class="text-[11px] text-zinc-400 mt-0.5 flex items-center gap-2">
+                      <span>${leg.subDetail || '0G, 0A • 0 SOG'}</span>
+                      ${leg.manualDelta !== 0 && leg.manualDelta ? `<span class="text-[10px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40">Manual ${leg.manualDelta > 0 ? '+' + leg.manualDelta : leg.manualDelta}</span>` : ''}
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Manual & Live Counter Controls -->
+                <div class="flex items-center gap-1.5 shrink-0">
+                  <button onclick="adjustManual('${leg.id}', -1)" title="Subtract 1" class="w-6 h-6 rounded bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold text-xs flex items-center justify-center border border-zinc-700">-</button>
+                  <div class="min-w-[54px] text-center px-2 py-0.5 rounded bg-zinc-900 border border-zinc-700">
+                    <span class="text-sm font-extrabold ${isHit ? 'b365-green' : 'text-white'}">${currentVal}</span>
+                    <span class="text-[11px] text-zinc-400">/ ${leg.target}${unitLabel}</span>
+                  </div>
+                  <button onclick="adjustManual('${leg.id}', 1)" title="Add 1" class="w-6 h-6 rounded bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-xs flex items-center justify-center border border-zinc-700">+</button>
+                </div>
+              </div>
+
+              <!-- Progress Bar -->
+              <div class="mt-2.5 w-full bg-zinc-900 h-2 rounded-full overflow-hidden border border-zinc-800">
+                <div class="h-full progress-bar-fill ${isHit ? 'bg-[#00ff87]' : 'bg-amber-400'}" style="width: ${pct}%"></div>
+              </div>
+            </div>
+          `;
+        }).join("")}
+      </div>
+
+      <!-- Matchup Pill Box -->
+      <div class="b365-subcard rounded-lg px-3.5 py-2.5 flex items-center justify-between text-xs text-zinc-300">
+        <div class="space-y-0.5 font-semibold">
+          <div>${game.awayName}</div>
+          <div>${game.homeName}</div>
+        </div>
+        <div class="text-right text-zinc-400 text-[11px]">
+          <div>${game.startTime}</div>
+          <div class="text-[10px] text-zinc-500">Live NHL Boxscore Linked</div>
+        </div>
+      </div>
+    `;
+
+    DOM.trackerGamesContainer.appendChild(gameCard);
+  });
+
+  // Update Overall Header & Ticket Banner
+  DOM.legsHitCount.textContent = `${hitLegs} / ${totalLegs}`;
+  const overallPct = totalLegs > 0 ? Math.round((hitLegs / totalLegs) * 100) : 0;
+  DOM.overallProgressBar.style.width = `${overallPct}%`;
+
+  const totalOddsMulti = 10.50; // default multiplier
+  const payout = (state.stake * totalOddsMulti).toFixed(2);
+  DOM.trackerWagerDisplay.textContent = `$${state.stake.toFixed(2)}`;
+  DOM.trackerReturnDisplay.textContent = `$${payout}`;
+  DOM.trackerTotalOddsBadge.textContent = `${totalOddsMulti.toFixed(2)}x`;
+  DOM.navLiveMultiplier.textContent = `${totalOddsMulti.toFixed(2)}x`;
+
+  if (hitLegs === totalLegs && totalLegs > 0) {
+    DOM.ticketStatusBanner.textContent = `🎉 ALL ${totalLegs} LEGS HIT! PAYOUT: $${payout}`;
+    DOM.ticketStatusBanner.className = "w-full py-3 rounded-lg bg-[#00ff87] text-black text-center font-extrabold text-sm tracking-wide shadow-lg cursor-pointer";
+  } else {
+    DOM.ticketStatusBanner.textContent = `Cash Out $${state.stake.toFixed(2)} • ${hitLegs} of ${totalLegs} Legs Hit`;
+    DOM.ticketStatusBanner.className = "w-full py-3 rounded-lg b365-btn-green text-center font-bold text-white text-sm tracking-wide shadow-inner cursor-pointer";
+  }
+}
+
+// Live API Fetching (ESPN NHL Public API + NHL Web API fallback)
+async function fetchAllLiveStats(isManualClick = false) {
+  if (isManualClick && DOM.refreshIcon) DOM.refreshIcon.classList.add("animate-spin");
+  if (DOM.syncStatus) DOM.syncStatus.textContent = "Checking live NHL boxscores...";
+
+  let updatedPlayers = 0;
+
+  try {
+    const espnResp = await fetch("https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/scoreboard");
+    if (espnResp.ok) {
+      const scoreboard = await espnResp.json();
+      const events = scoreboard.events || [];
+
+      for (const event of events) {
+        const comp = event.competitions?.[0];
+        if (!comp) continue;
+
+        const competitors = comp.competitors || [];
+        const abbrevs = competitors.map(c => (c.team?.abbreviation || "").toUpperCase());
+
+        const matchingGame = state.trackerData.find(g =>
+          abbrevs.includes(g.awayTeam) && abbrevs.includes(g.homeTeam)
+        );
+
+        if (matchingGame) {
+          const awayObj = competitors.find(c => c.team?.abbreviation?.toUpperCase() === matchingGame.awayTeam);
+          const homeObj = competitors.find(c => c.team?.abbreviation?.toUpperCase() === matchingGame.homeTeam);
+          const statusDetail = event.status?.type?.shortDetail || matchingGame.startTime;
+
+          if (awayObj && homeObj) {
+            matchingGame.gameStateText = `${matchingGame.awayTeam} ${awayObj.score || 0} - ${matchingGame.homeTeam} ${homeObj.score || 0} (${statusDetail})`;
+          }
+
+          const summaryResp = await fetch(`https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/summary?event=${event.id}`);
+          if (summaryResp.ok) {
+            const summaryData = await summaryResp.json();
+            updatedPlayers += parseEspnBoxscore(summaryData, matchingGame);
+          }
+        }
+      }
+    }
+  } catch (err) {
+    console.warn("ESPN live feed check fallback:", err);
+  }
+
+  // Fallback: NHL Official Web API via CORS Proxy
+  if (updatedPlayers === 0) {
+    try {
+      const nhlUrl = encodeURIComponent("https://api-web.nhle.com/v1/score/now");
+      const resp = await fetch(`https://api.allorigins.win/raw?url=${nhlUrl}`);
+      if (resp.ok) {
+        const data = await resp.json();
+        const games = data.games || [];
+        for (const g of games) {
+          const away = g.awayTeam?.abbrev;
+          const home = g.homeTeam?.abbrev;
+          const matchingGame = state.trackerData.find(item =>
+            (item.awayTeam === away && item.homeTeam === home) ||
+            (item.awayTeam === home && item.homeTeam === away)
+          );
+
+          if (matchingGame) {
+            const stateText = g.gameState;
+            const period = g.periodDescriptor?.number ? `P${g.periodDescriptor.number}` : "";
+            const clock = g.clock?.timeRemaining || "";
+            matchingGame.gameStateText = stateText === "FUT" || stateText === "PRE"
+              ? matchingGame.startTime
+              : `${away} ${g.awayTeam?.score ?? 0} - ${home} ${g.homeTeam?.score ?? 0} (${period} ${clock})`;
+
+            const boxUrl = encodeURIComponent(`https://api-web.nhle.com/v1/gamecenter/${g.id}/boxscore`);
+            const boxResp = await fetch(`https://api.allorigins.win/raw?url=${boxUrl}`);
+            if (boxResp.ok) {
+              const boxData = await boxResp.json();
+              updatedPlayers += parseNhlBoxscore(boxData, matchingGame);
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.warn("NHL Web API proxy fallback skipped:", e);
+    }
+  }
+
+  const nowStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  if (DOM.syncStatus) DOM.syncStatus.textContent = `Last synced: ${nowStr} • Auto-updates every 20s`;
+  if (isManualClick && DOM.refreshIcon) {
+    setTimeout(() => DOM.refreshIcon.classList.remove("animate-spin"), 350);
+  }
+
+  renderTracker();
+}
+
+function parseEspnBoxscore(summaryData, gameObj) {
+  let count = 0;
+  const teams = summaryData.boxscore?.players || [];
+  for (const teamBlock of teams) {
+    const statGroups = teamBlock.statistics || [];
+    for (const group of statGroups) {
+      const labels = (group.labels || []).map(l => l.toUpperCase());
+      const gIdx = labels.indexOf("G");
+      const aIdx = labels.indexOf("A");
+      const sIdx = labels.indexOf("S") !== -1 ? labels.indexOf("S") : labels.indexOf("SOG");
+      const toiIdx = labels.indexOf("TOI");
+
+      for (const athleteRow of (group.athletes || [])) {
+        const fullName = athleteRow.athlete?.displayName || "";
+        const normTarget = normalizeName(fullName);
+
+        gameObj.legs.forEach(leg => {
+          if (normalizeName(leg.playerName) === normTarget) {
+            const stats = athleteRow.stats || [];
+            const goals = gIdx !== -1 ? parseInt(stats[gIdx] || "0", 10) : 0;
+            const assists = aIdx !== -1 ? parseInt(stats[aIdx] || "0", 10) : 0;
+            const shots = sIdx !== -1 ? parseInt(stats[sIdx] || "0", 10) : 0;
+            const toi = toiIdx !== -1 ? stats[toiIdx] : null;
+            const points = goals + assists;
+
+            leg.apiStat = leg.statType === "shots" ? shots : points;
+            leg.subDetail = `${goals}G, ${assists}A • ${shots} SOG${toi ? ` • ${toi} TOI` : ''}`;
+            count++;
+          }
+        });
+      }
+    }
+  }
+  return count;
+}
+
+function parseNhlBoxscore(boxData, gameObj) {
+  let count = 0;
+  const pStats = boxData.playerByGameStats;
+  if (!pStats) return 0;
+
+  const allSkaters = [
+    ...(pStats.awayTeam?.forwards || []),
+    ...(pStats.awayTeam?.defense || []),
+    ...(pStats.homeTeam?.forwards || []),
+    ...(pStats.homeTeam?.defense || [])
+  ];
+
+  for (const p of allSkaters) {
+    const name = p.name?.default || "";
+    const lastName = name.split(" ").slice(-1)[0]?.toLowerCase();
+
+    gameObj.legs.forEach(leg => {
+      const legLast = leg.playerName.split(" ").slice(-1)[0]?.toLowerCase();
+      if (lastName && legLast && lastName === legLast) {
+        const goals = p.goals ?? 0;
+        const assists = p.assists ?? 0;
+        const points = p.points ?? (goals + assists);
+        const shots = p.sog ?? 0;
+        const toi = p.toi || "";
+
+        leg.apiStat = leg.statType === "shots" ? shots : points;
+        leg.subDetail = `${goals}G, ${assists}A • ${shots} SOG${toi ? ` • ${toi} TOI` : ''}`;
+        count++;
+      }
+    });
+  }
+  return count;
+}
+
+// Auto-Polling Loop (every 20 seconds)
+let pollInterval = null;
+function toggleAutoPoll() {
+  const enabled = DOM.autoPollToggle ? DOM.autoPollToggle.checked : true;
+  if (enabled) {
+    if (!pollInterval) {
+      pollInterval = setInterval(() => {
+        if (state.currentView === 'liveTrackerView') fetchAllLiveStats(false);
+      }, 20000);
+    }
+  } else if (pollInterval) {
+    clearInterval(pollInterval);
+    pollInterval = null;
+  }
+}
+
+// =============================================================================
+// 9. FRIDAY NHL GAMES FETCH (SCOREBOARD TICKER & MATCHUPS EXPLORER)
+// =============================================================================
 async function fetchFridayNhlGames(dateStr) {
-  DOM.gamesTicker.innerHTML = `<div class="ticker-loading">Loading NHL matchups...</div>`;
+  DOM.gamesTicker.innerHTML = `<div class="ticker-loading">Loading Friday NHL slate...</div>`;
   DOM.matchupsList.innerHTML = `<div class="loading-state">Loading Friday games from NHL.com...</div>`;
 
   let gamesList = [];
@@ -427,7 +1295,9 @@ function formatGameTime(utcString) {
   }
 }
 
-// STORAGE & SUPABASE SYNC ENGINE
+// =============================================================================
+// 10. LOCAL STORAGE & SUPABASE SYNC
+// =============================================================================
 function loadLocalData(dateStr) {
   const key = `bet_the_show_${dateStr}`;
   const saved = localStorage.getItem(key);
@@ -435,15 +1305,15 @@ function loadLocalData(dateStr) {
     try {
       const parsed = JSON.parse(saved);
       state.legs = parsed.legs || {};
-      state.stake = parsed.stake || 25;
+      state.stake = parsed.stake || 30;
       state.isPlaced = !!parsed.isPlaced;
       return;
     } catch (e) {}
   }
 
-  // Blank by default for Week 2 (No picks locked in yet!)
+  // Blank by default for Week 2 (6 legs to build)
   state.legs = {};
-  state.stake = 25;
+  state.stake = 30;
   state.isPlaced = false;
   saveLocalData(dateStr);
 }
@@ -460,7 +1330,6 @@ function saveLocalData(dateStr) {
   localStorage.setItem(key, JSON.stringify(payload));
 }
 
-// SUPABASE AUTO-CONNECT TO JACKSON'S DATABASE
 function initSupabase() {
   const url = localStorage.getItem('bts_supabase_url') || DEFAULT_SUPABASE_CONFIG.url;
   const key = localStorage.getItem('bts_supabase_key') || DEFAULT_SUPABASE_CONFIG.key;
@@ -575,7 +1444,9 @@ async function deleteLeg(userName) {
   showToast(`Removed ${userName}'s pick`, '🗑️');
 }
 
-// RENDER ALL COMPONENTS
+// =============================================================================
+// 11. RENDER SLIP BUILDER & BETTOR ROTATION
+// =============================================================================
 function renderSquadLegs() {
   const bettorThisWeek = getBettorForFriday(state.currentFriday);
 
@@ -642,7 +1513,7 @@ function renderSquadLegs() {
                   <span class="boy-name-text">${boy.name}</span>
                   ${isBettor ? '<span class="bettor-tag-inline">👑 BETTOR ON DECK</span>' : ''}
                 </div>
-                <div class="boy-sub-role">Waiting on ${boy.name}'s leg</div>
+                <div class="boy-sub-role">Waiting on ${boy.name}'s leg ($5 share)</div>
               </div>
             </div>
 
@@ -687,23 +1558,23 @@ function renderBettorBanner() {
   DOM.bettorAvatar.textContent = bettor.initials;
   
   if (weekNum === 2) {
-    DOM.bettorDesc.innerHTML = `Week 1 was placed by Alex. This week it's <strong>${bettor.name}</strong>'s turn to place the 5-leg parlay ticket on his sportsbook account.`;
+    DOM.bettorDesc.innerHTML = `Week 1 was placed by Axel. This week it's <strong>${bettor.name}</strong>'s turn to place the 6-leg parlay ticket ($30 total wager) on his sportsbook account.`;
   } else {
-    DOM.bettorDesc.innerHTML = `It's <strong>${bettor.name}</strong>'s turn in the 5-week rotation to place this week's 5-leg ticket on his sportsbook account.`;
+    DOM.bettorDesc.innerHTML = `It's <strong>${bettor.name}</strong>'s turn in the 6-week rotation to place this week's 6-leg ticket ($30 total wager) on his sportsbook account.`;
   }
 
   const legsCount = Object.keys(state.legs).length;
-  DOM.slipProgressText.textContent = `${legsCount} / 5 LEGS`;
-  DOM.slipProgressBar.style.width = `${(legsCount / 5) * 100}%`;
+  DOM.slipProgressText.textContent = `${legsCount} / 6 LEGS`;
+  DOM.slipProgressBar.style.width = `${(legsCount / 6) * 100}%`;
 
-  if (legsCount === 5) {
-    DOM.slipStatusMsg.textContent = `🔥 All 5 legs locked in! ${bettor.name} is clear to submit the ticket to the book!`;
-    DOM.slipStatusMsg.style.color = 'var(--green-win)';
+  if (legsCount === 6) {
+    DOM.slipStatusMsg.textContent = `🔥 All 6 legs locked in! ${bettor.name} is clear to submit the $30 ticket to the book!`;
+    DOM.slipStatusMsg.style.color = 'var(--b365-green)';
   } else if (legsCount === 0) {
-    DOM.slipStatusMsg.textContent = `No picks locked in yet for Week 2. Let's build the ticket!`;
+    DOM.slipStatusMsg.textContent = `No picks locked in yet for Week 2. Let's build the $30 ticket!`;
     DOM.slipStatusMsg.style.color = 'var(--text-muted)';
   } else {
-    DOM.slipStatusMsg.textContent = `Need ${5 - legsCount} more leg${5 - legsCount === 1 ? '' : 's'} to complete the 5-legger.`;
+    DOM.slipStatusMsg.textContent = `Need ${6 - legsCount} more leg${6 - legsCount === 1 ? '' : 's'} to complete the 6-legger ($30 stake).`;
     DOM.slipStatusMsg.style.color = 'var(--gold-odds)';
   }
 
@@ -736,11 +1607,11 @@ function renderSportsbookTicket() {
   DOM.ticketDateText.textContent = formatDateDisplay(state.currentFriday);
   DOM.ticketReferenceCode.textContent = `SLIP #BTS-${state.currentFridayStr.replace(/-/g, '')}-W${state.weekNumber}`;
 
-  if (totals.count === 5) {
-    DOM.ticketStatusBadge.textContent = 'SLIP READY (5/5)';
+  if (totals.count === 6) {
+    DOM.ticketStatusBadge.textContent = 'SLIP READY (6/6)';
     DOM.ticketStatusBadge.className = 'ticket-badge ready';
   } else {
-    DOM.ticketStatusBadge.textContent = `${totals.count}/5 LEGS`;
+    DOM.ticketStatusBadge.textContent = `${totals.count}/6 LEGS`;
     DOM.ticketStatusBadge.className = 'ticket-badge';
   }
 
@@ -767,12 +1638,11 @@ function renderSportsbookTicket() {
 
   if (state.isPlaced) {
     DOM.markPlacedBtn.classList.remove('outline');
-    DOM.markPlacedBtn.classList.add('primary');
-    DOM.markPlacedText.textContent = `✓ Bet Placed on Sportsbook`;
+    DOM.markPlacedBtn.classList.add('b365-btn-green');
+    DOM.markPlacedText.textContent = `✓ Bet Placed • Click to View Live Tracker 🟢`;
   } else {
     const bettor = getBettorForFriday(state.currentFriday);
-    DOM.markPlacedBtn.classList.add('outline');
-    DOM.markPlacedBtn.classList.remove('primary');
+    DOM.markPlacedBtn.classList.add('b365-btn-green');
     DOM.markPlacedText.textContent = `Mark as Placed by ${bettor.name}`;
   }
 }
@@ -781,7 +1651,7 @@ function renderRotationSchedule() {
   const weeks = [];
   const base = new Date(state.currentFriday);
 
-  for (let i = -1; i <= 3; i++) {
+  for (let i = -1; i <= 4; i++) {
     const d = new Date(base);
     d.setDate(d.getDate() + (i * 7));
     weeks.push(d);
@@ -800,7 +1670,7 @@ function renderRotationSchedule() {
         </div>
         <div style="display: flex; align-items: center; gap: 6px;">
           <span class="rot-bettor-name">${bettor.name}</span>
-          ${isCurrent ? '<span style="color: var(--gold-odds); font-weight: 800;">👑 ON DECK</span>' : ''}
+          ${isCurrent ? '<span style="color: var(--b365-green); font-weight: 800;">👑 ON DECK</span>' : ''}
         </div>
       </div>
     `;
@@ -815,7 +1685,9 @@ function renderAll() {
   renderRotationSchedule();
 }
 
-// INTERACTIVE MODALS
+// =============================================================================
+// 12. INTERACTIVE MODALS & BET SUBMISSION
+// =============================================================================
 function openLegModal(defaultBoy = null, defaultGame = null) {
   DOM.legModalBackdrop.classList.add('open');
 
@@ -886,9 +1758,9 @@ function copySlipForSportsbook() {
   const totals = calculateParlayTotals(legsList, state.stake);
   const dateFormatted = formatDateDisplay(state.currentFriday);
 
-  let text = `🏒 BET THE SHOW: FRIDAY NHL 5-LEGGER (${dateFormatted})\n`;
-  text += `👤 Bettor On Deck: ${bettor.name} ($${state.stake} Pool Stake)\n`;
-  text += `🔥 ${totals.count}/5 Legs Locked In:\n\n`;
+  let text = `🏒 BET THE SHOW: FRIDAY NHL 6-LEGGER (${dateFormatted})\n`;
+  text += `👤 Bettor On Deck: ${bettor.name} ($${state.stake} Pool Stake • $5/Boy)\n`;
+  text += `🔥 ${totals.count}/6 Legs Locked In:\n\n`;
 
   SQUAD.forEach((boy, idx) => {
     const leg = state.legs[boy.name];
@@ -901,14 +1773,14 @@ function copySlipForSportsbook() {
   });
 
   text += `\n-------------------------------\n`;
-  text += `💰 Total Odds: ${totals.american} (${totals.decimal.toFixed(2)}x)\n`;
+  text += `💰 Total Combined Odds: ${totals.american} (${totals.decimal.toFixed(2)}x)\n`;
   text += `💵 Potential Payout: $${totals.payout.toFixed(2)} (+$${totals.profit.toFixed(2)} profit)\n`;
   text += `📱 View Live Slip: https://mukpostproduction-debug.github.io/friday-puck-parlay/\n`;
 
   navigator.clipboard.writeText(text).then(() => {
     playSound('triumph');
     if (window.confetti) confetti({ particleCount: 80, spread: 60, origin: { y: 0.85 } });
-    showToast('Slip copied! Ready to paste into sportsbook or chat', '📋');
+    showToast('6-Leg Slip copied! Ready to paste into sportsbook or chat', '📋');
   });
 }
 
@@ -919,7 +1791,7 @@ function generateGroupChirp() {
 
   let msg = '';
   if (missing.length === 0) {
-    msg = `🚨 ALL 5 LEGS ARE LOCKED IN FOR THE SHOW! 👑 @${bettor.name} is on deck to place the ticket on his sportsbook right now! Let's get that bag boys 🏒💰`;
+    msg = `🚨 ALL 6 LEGS ARE LOCKED IN FOR THE SHOW! 👑 @${bettor.name} is on deck to place the $30 ticket on his sportsbook right now! Let's get that bag boys 🏒💰`;
   } else {
     const names = missing.map(b => `@${b.name}`).join(', ');
     const insults = [
@@ -948,8 +1820,15 @@ function escapeHTML(str) {
   }[tag] || tag));
 }
 
-// EVENT HANDLERS
+// =============================================================================
+// 13. EVENT HANDLERS & INITIALIZATION
+// =============================================================================
 function setupEvents() {
+  // Navigation tabs
+  DOM.tabSlipBuilder.addEventListener('click', () => switchView('slipBuilderView'));
+  DOM.tabLiveTracker.addEventListener('click', () => switchView('liveTrackerView'));
+  DOM.tabStats.addEventListener('click', () => switchView('statsView'));
+
   // iPhone App install modal
   DOM.installAppBtn.addEventListener('click', () => {
     DOM.installModalBackdrop.classList.add('open');
@@ -992,18 +1871,26 @@ function setupEvents() {
       state.stake = val;
       saveLocalData(state.currentFridayStr);
       renderSportsbookTicket();
+      renderTracker();
     }
   });
 
-  // Mark placed toggle
+  // Mark placed toggle -> AUTOMATIC SWITCH TO LIVE BET TRACKER!
   DOM.markPlacedBtn.addEventListener('click', () => {
     state.isPlaced = !state.isPlaced;
     saveLocalData(state.currentFridayStr);
     renderSportsbookTicket();
     playSound('lock');
+
     if (state.isPlaced) {
-      if (window.confetti) confetti({ particleCount: 100, spread: 70, origin: { y: 0.7 } });
-      showToast('Bet marked as placed on sportsbook! 🏒🎯', '✅');
+      if (window.confetti) confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
+      playSound('triumph');
+      showToast('Bet placed on sportsbook! Switching to Live Tracker 🏒🟢', '✅');
+      setTimeout(() => {
+        switchView('liveTrackerView');
+      }, 350);
+    } else {
+      showToast('Bet marked as unplaced', 'ℹ️');
     }
   });
 
@@ -1053,9 +1940,9 @@ function setupEvents() {
     renderAll();
     showToast(`Locked in ${userName}'s leg! 🔥`, '🏒');
 
-    if (Object.keys(state.legs).length === 5 && window.confetti) {
+    if (Object.keys(state.legs).length === 6 && window.confetti) {
       setTimeout(() => {
-        confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
+        confetti({ particleCount: 140, spread: 90, origin: { y: 0.6 } });
         playSound('triumph');
       }, 200);
     }
@@ -1097,11 +1984,14 @@ window.addEventListener('DOMContentLoaded', () => {
   state.currentFriday = new Date('2026-10-16T12:00:00Z');
   state.currentFridayStr = formatDateISO(state.currentFriday);
 
+  initTrackerData();
+  initStatsHistory();
   loadLocalData(state.currentFridayStr);
   setupEvents();
   renderAll();
   initSupabase();
   fetchFridayNhlGames(state.currentFridayStr);
+  toggleAutoPoll();
 
   setInterval(updateCountdown, 60000);
 });
