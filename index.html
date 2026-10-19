@@ -25,7 +25,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
 
-  <link rel="stylesheet" href="style.css?v=2.8" />
+  <link rel="stylesheet" href="style.css?v=3.0" />
 </head>
 <body>
   <!-- TOP GLOBAL NAVIGATION BAR (BET365 / BROADCAST DARK AESTHETIC) -->
@@ -369,16 +369,24 @@
           </div>
           <div class="stats-hero-meta">
             <div class="meta-stat-pill">
+              <span class="meta-label">Parlay Win Rate</span>
+              <span class="meta-val red" id="statsParlayWinRate">0.0%</span>
+              <span class="meta-sub" id="statsParlayRecord">0 / 1 Parlays</span>
+            </div>
+            <div class="meta-stat-pill">
+              <span class="meta-label">Pick Win Rate</span>
+              <span class="meta-val b365-green" id="statsSquadWinRate">80.0%</span>
+              <span class="meta-sub" id="statsPickRecord">4 / 5 Legs Hit</span>
+            </div>
+            <div class="meta-stat-pill">
+              <span class="meta-label">Settled Legs</span>
+              <span class="meta-val" id="statsTotalLegs">5</span>
+              <span class="meta-sub">Week 1 Locked</span>
+            </div>
+            <div class="meta-stat-pill">
               <span class="meta-label">Season Wagered</span>
-              <span class="meta-val" id="statsTotalWagered">$60.00</span>
-            </div>
-            <div class="meta-stat-pill">
-              <span class="meta-label">Total Legs Picked</span>
-              <span class="meta-val" id="statsTotalLegs">12</span>
-            </div>
-            <div class="meta-stat-pill">
-              <span class="meta-label">Squad Win Rate</span>
-              <span class="meta-val b365-green" id="statsSquadWinRate">83.3%</span>
+              <span class="meta-val" id="statsTotalWagered">$25.00</span>
+              <span class="meta-sub">Week 1 Pool</span>
             </div>
           </div>
         </div>
@@ -671,6 +679,6 @@
   <div class="nhl-toast-container" id="toastContainer"></div>
 
   <!-- Main JavaScript Controller -->
-  <script src="app.js?v=2.8"></script>
+  <script src="app.js?v=3.0"></script>
 </body>
 </html>

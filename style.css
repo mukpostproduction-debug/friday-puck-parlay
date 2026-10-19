@@ -1588,6 +1588,162 @@ body {
   box-sizing: border-box;
 }
 
+/* Empty / Awaiting Bet Lock-In State */
+.tracker-empty-card {
+  background: #14171a;
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+  border-radius: 14px;
+  padding: 24px 18px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.tracker-empty-icon-wrap {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+
+.tracker-empty-badge {
+  font-family: var(--font-sports);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  color: #fbbf24;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  padding: 3px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.tracker-empty-title {
+  font-family: var(--font-sports);
+  font-size: 1.15rem;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  color: #ffffff;
+  margin-bottom: 6px;
+}
+
+.tracker-empty-desc {
+  font-size: 0.80rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  max-width: 440px;
+  margin: 0 auto 16px;
+}
+
+.tracker-empty-slip-preview {
+  width: 100%;
+  background: #0f1214;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 16px;
+  box-sizing: border-box;
+  text-align: left;
+}
+
+.tracker-empty-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--font-sports);
+  font-size: 0.70rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.tracker-empty-ready-count {
+  color: var(--b365-green);
+}
+
+.tracker-empty-preview-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tracker-empty-pick-pill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #181c20;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 0.76rem;
+}
+
+.tracker-empty-pick-pill.ready {
+  border-left: 3px solid var(--b365-green);
+}
+
+.tracker-empty-pick-pill.empty {
+  opacity: 0.5;
+  border-left: 3px solid #4b5563;
+}
+
+.tracker-empty-boy-tag {
+  font-family: var(--font-sports);
+  font-weight: 900;
+  font-size: 0.70rem;
+  color: var(--b365-green);
+  width: 60px;
+  flex-shrink: 0;
+}
+
+.tracker-empty-pick-name {
+  color: #ffffff;
+  font-weight: 600;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0 8px;
+}
+
+.tracker-empty-pick-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--b365-green);
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+
+.tracker-empty-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.tracker-cashout-btn.pending {
+  background: #20252b;
+  color: #9ca3af;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: default;
+}
+
 .tracker-game-block {
   background: #14171a;
   border: 1px solid var(--border-subtle);
@@ -1928,15 +2084,17 @@ body {
 
 .stats-hero-meta {
   display: flex;
-  gap: 12px;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .meta-stat-pill {
   background: var(--nhl-subcard);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
-  padding: 10px 16px;
+  padding: 10px 14px;
   text-align: center;
+  min-width: 105px;
 }
 
 .meta-label {
@@ -1950,12 +2108,27 @@ body {
 
 .meta-val {
   font-family: var(--font-sports);
-  font-size: 1.45rem;
+  font-size: 1.40rem;
   font-weight: 900;
   color: #fff;
   line-height: 1.1;
   margin-top: 2px;
   display: block;
+}
+
+.meta-val.red {
+  color: #f87171;
+  text-shadow: 0 0 10px rgba(239, 68, 68, 0.25);
+}
+
+.meta-sub {
+  font-family: var(--font-sports);
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  display: block;
+  margin-top: 3px;
+  white-space: nowrap;
 }
 
 /* Trophies Grid */

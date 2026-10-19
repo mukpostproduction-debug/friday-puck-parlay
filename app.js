@@ -293,6 +293,9 @@ const DOM = {
   statsTotalWagered: document.getElementById('statsTotalWagered'),
   statsTotalLegs: document.getElementById('statsTotalLegs'),
   statsSquadWinRate: document.getElementById('statsSquadWinRate'),
+  statsPickRecord: document.getElementById('statsPickRecord'),
+  statsParlayWinRate: document.getElementById('statsParlayWinRate'),
+  statsParlayRecord: document.getElementById('statsParlayRecord'),
   trophySniperName: document.getElementById('trophySniperName'),
   trophySniperStat: document.getElementById('trophySniperStat'),
   trophySlumpName: document.getElementById('trophySlumpName'),
@@ -330,7 +333,9 @@ function switchView(targetViewId, updateHash = true) {
 
   if (targetViewId === 'liveTrackerView') {
     renderTracker();
-    fetchAllLiveStats(false);
+    if (state.isPlaced) {
+      fetchAllLiveStats(false);
+    }
   } else if (targetViewId === 'statsView') {
     renderStatsView();
   } else {
@@ -358,6 +363,7 @@ const ICONS = {
   frost: `<svg class="bts-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="22"/><line x1="3.34" y1="7" x2="20.66" y2="17"/><line x1="3.34" y1="17" x2="20.66" y2="7"/><polyline points="9 4 12 7 15 4"/><polyline points="9 20 12 17 15 20"/><polyline points="4 10 7 12 5 15"/><polyline points="20 14 17 12 19 9"/></svg>`,
   rocket: `<svg class="bts-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/></svg>`,
   shield: `<svg class="bts-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`,
+  lock: `<svg class="bts-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`,
   spark: `<svg class="bts-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
   refresh: `<svg class="bts-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>`,
   bolt: `<svg class="bts-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" fill="currentColor"/></svg>`,
@@ -588,6 +594,96 @@ function getSlateForDate(dateStr) {
   return JSON.parse(JSON.stringify(DEFAULT_OCT23_SLATE));
 }
 
+// Convert any squad member's pick string into an NHL API-trackable leg
+function parsePickIntoLeg(boyName, pickObj) {
+  const pickText = (pickObj.pick_text || '').trim();
+  let statType = 'points';
+  let target = 1;
+  let playerName = pickText;
+  let marketLabel = '1+ Points';
+
+  const isShot = /shot|sog/i.test(pickText);
+  if (isShot) {
+    statType = 'shots';
+    const match = pickText.match(/(\d+)\+?\s*(shot|sog)/i) || pickText.match(/(over|under)\s*(\d+(\.\d+)?)\s*(shot|sog)/i);
+    if (match) {
+      target = parseInt(match[1] || match[2] || "3", 10);
+      marketLabel = `${target}+ Shots on Goal`;
+    } else {
+      target = 3;
+      marketLabel = "3+ Shots on Goal";
+    }
+    playerName = pickText.replace(/(\d+)\+?\s*(shot|sog).*/i, '').replace(/(over|under)\s*\d+(\.\d+)?\s*(shot|sog).*/i, '').trim();
+  } else {
+    statType = 'points';
+    const match = pickText.match(/(\d+)\+?\s*(point|pts|goal|assist)/i) || pickText.match(/(over|under)\s*(\d+(\.\d+)?)\s*(point|pts)/i);
+    if (match) {
+      target = parseInt(match[1] || match[2] || "1", 10);
+      marketLabel = `${target}+ Points`;
+    } else {
+      target = 1;
+      marketLabel = "1+ Points";
+    }
+    playerName = pickText.replace(/(\d+)\+?\s*(point|pts|goal|assist).*/i, '').replace(/(over|under)\s*\d+(\.\d+)?\s*(point|pts).*/i, '').trim();
+  }
+
+  if (!playerName || playerName === pickText) {
+    const splitMatch = pickText.match(/^([A-Za-z\s.'-]+?)\s+(\d+.*)$/);
+    if (splitMatch) {
+      playerName = splitMatch[1].trim();
+    }
+  }
+
+  const id = `${boyName.toLowerCase()}_${statType}_${Date.now() % 10000}`;
+
+  return {
+    id: id,
+    boyName: boyName,
+    playerName: playerName || pickText,
+    marketLabel: marketLabel,
+    statType: statType,
+    target: target,
+    apiStat: 0,
+    subDetail: statType === 'shots' ? '0 SOG • 0G, 0A' : '0G, 0A • 0 SOG'
+  };
+}
+
+// Synchronize live tracker game blocks with the boys' real picks on the Bet Slip
+function syncTrackerFromRealPicks() {
+  if (state.currentFridayStr === '2026-10-16') {
+    state.trackerData = getSlateForDate('2026-10-16');
+    saveTrackerData();
+    return;
+  }
+
+  let slate = getSlateForDate(state.currentFridayStr);
+  const boysWithPicks = Object.keys(state.legs || {});
+
+  if (boysWithPicks.length === 0) {
+    state.trackerData = slate;
+    saveTrackerData();
+    return;
+  }
+
+  slate.forEach(game => {
+    game.legs.forEach(leg => {
+      const realPick = state.legs[leg.boyName];
+      if (realPick && realPick.pick_text) {
+        const parsed = parsePickIntoLeg(leg.boyName, realPick);
+        leg.playerName = parsed.playerName || leg.playerName;
+        leg.statType = parsed.statType || leg.statType;
+        leg.target = parsed.target || leg.target;
+        leg.marketLabel = parsed.marketLabel || leg.marketLabel;
+        leg.apiStat = 0;
+        leg.subDetail = parsed.subDetail;
+      }
+    });
+  });
+
+  state.trackerData = slate;
+  saveTrackerData();
+}
+
 // Initialize Tracker Data from LocalStorage or Default (Purely NHL API Data-Driven)
 const TRACKER_STORAGE_KEY = "b365_sgp_tracker_data_v4";
 
@@ -602,6 +698,10 @@ function initTrackerData() {
     }
   } else {
     state.trackerData = getSlateForDate(state.currentFridayStr);
+  }
+
+  if (state.isPlaced) {
+    syncTrackerFromRealPicks();
   }
 }
 
@@ -806,11 +906,21 @@ function computeSquadAnalytics() {
   const chalkSorted = [...list].filter(p => p.total > 0).sort((a, b) => a.avgDec - b.avgDec);
   const chalkMerchant = chalkSorted[0] || list[0];
 
-  // Group totals: sum stakes across all weeks (e.g. $25 Week 1 + $30 Week 2)
-  let totalWagered = state.statsHistory.reduce((acc, w) => acc + (w.stake || 30), 0);
+  // Parlay totals (settled weeks only)
+  const settledWeeks = sortedWeeks.filter(w => w.result === 'win' || w.result === 'loss');
+  const totalParlays = settledWeeks.length;
+  const wonParlays = settledWeeks.filter(w => w.result === 'win').length;
+  const lostParlays = settledWeeks.filter(w => w.result === 'loss').length;
+  const parlayWinRate = totalParlays > 0 ? ((wonParlays / totalParlays) * 100).toFixed(1) : "0.0";
+  const parlayRecordStr = `${wonParlays} / ${totalParlays} Parlays`;
+
+  // Pick totals (settled legs only)
+  let totalWagered = settledWeeks.reduce((acc, w) => acc + (w.stake || 25), 0);
+  if (totalWagered === 0) totalWagered = 25;
   let totalLegsCount = list.reduce((acc, p) => acc + p.total, 0);
   let totalHitsCount = list.reduce((acc, p) => acc + p.hits, 0);
-  let squadWinRate = totalLegsCount > 0 ? ((totalHitsCount / totalLegsCount) * 100).toFixed(1) : "0.0";
+  let pickWinRate = totalLegsCount > 0 ? ((totalHitsCount / totalLegsCount) * 100).toFixed(1) : "0.0";
+  let pickRecordStr = `${totalHitsCount} / ${totalLegsCount} Legs Hit`;
 
   return {
     players: list,
@@ -820,7 +930,14 @@ function computeSquadAnalytics() {
     chalkMerchant,
     totalWagered,
     totalLegsCount,
-    squadWinRate
+    totalHitsCount,
+    pickWinRate,
+    pickRecordStr,
+    totalParlays,
+    wonParlays,
+    lostParlays,
+    parlayWinRate,
+    parlayRecordStr
   };
 }
 
@@ -830,7 +947,15 @@ function renderStatsView() {
   // Hero numbers
   DOM.statsTotalWagered.textContent = `$${data.totalWagered.toFixed(2)}`;
   DOM.statsTotalLegs.textContent = data.totalLegsCount;
-  DOM.statsSquadWinRate.textContent = `${data.squadWinRate}%`;
+  DOM.statsSquadWinRate.textContent = `${data.pickWinRate}%`;
+  if (DOM.statsPickRecord) DOM.statsPickRecord.textContent = data.pickRecordStr;
+  if (DOM.statsParlayWinRate) {
+    DOM.statsParlayWinRate.textContent = `${data.parlayWinRate}%`;
+    DOM.statsParlayWinRate.className = `meta-val ${data.wonParlays > 0 ? 'b365-green' : 'red'}`;
+  }
+  if (DOM.statsParlayRecord) {
+    DOM.statsParlayRecord.textContent = `${data.wonParlays} / ${data.totalParlays} Parlays`;
+  }
 
   // Trophies
   DOM.trophySniperName.textContent = data.sniper ? data.sniper.name : 'TBD';
@@ -951,9 +1076,97 @@ function normalizeName(str) {
     .trim();
 }
 
+function renderEmptyTrackerState() {
+  if (!DOM.trackerGamesContainer) return;
+  DOM.trackerGamesContainer.innerHTML = "";
+
+  const bettor = getBettorForFriday(state.currentFriday);
+  const boysWithPicks = Object.keys(state.legs || {});
+  const readyCount = boysWithPicks.length;
+
+  DOM.legsHitCount.textContent = `0 / 6`;
+  if (DOM.overallProgressBar) DOM.overallProgressBar.style.width = "0%";
+  if (DOM.trackerTotalOddsBadge) DOM.trackerTotalOddsBadge.textContent = "AWAITING LOCK-IN";
+  if (DOM.navLiveMultiplier) DOM.navLiveMultiplier.textContent = "--";
+  if (DOM.syncStatus) DOM.syncStatus.textContent = "Awaiting Bet Placement • Live NHL API ready to sync upon lock-in";
+
+  DOM.trackerWagerDisplay.textContent = `$${state.stake.toFixed(2)}`;
+  DOM.trackerReturnDisplay.textContent = "--";
+
+  if (DOM.ticketStatusBanner) {
+    DOM.ticketStatusBanner.className = "tracker-cashout-btn pending";
+    DOM.ticketStatusBanner.innerHTML = `<span class="bts-icon" style="margin-right:6px;">${getIcon('lock')}</span> Bet Not Placed Yet • Awaiting Confirmation`;
+  }
+
+  const emptyCard = document.createElement("div");
+  emptyCard.className = "tracker-empty-card";
+  emptyCard.innerHTML = `
+    <div class="tracker-empty-icon-wrap">
+      ${getIcon('lock')}
+    </div>
+    <div class="tracker-empty-badge">PARLAY PENDING</div>
+    <h3 class="tracker-empty-title">LIVE TRACKER AWAITING LOCK-IN</h3>
+    <p class="tracker-empty-desc">
+      This week’s parlay has not been placed yet. Once <strong>${bettor.name}</strong> places the bet on the sportsbook and confirms it, the live tracker will activate, refresh with our real picks, and begin streaming real-time NHL boxscore progress!
+    </p>
+
+    <div class="tracker-empty-slip-preview">
+      <div class="tracker-empty-preview-header">
+        <span>PICKS READY ON BET SLIP</span>
+        <span class="tracker-empty-ready-count">${readyCount} / 6 READY</span>
+      </div>
+      <div class="tracker-empty-preview-list">
+        ${SQUAD.map(boy => {
+          const leg = state.legs[boy.name];
+          const hasPick = !!leg;
+          return `
+            <div class="tracker-empty-pick-pill ${hasPick ? 'ready' : 'empty'}">
+              <span class="tracker-empty-boy-tag">${boy.name}</span>
+              <span class="tracker-empty-pick-name">${hasPick ? (leg.pick_text || 'Pick Added') : 'Pending pick...'}</span>
+              <span class="tracker-empty-pick-status">${hasPick ? getIcon('check') : '--'}</span>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>
+
+    <div class="tracker-empty-actions">
+      <button class="nhl-action-btn secondary" onclick="switchView('slipBuilderView')">
+        <span class="bts-icon">${getIcon('slip')}</span>
+        <span>View Bet Slip (${readyCount}/6)</span>
+      </button>
+      <button class="nhl-action-btn primary" onclick="lockInBetAndRefreshTracker()">
+        <span class="bts-icon">${getIcon('check')}</span>
+        <span>Lock In Bet as ${bettor.name}</span>
+      </button>
+    </div>
+  `;
+
+  DOM.trackerGamesContainer.appendChild(emptyCard);
+}
+
+window.lockInBetAndRefreshTracker = function() {
+  state.isPlaced = true;
+  saveLocalData(state.currentFridayStr);
+  syncTrackerFromRealPicks();
+  saveTrackerData();
+  renderSportsbookTicket();
+  renderTracker();
+  if (window.confetti) confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
+  playSound('triumph');
+  const bettor = getBettorForFriday(state.currentFriday);
+  showToast(`Bet locked in by ${bettor.name}! Live tracker active`, 'checkCircle');
+  fetchAllLiveStats(true);
+};
+
 function renderTracker() {
   if (!DOM.trackerGamesContainer) return;
   DOM.trackerGamesContainer.innerHTML = "";
+
+  if (!state.isPlaced) {
+    renderEmptyTrackerState();
+    return;
+  }
 
   let totalLegs = 0;
   let hitLegs = 0;
@@ -1056,6 +1269,15 @@ function renderTracker() {
 
 // Live API Fetching (ESPN NHL Public API + NHL Web API fallback)
 async function fetchAllLiveStats(isManualClick = false) {
+  if (!state.isPlaced) {
+    if (DOM.syncStatus) DOM.syncStatus.textContent = "Awaiting Bet Placement • Live NHL API ready to sync upon lock-in";
+    if (isManualClick && DOM.refreshIcon) {
+      setTimeout(() => DOM.refreshIcon.classList.remove("animate-spin"), 250);
+    }
+    renderTracker();
+    return;
+  }
+
   if (isManualClick && DOM.refreshIcon) DOM.refreshIcon.classList.add("animate-spin");
   if (DOM.syncStatus) DOM.syncStatus.textContent = "Checking live NHL boxscores...";
 
@@ -2044,6 +2266,7 @@ function setupEvents() {
     fetchFridayNhlGames(state.currentFridayStr);
     if (state.supabase) fetchSupabaseParlay(state.currentFridayStr);
     renderAll();
+    renderTracker();
     playSound('click');
   });
 
@@ -2055,6 +2278,7 @@ function setupEvents() {
     fetchFridayNhlGames(state.currentFridayStr);
     if (state.supabase) fetchSupabaseParlay(state.currentFridayStr);
     renderAll();
+    renderTracker();
     playSound('click');
   });
 
@@ -2077,13 +2301,18 @@ function setupEvents() {
     playSound('lock');
 
     if (state.isPlaced) {
+      syncTrackerFromRealPicks();
+      saveTrackerData();
       if (window.confetti) confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
       playSound('triumph');
       showToast('Bet placed on sportsbook! Switching to Live Tracker', 'checkCircle');
+      renderTracker();
       setTimeout(() => {
         switchView('liveTrackerView');
+        fetchAllLiveStats(true);
       }, 350);
     } else {
+      renderTracker();
       showToast('Bet marked as unplaced', 'puck');
     }
   });
@@ -2131,7 +2360,12 @@ function setupEvents() {
     await persistLeg(legObj);
     closeLegModal();
     playSound('lock');
+    if (state.isPlaced) {
+      syncTrackerFromRealPicks();
+      saveTrackerData();
+    }
     renderAll();
+    renderTracker();
     showToast(`Locked in ${userName}'s leg!`, 'fire');
 
     if (Object.keys(state.legs).length === 6 && window.confetti) {
@@ -2178,9 +2412,9 @@ window.addEventListener('DOMContentLoaded', () => {
   state.currentFriday = getActiveFridayDate();
   state.currentFridayStr = formatDateISO(state.currentFriday);
 
+  loadLocalData(state.currentFridayStr);
   initTrackerData();
   initStatsHistory();
-  loadLocalData(state.currentFridayStr);
   setupEvents();
   renderAll();
   initSupabase();
