@@ -613,9 +613,34 @@ function getSlateForDate(dateStr) {
   return JSON.parse(JSON.stringify(DEFAULT_OCT23_SLATE));
 }
 
+const KNOWN_OCT23_PLAYERS = {
+  Edward: { name: 'Cole Caufield', target: 4, type: 'shots', label: 'Over 3.5 Shots on Goal' },
+  Will: { name: 'Juraj Slafkovsky', target: 1, type: 'points', label: 'Over 0.5 Total Points' },
+  Ben: { name: 'Lane Hutson', target: 2, type: 'shots', label: 'Over 1.5 Shots on Goal' },
+  Jackson: { name: 'Nathan MacKinnon', target: 4, type: 'shots', label: 'Over 3.5 Shots on Goal' },
+  Alex: { name: 'Nikita Kucherov', target: 1, type: 'goals', label: 'Over 0.5 Total Goals' },
+  Axel: { name: 'Brandon Hagel', target: 1, type: 'points', label: 'Over 0.5 Total Points' }
+};
+
 // Convert any squad member's pick string into an NHL API-trackable leg
 function parsePickIntoLeg(boyName, pickObj) {
   const pickText = (pickObj.pick_text || '').trim();
+
+  // If this is the active Oct 23 week, prioritize the known boy -> player mapping
+  if (state.currentFridayStr === '2026-10-23' && KNOWN_OCT23_PLAYERS[boyName]) {
+    const known = KNOWN_OCT23_PLAYERS[boyName];
+    return {
+      id: `${boyName.toLowerCase()}_${known.type}_oct23`,
+      boyName: boyName,
+      playerName: known.name,
+      marketLabel: known.label,
+      statType: known.type,
+      target: known.target,
+      apiStat: 0,
+      subDetail: known.type === 'shots' ? '0 SOG • 0G, 0A' : (known.type === 'goals' ? '0G • 0A, 0 SOG' : '0G, 0A • 0 SOG')
+    };
+  }
+
   let statType = 'points';
   let target = 1;
   let playerName = pickText;
@@ -1449,7 +1474,7 @@ function renderTracker() {
     gameBlock.innerHTML = `
       <div class="tracker-game-top">
         <div class="tracker-game-tag">
-          <span class="live-dot-mini" style="background:${allGameLegsHit ? 'var(--b365-green)' : '#6b7280'};"></span>
+          <span class="live-dot-mini" style="background:${allGameLegsHit ? '#00ff87' : '#6b7280'};"></span>
           <span>SAME GAME <span class="b365-green">PARLAY</span></span>
           <span class="tracker-game-mult">${game.odds}x</span>
         </div>
@@ -1463,32 +1488,42 @@ function renderTracker() {
           const currentVal = Math.max(0, leg.apiStat || 0);
           const pct = Math.min(100, Math.round((currentVal / leg.target) * 100));
           const isHit = currentVal >= leg.target;
-          const unitLabel = leg.statType === "shots" ? "SOG" : "PTS";
+          const unitLabel = leg.statType === "shots" ? "SOG" : (leg.statType === "goals" ? "GOALS" : "PTS");
+          const remaining = Math.max(0, leg.target - currentVal);
+          const statusText = isHit
+            ? "✓ LEG HIT"
+            : (currentVal > 0 ? `${remaining} TO GO` : `NEED ${leg.target} ${unitLabel}`);
+          const statusClass = isHit ? "hit" : (currentVal > 0 ? "in-progress" : "");
 
           return `
             <div class="tracker-leg-card ${isHit ? 'hit' : ''}">
-              <div class="tracker-leg-header-row">
+              <div class="tracker-leg-tier1">
                 <div class="tracker-leg-person">
                   <div class="tracker-hit-indicator">${getIcon('check')}</div>
-                  <span class="tracker-boy-pill">${leg.boyName || 'SQUAD'}</span>
                   <span class="tracker-player-title">${leg.playerName}</span>
                 </div>
-                <div class="tracker-target-odds">${leg.marketLabel}</div>
-              </div>
-
-              <div class="tracker-leg-action-row">
-                <div class="tracker-leg-stats-detail">
-                  <span>${leg.subDetail || '0G, 0A • 0 SOG'}</span>
-                </div>
-
                 <div class="tracker-stat-box ${isHit ? 'hit' : ''}">
                   <span class="tracker-current-num">${currentVal}</span>
                   <span class="tracker-target-num">/ ${leg.target} ${unitLabel}</span>
                 </div>
               </div>
 
-              <div class="tracker-progress-track">
-                <div class="tracker-progress-fill" style="width: ${pct}%"></div>
+              <div class="tracker-leg-tier2">
+                <span class="tracker-boy-pill">${leg.boyName || 'SQUAD'}</span>
+                <span class="tracker-market-desc">${leg.marketLabel}</span>
+              </div>
+
+              <div class="tracker-slider-wrap">
+                <div class="tracker-progress-track">
+                  <div class="tracker-progress-fill ${statusClass}" style="width: ${pct}%">
+                    ${pct > 0 && !isHit ? '<span class="tracker-slider-thumb"></span>' : ''}
+                  </div>
+                </div>
+              </div>
+
+              <div class="tracker-leg-tier4">
+                <span class="tracker-live-detail">${leg.subDetail || '0G, 0A • 0 SOG'}</span>
+                <span class="tracker-status-badge ${statusClass}">${statusText}</span>
               </div>
             </div>
           `;
@@ -1500,7 +1535,7 @@ function renderTracker() {
         <div style="font-weight:700;">
           <span>${game.awayName}</span> vs <span>${game.homeName}</span>
         </div>
-        <div style="text-align:right; font-size:0.7rem; color:var(--text-secondary);">
+        <div style="text-align:right; font-size:0.7rem; color:#94a3b8;">
           <span>${game.startTime}</span>
         </div>
       </div>
@@ -1536,7 +1571,6 @@ function renderTracker() {
     DOM.ticketStatusBanner.className = "tracker-cashout-btn active";
   }
 }
-
 // Live API Fetching (ESPN NHL Public API + NHL Web API fallback)
 async function fetchAllLiveStats(isManualClick = false) {
   if (!state.isPlaced) {
@@ -1929,12 +1963,12 @@ function formatGameTime(utcString) {
 }
 
 const DEFAULT_OCT23_PICKS = {
-  Axel: { boy: 'Axel', game: 'MTL @ CHI', betType: 'prop', pick_text: 'Cole Caufield 1+ Points', odds: '-135', chirp: 'Sniper heating up!' },
-  Jackson: { boy: 'Jackson', game: 'MTL @ CHI', betType: 'prop', pick_text: 'Connor Bedard 3+ Shots', odds: '-125', chirp: 'High volume night at United Center' },
-  Will: { boy: 'Will', game: 'TBL @ COL', betType: 'prop', pick_text: 'Nikita Kucherov 1+ Points', odds: '-150', chirp: 'Kuch always produces' },
-  Alex: { boy: 'Alex', game: 'MTL @ CHI', betType: 'prop', pick_text: 'Nick Suzuki 1+ Points', odds: '-120', chirp: 'Captain leads the way' },
-  Ben: { boy: 'Ben', game: 'TBL @ COL', betType: 'prop', pick_text: 'Nathan MacKinnon 4+ SOG', odds: '-130', chirp: 'Redemption week for Ben!' },
-  Edward: { boy: 'Edward', game: 'TBL @ COL', betType: 'prop', pick_text: 'Cale Makar 1+ Points', odds: '-135', chirp: 'Makar power play wizardry' }
+  Edward: { user_name: 'Edward', boy: 'Edward', game: 'MTL @ CHI', game_title: 'MTL Canadiens @ CHI Blackhawks', betType: 'Player Prop', pick_text: 'Over 3.5 Shots on Goal', odds: '-145', chirp: "He’s 7/9 on this line through the season", locked: true },
+  Will: { user_name: 'Will', boy: 'Will', game: 'MTL @ CHI', game_title: 'MTL Canadiens @ CHI Blackhawks', betType: 'Player Prop', pick_text: 'Over 0.5 Total Points', odds: '-175', chirp: "Free money boys, goalie on a cold streak…", locked: true },
+  Ben: { user_name: 'Ben', boy: 'Ben', game: 'MTL @ CHI', game_title: 'MTL Canadiens @ CHI Blackhawks', betType: 'Player Prop', pick_text: 'Over 1.5 Total Shots On Goal', odds: '-130', chirp: "Hutson running the entire show from the point", locked: true },
+  Jackson: { user_name: 'Jackson', boy: 'Jackson', game: 'TBL @ COL', game_title: 'TBL Lightning @ COL Avalanche', betType: 'Player Prop', pick_text: 'Over 3.5 Total Shots On Goal', odds: '-145', chirp: "Nate Dogg let 'em fly 🔥", locked: true },
+  Alex: { user_name: 'Alex', boy: 'Alex', game: 'TBL @ COL', game_title: 'TBL Lightning @ COL Avalanche', betType: 'Player Prop', pick_text: 'Over 0.5 Total Goals', odds: '+170', chirp: "My Kuchy quakinnnn 💅😮‍💨", locked: true },
+  Axel: { user_name: 'Axel', boy: 'Axel', game: 'TBL @ COL', game_title: 'TBL Lightning @ COL Avalanche', betType: 'Player Prop', pick_text: 'Over 0.5 Total Points', odds: '-175', chirp: "the saskatoon man is showing out tonight", locked: true }
 };
 
 const DEFAULT_OCT16_PICKS = {
@@ -1962,7 +1996,7 @@ function loadLocalData(dateStr) {
   if (dateStr === '2026-10-23') {
     state.legs = JSON.parse(JSON.stringify(DEFAULT_OCT23_PICKS));
     state.stake = 30;
-    state.isPlaced = false;
+    state.isPlaced = true;
   } else if (dateStr === '2026-10-16') {
     state.legs = JSON.parse(JSON.stringify(DEFAULT_OCT16_PICKS));
     state.stake = 25;
