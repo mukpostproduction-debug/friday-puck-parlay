@@ -2019,8 +2019,26 @@ async function fetchSupabaseParlay(dateStr) {
       legs.forEach(l => { map[l.user_name] = l; });
       state.legs = map;
       saveLocalData(dateStr);
-      renderAll();
     }
+
+    try {
+      const { data: master } = await state.supabase
+        .from('friday_parlays')
+        .select('*')
+        .eq('id', dateStr)
+        .maybeSingle();
+
+      if (master) {
+        state.masterSlip = master;
+        if (master.status === 'placed') {
+          state.isPlaced = true;
+          if (DOM.markPlacedText) DOM.markPlacedText.textContent = 'Placed on Sportsbook!';
+          if (DOM.markPlacedBtn) DOM.markPlacedBtn.classList.add('placed');
+        }
+      }
+    } catch (errMaster) {}
+
+    renderAll();
   } catch (e) {
     console.error('Supabase query error:', e);
   }
@@ -2323,10 +2341,15 @@ function renderSportsbookTicket() {
   const legsList = SQUAD.map(b => state.legs[b.name]).filter(Boolean);
   const totals = calculateParlayTotals(legsList, state.stake);
 
-  DOM.totalAmericanOdds.textContent = totals.american;
-  DOM.totalDecimalOdds.textContent = `${totals.decimal.toFixed(2)}x`;
-  DOM.potentialPayoutDisplay.textContent = `$${totals.payout.toFixed(2)}`;
-  DOM.potentialProfitDisplay.textContent = `+$${totals.profit.toFixed(2)} net profit`;
+  const displayOdds = (state.masterSlip && state.masterSlip.total_odds) ? state.masterSlip.total_odds : totals.american;
+  const displayPayout = (state.masterSlip && state.masterSlip.potential_payout) ? parseFloat(state.masterSlip.potential_payout) : totals.payout;
+  const displayProfit = displayPayout - state.stake;
+  const displayDecimal = displayPayout / (state.stake || 1);
+
+  DOM.totalAmericanOdds.textContent = displayOdds;
+  DOM.totalDecimalOdds.textContent = `${displayDecimal.toFixed(2)}x`;
+  DOM.potentialPayoutDisplay.textContent = `$${displayPayout.toFixed(2)}`;
+  DOM.potentialProfitDisplay.textContent = `+$${displayProfit.toFixed(2)} net profit`;
   DOM.ticketDateText.textContent = formatDateDisplay(state.currentFriday);
   DOM.ticketReferenceCode.textContent = `SLIP #BTS-${state.currentFridayStr.replace(/-/g, '')}-W${state.weekNumber}`;
 
