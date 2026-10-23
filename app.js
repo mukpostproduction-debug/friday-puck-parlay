@@ -1815,13 +1815,6 @@ function getFallbackGames(dateStr) {
       venue: 'Ball Arena',
       away: { abbrev: 'TBL', name: 'Lightning', place: 'Tampa Bay', logo: 'https://assets.nhle.com/logos/nhl/svg/TBL_light.svg' },
       home: { abbrev: 'COL', name: 'Avalanche', place: 'Colorado', logo: 'https://assets.nhle.com/logos/nhl/svg/COL_light.svg' }
-    },
-    {
-      id: 2026020162,
-      startTimeUTC: `${dateStr}T02:00:00Z`,
-      venue: 'T-Mobile Arena',
-      away: { abbrev: 'EDM', name: 'Oilers', place: 'Edmonton', logo: 'https://assets.nhle.com/logos/nhl/svg/EDM_light.svg' },
-      home: { abbrev: 'VGK', name: 'Golden Knights', place: 'Vegas', logo: 'https://assets.nhle.com/logos/nhl/svg/VGK_light.svg' }
     }
   ];
 }
