@@ -1592,6 +1592,25 @@ function renderTracker() {
     DOM.ticketStatusBanner.className = "tracker-cashout-btn active";
   }
 }
+// Team Abbreviation Normalizer (maps ESPN/NHL variations e.g. TB -> TBL, MON -> MTL)
+const TEAM_ABBR_ALIASES = {
+  TB: "TBL",
+  MON: "MTL",
+  VEG: "VGK",
+  WAS: "WSH",
+  NJ: "NJD",
+  SJ: "SJS",
+  LA: "LAK",
+  CAL: "CGY",
+  WIN: "WPG"
+};
+
+function normalizeTeamAbbr(abbr) {
+  if (!abbr) return "";
+  const upper = String(abbr).toUpperCase().trim();
+  return TEAM_ABBR_ALIASES[upper] || upper;
+}
+
 // Live API Fetching (ESPN NHL Public API + NHL Web API fallback)
 async function fetchAllLiveStats(isManualClick = false) {
   if (!state.isPlaced) {
@@ -1619,15 +1638,15 @@ async function fetchAllLiveStats(isManualClick = false) {
         if (!comp) continue;
 
         const competitors = comp.competitors || [];
-        const abbrevs = competitors.map(c => (c.team?.abbreviation || "").toUpperCase());
+        const abbrevs = competitors.map(c => normalizeTeamAbbr(c.team?.abbreviation));
 
         const matchingGame = state.trackerData.find(g =>
-          abbrevs.includes(g.awayTeam) && abbrevs.includes(g.homeTeam)
+          abbrevs.includes(normalizeTeamAbbr(g.awayTeam)) && abbrevs.includes(normalizeTeamAbbr(g.homeTeam))
         );
 
         if (matchingGame) {
-          const awayObj = competitors.find(c => c.team?.abbreviation?.toUpperCase() === matchingGame.awayTeam);
-          const homeObj = competitors.find(c => c.team?.abbreviation?.toUpperCase() === matchingGame.homeTeam);
+          const awayObj = competitors.find(c => normalizeTeamAbbr(c.team?.abbreviation) === normalizeTeamAbbr(matchingGame.awayTeam));
+          const homeObj = competitors.find(c => normalizeTeamAbbr(c.team?.abbreviation) === normalizeTeamAbbr(matchingGame.homeTeam));
           const statusDetail = event.status?.type?.shortDetail || matchingGame.startTime;
 
           if (awayObj && homeObj) {
@@ -1655,11 +1674,11 @@ async function fetchAllLiveStats(isManualClick = false) {
         const data = await resp.json();
         const games = data.games || [];
         for (const g of games) {
-          const away = g.awayTeam?.abbrev;
-          const home = g.homeTeam?.abbrev;
+          const away = normalizeTeamAbbr(g.awayTeam?.abbrev);
+          const home = normalizeTeamAbbr(g.homeTeam?.abbrev);
           const matchingGame = state.trackerData.find(item =>
-            (item.awayTeam === away && item.homeTeam === home) ||
-            (item.awayTeam === home && item.homeTeam === away)
+            (normalizeTeamAbbr(item.awayTeam) === away && normalizeTeamAbbr(item.homeTeam) === home) ||
+            (normalizeTeamAbbr(item.awayTeam) === home && normalizeTeamAbbr(item.homeTeam) === away)
           );
 
           if (matchingGame) {
