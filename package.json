@@ -3,7 +3,8 @@
   "version": "4.0.0",
   "description": "Friday NHL 6-Leg Parlay Pool for Axel, Jackson, Will, Alex, Ben, and Edward",
   "scripts": {
-    "test:ui": "node scripts/capture_screens.js"
+    "test:ui": "node scripts/capture_screens.js",
+    "parse-slip": "node tools/parse_slip.js"
   },
   "devDependencies": {
     "puppeteer-core": "^25.14.0"

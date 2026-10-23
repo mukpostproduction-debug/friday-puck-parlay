@@ -3500,3 +3500,110 @@ body {
     font-size: 0.54rem;
   }
 }
+
+/* ==========================================================================
+   15. AUTOMATED BET SLIP DROPZONE & INTAKE MODAL STYLES
+   ========================================================================== */
+.slip-dropzone {
+  border: 2px dashed var(--border-medium);
+  border-radius: var(--radius-md);
+  padding: 26px 18px;
+  text-align: center;
+  background: var(--nhl-subcard);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.slip-dropzone:hover,
+.slip-dropzone.dragover {
+  border-color: var(--nhl-blue);
+  background: var(--nhl-blue-subtle);
+}
+
+.slip-drop-icon {
+  color: var(--nhl-blue);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.slip-drop-title {
+  font-family: var(--font-sports);
+  font-size: 0.98rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin-bottom: 4px;
+}
+
+.slip-drop-sub {
+  font-size: 0.74rem;
+  color: var(--text-secondary);
+}
+
+.slip-preview-wrap {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: #ffffff;
+  margin-top: 14px;
+}
+
+.slip-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: var(--nhl-subcard);
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.slip-preview-header .text-btn {
+  background: transparent;
+  border: none;
+  color: var(--red-alert);
+  font-size: 0.74rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.slip-preview-img-box {
+  max-height: 220px;
+  background: #0b0e14;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.slip-preview-img-box img {
+  max-height: 220px;
+  width: auto;
+  object-fit: contain;
+}
+
+.slip-ocr-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--nhl-blue);
+  background: var(--nhl-blue-subtle);
+  border: 1px solid var(--nhl-blue-border);
+  padding: 8px 12px;
+  border-radius: var(--radius-xs);
+  margin-top: 12px;
+}
+
+.slip-fields-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}

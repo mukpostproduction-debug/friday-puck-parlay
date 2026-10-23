@@ -224,6 +224,10 @@
             </div>
 
             <div class="ticket-actions-group">
+              <button id="scanSlipBtn" class="btn-ticket secondary" type="button" title="Upload or paste sportsbook screenshot to lock in bet">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                <span>📸 Drop Bet Slip Screenshot</span>
+              </button>
               <button id="ticketCopyBtn" class="btn-ticket primary">
                 <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                 <span>Copy for Sportsbook App</span>
@@ -671,10 +675,103 @@
     </div>
   </div>
 
+  <!-- ===================================================================== -->
+  <!-- MODAL 4: SCAN & DROP BET SLIP SCREENSHOT -->
+  <!-- ===================================================================== -->
+  <div class="nhl-modal-backdrop" id="scanSlipModalBackdrop">
+    <div class="nhl-modal-card">
+      <div class="modal-top">
+        <div class="modal-title-group">
+          <span class="modal-tag">AUTOMATED INTAKE</span>
+          <h3 class="modal-title">Drop Sportsbook Slip Screenshot</h3>
+        </div>
+        <button id="closeScanSlipModalBtn" class="modal-close">&times;</button>
+      </div>
+
+      <div class="scan-slip-body">
+        <p class="modal-desc" style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 14px;">
+          Drop your placed bet slip screenshot from <strong>FanDuel, BetMGM, Bet365, or DraftKings</strong>. The built-in OCR engine extracts the stake, odds, and potential payout to prime the Live Tracker instantly.
+        </p>
+
+        <!-- Drag & Drop Target Area -->
+        <div id="slipDropzone" class="slip-dropzone">
+          <input type="file" id="slipFileInput" accept="image/*" style="display:none;" />
+          <div class="slip-drop-icon">
+            <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+          </div>
+          <div class="slip-drop-title">Drop Screenshot Here or Click to Browse</div>
+          <div class="slip-drop-sub">Supports PNG, JPG, WebP • Or press <strong>Cmd + V</strong> anywhere to paste</div>
+        </div>
+
+        <!-- Image Preview Container -->
+        <div id="slipPreviewWrap" class="slip-preview-wrap" style="display: none;">
+          <div class="slip-preview-header">
+            <span id="slipFileNameText">screenshot.png</span>
+            <button id="clearSlipFileBtn" class="text-btn" type="button">Change Image</button>
+          </div>
+          <div class="slip-preview-img-box">
+            <img id="slipPreviewImg" src="" alt="Placed Slip Screenshot" />
+          </div>
+        </div>
+
+        <!-- OCR Scanning Status Indicator -->
+        <div id="slipOcrStatus" class="slip-ocr-status" style="display: none;">
+          <div class="animate-spin" style="display: inline-block;">⚙️</div>
+          <span id="slipOcrStatusText">Scanning odds, wager & payout via Tesseract OCR...</span>
+        </div>
+
+        <!-- Parsed Fields Form -->
+        <div id="slipParsedForm" class="slip-parsed-form" style="margin-top: 14px;">
+          <div style="font-family: var(--font-sports); font-size: 0.72rem; font-weight: 800; letter-spacing: 0.5px; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 8px;">
+            Confirmed Slip Details
+          </div>
+          <div class="slip-fields-grid">
+            <div class="form-group">
+              <label class="form-label" for="slipStakeInput">POOL WAGER ($)</label>
+              <input type="number" id="slipStakeInput" class="nhl-input" value="30.00" step="5" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="slipOddsInput">TOTAL ODDS</label>
+              <input type="text" id="slipOddsInput" class="nhl-input text-mono" value="+1261" placeholder="+1261" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="slipPayoutInput">POTENTIAL PAYOUT ($)</label>
+              <input type="number" id="slipPayoutInput" class="nhl-input text-mono" value="408.35" step="0.01" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="slipBookInput">SPORTSBOOK</label>
+              <select id="slipBookInput" class="nhl-input">
+                <option value="FanDuel">FanDuel Ontario</option>
+                <option value="BetMGM">BetMGM Ontario</option>
+                <option value="Bet365">Bet365 Ontario</option>
+                <option value="DraftKings">DraftKings</option>
+                <option value="theScore Bet">theScore Bet</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal Actions -->
+        <div class="modal-bottom" style="margin-top: 20px; display: flex; gap: 10px;">
+          <button id="cancelScanSlipBtn" class="nhl-btn secondary" type="button" style="flex: 1;">Cancel</button>
+          <button id="confirmScanSlipBtn" class="nhl-btn primary" type="button" style="flex: 2;">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span>Lock In & Launch Live Tracker</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- TOAST NOTIFICATION CONTAINER -->
   <div class="nhl-toast-container" id="toastContainer"></div>
 
   <!-- Main JavaScript Controller -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <script src="app.js?v=4.2"></script>
 </body>
 </html>

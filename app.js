@@ -308,6 +308,24 @@ const DOM = {
   statsParlayRecord: document.getElementById('statsParlayRecord'),
   trophySniperName: document.getElementById('trophySniperName'),
   trophySniperStat: document.getElementById('trophySniperStat'),
+  // Scan & Drop Slip Modal
+  scanSlipBtn: document.getElementById('scanSlipBtn'),
+  scanSlipModalBackdrop: document.getElementById('scanSlipModalBackdrop'),
+  closeScanSlipModalBtn: document.getElementById('closeScanSlipModalBtn'),
+  cancelScanSlipBtn: document.getElementById('cancelScanSlipBtn'),
+  confirmScanSlipBtn: document.getElementById('confirmScanSlipBtn'),
+  slipDropzone: document.getElementById('slipDropzone'),
+  slipFileInput: document.getElementById('slipFileInput'),
+  slipPreviewWrap: document.getElementById('slipPreviewWrap'),
+  slipPreviewImg: document.getElementById('slipPreviewImg'),
+  slipFileNameText: document.getElementById('slipFileNameText'),
+  clearSlipFileBtn: document.getElementById('clearSlipFileBtn'),
+  slipOcrStatus: document.getElementById('slipOcrStatus'),
+  slipOcrStatusText: document.getElementById('slipOcrStatusText'),
+  slipStakeInput: document.getElementById('slipStakeInput'),
+  slipOddsInput: document.getElementById('slipOddsInput'),
+  slipPayoutInput: document.getElementById('slipPayoutInput'),
+  slipBookInput: document.getElementById('slipBookInput'),
   trophySniperLabel: document.getElementById('trophySniperLabel'),
   trophySniperNote: document.getElementById('trophySniperNote'),
   trophySlumpName: document.getElementById('trophySlumpName'),
@@ -1419,13 +1437,16 @@ function renderEmptyTrackerState() {
     </div>
 
     <div class="tracker-empty-actions">
+      <button class="nhl-action-btn accent" onclick="openScanSlipModal()">
+        <span>📸 Drop Bet Slip Screenshot</span>
+      </button>
       <button class="nhl-action-btn secondary" onclick="switchView('slipBuilderView')">
         <span class="bts-icon">${getIcon('slip')}</span>
         <span>View Bet Slip (${readyCount}/6)</span>
       </button>
       <button class="nhl-action-btn primary" onclick="lockInBetAndRefreshTracker()">
         <span class="bts-icon">${getIcon('check')}</span>
-        <span>Lock In Bet as ${bettor.name}</span>
+        <span>Confirm as ${bettor.name}</span>
       </button>
     </div>
   `;
@@ -2611,7 +2632,196 @@ function escapeHTML(str) {
 // =============================================================================
 // 13. EVENT HANDLERS & INITIALIZATION
 // =============================================================================
+
+// =============================================================================
+// AUTOMATED BET SLIP INTAKE & OCR MODAL CONTROLLER
+// =============================================================================
+function openScanSlipModal() {
+  if (DOM.scanSlipModalBackdrop) {
+    DOM.scanSlipModalBackdrop.classList.add('open');
+    if (DOM.slipStakeInput) DOM.slipStakeInput.value = state.stake.toFixed(2);
+    if (state.masterSlip && state.masterSlip.total_odds) {
+      if (DOM.slipOddsInput) DOM.slipOddsInput.value = state.masterSlip.total_odds;
+      if (DOM.slipPayoutInput) DOM.slipPayoutInput.value = parseFloat(state.masterSlip.potential_payout || 0).toFixed(2);
+    }
+  }
+}
+window.openScanSlipModal = openScanSlipModal;
+
+function closeScanSlipModal() {
+  if (DOM.scanSlipModalBackdrop) {
+    DOM.scanSlipModalBackdrop.classList.remove('open');
+  }
+}
+
+async function handleSlipFile(file) {
+  if (!file || !file.type.startsWith("image/")) {
+    showToast("Please select a valid image screenshot (PNG, JPG, WebP)", "cross");
+    return;
+  }
+
+  if (DOM.slipFileNameText) DOM.slipFileNameText.textContent = file.name || "Pasted Bet Slip";
+  if (DOM.slipDropzone) DOM.slipDropzone.style.display = "none";
+  if (DOM.slipPreviewWrap) DOM.slipPreviewWrap.style.display = "block";
+
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    const dataUrl = e.target.result;
+    if (DOM.slipPreviewImg) DOM.slipPreviewImg.src = dataUrl;
+
+    if (window.Tesseract) {
+      if (DOM.slipOcrStatus) DOM.slipOcrStatus.style.display = "flex";
+      if (DOM.slipOcrStatusText) DOM.slipOcrStatusText.textContent = "Scanning odds, wager & payout via Tesseract OCR...";
+      try {
+        const result = await Tesseract.recognize(dataUrl, "eng");
+        const text = result?.data?.text || "";
+
+        const summaryMatch = text.match(/\$([0-9]+(?:\.[0-9]{2})?)\s+([+-][0-9]{3,5})\s+\$([0-9]+(?:\.[0-9]{2})?)/);
+        if (summaryMatch) {
+          if (DOM.slipStakeInput) DOM.slipStakeInput.value = parseFloat(summaryMatch[1]).toFixed(2);
+          if (DOM.slipOddsInput) DOM.slipOddsInput.value = summaryMatch[2];
+          if (DOM.slipPayoutInput) DOM.slipPayoutInput.value = parseFloat(summaryMatch[3]).toFixed(2);
+        } else {
+          const moneyMatches = text.match(/\$([0-9]+(?:\.[0-9]{2})?)/g);
+          if (moneyMatches && moneyMatches.length >= 2) {
+            const clean1 = moneyMatches[0].replace("$", "");
+            const clean2 = moneyMatches[moneyMatches.length - 1].replace("$", "");
+            if (DOM.slipStakeInput) DOM.slipStakeInput.value = parseFloat(clean1).toFixed(2);
+            if (DOM.slipPayoutInput) DOM.slipPayoutInput.value = parseFloat(clean2).toFixed(2);
+          }
+          const oddsMatch = text.match(/([+-][0-9]{3,5})/);
+          if (oddsMatch && DOM.slipOddsInput) {
+            DOM.slipOddsInput.value = oddsMatch[1];
+          }
+        }
+
+        if (text.toLowerCase().includes("fanduel") && DOM.slipBookInput) DOM.slipBookInput.value = "FanDuel";
+        else if (text.toLowerCase().includes("betmgm") && DOM.slipBookInput) DOM.slipBookInput.value = "BetMGM";
+        else if (text.toLowerCase().includes("bet365") && DOM.slipBookInput) DOM.slipBookInput.value = "Bet365";
+        else if (text.toLowerCase().includes("draftkings") && DOM.slipBookInput) DOM.slipBookInput.value = "DraftKings";
+
+        if (DOM.slipOcrStatusText) DOM.slipOcrStatusText.textContent = "✓ OCR Complete! Values auto-filled from screenshot.";
+        showToast("Slip scanned & values extracted!", "checkCircle");
+      } catch (ocrErr) {
+        console.warn("OCR error:", ocrErr);
+        if (DOM.slipOcrStatusText) DOM.slipOcrStatusText.textContent = "Screenshot loaded. Review & confirm below.";
+      }
+    } else {
+      if (DOM.slipOcrStatus) DOM.slipOcrStatus.style.display = "flex";
+      if (DOM.slipOcrStatusText) DOM.slipOcrStatusText.textContent = "Screenshot loaded. Review & confirm details below.";
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearSlipFile() {
+  if (DOM.slipFileInput) DOM.slipFileInput.value = '';
+  if (DOM.slipPreviewImg) DOM.slipPreviewImg.src = '';
+  if (DOM.slipPreviewWrap) DOM.slipPreviewWrap.style.display = 'none';
+  if (DOM.slipDropzone) DOM.slipDropzone.style.display = 'block';
+  if (DOM.slipOcrStatus) DOM.slipOcrStatus.style.display = 'none';
+}
+
+async function confirmAndLockInSlip() {
+  const stake = parseFloat(DOM.slipStakeInput?.value || 30.00);
+  const odds = (DOM.slipOddsInput?.value || '+1261').trim();
+  const payout = parseFloat(DOM.slipPayoutInput?.value || 408.35);
+  const book = DOM.slipBookInput?.value || 'FanDuel';
+  const bettor = getBettorForFriday(state.currentFriday);
+
+  state.stake = stake;
+  state.isPlaced = true;
+  state.masterSlip = {
+    id: state.currentFridayStr,
+    week_date: state.currentFridayStr,
+    bettor_name: bettor.name,
+    status: 'placed',
+    stake: stake,
+    total_odds: odds,
+    potential_payout: payout,
+    notes: `Placed on ${book} by ${bettor.name}`
+  };
+
+  saveLocalData(state.currentFridayStr);
+  syncTrackerFromRealPicks();
+  saveTrackerData();
+
+  if (state.supabase) {
+    try {
+      await state.supabase
+        .from('friday_parlays')
+        .upsert({
+          id: state.currentFridayStr,
+          week_date: state.currentFridayStr,
+          bettor_name: bettor.name,
+          status: 'placed',
+          stake: stake,
+          total_odds: odds,
+          potential_payout: payout,
+          notes: `Placed on ${book} by ${bettor.name}`,
+          updated_at: new Date().toISOString()
+        });
+    } catch (e) {
+      console.warn('Could not sync placed parlay to Supabase:', e);
+    }
+  }
+
+  closeScanSlipModal();
+  renderSportsbookTicket();
+  renderTracker();
+
+  if (window.confetti) confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
+  playSound('triumph');
+  showToast(`Slip locked in on ${book}! Payout: ${payout.toFixed(2)}`, 'checkCircle');
+
+  setTimeout(() => {
+    switchView('liveTrackerView');
+    fetchAllLiveStats(true);
+  }, 350);
+}
+
 function setupEvents() {
+  // Scan slip modal triggers
+  if (DOM.scanSlipBtn) DOM.scanSlipBtn.addEventListener('click', openScanSlipModal);
+  if (DOM.closeScanSlipModalBtn) DOM.closeScanSlipModalBtn.addEventListener('click', closeScanSlipModal);
+  if (DOM.cancelScanSlipBtn) DOM.cancelScanSlipBtn.addEventListener('click', closeScanSlipModal);
+  if (DOM.confirmScanSlipBtn) DOM.confirmScanSlipBtn.addEventListener('click', confirmAndLockInSlip);
+  if (DOM.clearSlipFileBtn) DOM.clearSlipFileBtn.addEventListener('click', clearSlipFile);
+
+  if (DOM.slipDropzone && DOM.slipFileInput) {
+    DOM.slipDropzone.addEventListener('click', () => DOM.slipFileInput.click());
+    DOM.slipFileInput.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files[0]) handleSlipFile(e.target.files[0]);
+    });
+
+    DOM.slipDropzone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      DOM.slipDropzone.classList.add('dragover');
+    });
+    DOM.slipDropzone.addEventListener('dragleave', () => {
+      DOM.slipDropzone.classList.remove('dragover');
+    });
+    DOM.slipDropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      DOM.slipDropzone.classList.remove('dragover');
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+        handleSlipFile(e.dataTransfer.files[0]);
+      }
+    });
+  }
+
+  // Global paste handler (Cmd+V anywhere on the page to drop slip screenshot)
+  window.addEventListener('paste', (e) => {
+    const items = (e.clipboardData || e.originalEvent?.clipboardData)?.items || [];
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].kind === 'file' && items[i].type.startsWith('image/')) {
+        const file = items[i].getAsFile();
+        openScanSlipModal();
+        handleSlipFile(file);
+        break;
+      }
+    }
+  });
   // Navigation tabs
   DOM.tabSlipBuilder.addEventListener('click', () => switchView('slipBuilderView'));
   DOM.tabLiveTracker.addEventListener('click', () => switchView('liveTrackerView'));
