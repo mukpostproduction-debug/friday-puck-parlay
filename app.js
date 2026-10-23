@@ -419,8 +419,8 @@ function showToast(message, iconKey = 'puck') {
 const DEFAULT_OCT23_SLATE = [
   {
     gameId: "MTL_CHI",
-    title: "SAME GAME PARLAY",
-    odds: "3.20",
+    title: "SAME GAME PARLAY (+190)",
+    odds: "2.90",
     awayTeam: "MTL",
     awayName: "MTL Canadiens",
     homeTeam: "CHI",
@@ -429,47 +429,47 @@ const DEFAULT_OCT23_SLATE = [
     gameStateText: "Scheduled • 8:30 PM",
     legs: [
       {
-        id: "caufield_pts",
-        boyName: "Axel",
+        id: "caufield_sog",
+        boyName: "Edward",
         playerName: "Cole Caufield",
         team: "MTL",
-        marketLabel: "1+ Points",
-        statType: "points",
-        target: 1,
-        apiStat: 0,
-        manualDelta: 0,
-        subDetail: "0G, 0A • 0 SOG"
-      },
-      {
-        id: "bedard_sog",
-        boyName: "Jackson",
-        playerName: "Connor Bedard",
-        team: "CHI",
-        marketLabel: "3+ Shots on Goal",
+        marketLabel: "Over 3.5 Shots on Goal",
         statType: "shots",
-        target: 3,
+        target: 4,
         apiStat: 0,
         manualDelta: 0,
         subDetail: "0 SOG • 0G, 0A"
       },
       {
-        id: "suzuki_pts",
-        boyName: "Alex",
-        playerName: "Nick Suzuki",
+        id: "slafkovsky_pts",
+        boyName: "Will",
+        playerName: "Juraj Slafkovsky",
         team: "MTL",
-        marketLabel: "1+ Points",
+        marketLabel: "Over 0.5 Total Points",
         statType: "points",
         target: 1,
         apiStat: 0,
         manualDelta: 0,
         subDetail: "0G, 0A • 0 SOG"
+      },
+      {
+        id: "hutson_sog",
+        boyName: "Ben",
+        playerName: "Lane Hutson",
+        team: "MTL",
+        marketLabel: "Over 1.5 Shots on Goal",
+        statType: "shots",
+        target: 2,
+        apiStat: 0,
+        manualDelta: 0,
+        subDetail: "0 SOG • 0G, 0A"
       }
     ]
   },
   {
     gameId: "TBL_COL",
-    title: "SAME GAME PARLAY",
-    odds: "3.60",
+    title: "SAME GAME PARLAY (+369)",
+    odds: "4.69",
     awayTeam: "TBL",
     awayName: "TBL Lightning",
     homeTeam: "COL",
@@ -478,23 +478,11 @@ const DEFAULT_OCT23_SLATE = [
     gameStateText: "Scheduled • 9:00 PM",
     legs: [
       {
-        id: "kucherov_pts",
-        boyName: "Will",
-        playerName: "Nikita Kucherov",
-        team: "TBL",
-        marketLabel: "1+ Points",
-        statType: "points",
-        target: 1,
-        apiStat: 0,
-        manualDelta: 0,
-        subDetail: "0G, 0A • 0 SOG"
-      },
-      {
-        id: "mackinnon_sog2",
-        boyName: "Ben",
+        id: "mackinnon_sog",
+        boyName: "Jackson",
         playerName: "Nathan MacKinnon",
         team: "COL",
-        marketLabel: "4+ Shots on Goal",
+        marketLabel: "Over 3.5 Shots on Goal",
         statType: "shots",
         target: 4,
         apiStat: 0,
@@ -502,11 +490,23 @@ const DEFAULT_OCT23_SLATE = [
         subDetail: "0 SOG • 0G, 0A"
       },
       {
-        id: "makar_pts2",
-        boyName: "Edward",
-        playerName: "Cale Makar",
-        team: "COL",
-        marketLabel: "1+ Points",
+        id: "kucherov_goals",
+        boyName: "Alex",
+        playerName: "Nikita Kucherov",
+        team: "TBL",
+        marketLabel: "Over 0.5 Total Goals",
+        statType: "goals",
+        target: 1,
+        apiStat: 0,
+        manualDelta: 0,
+        subDetail: "0G • 0A, 0 SOG"
+      },
+      {
+        id: "hagel_pts",
+        boyName: "Axel",
+        playerName: "Brandon Hagel",
+        team: "TBL",
+        marketLabel: "Over 0.5 Total Points",
         statType: "points",
         target: 1,
         apiStat: 0,
@@ -1514,8 +1514,15 @@ function renderTracker() {
   const overallPct = totalLegs > 0 ? Math.round((hitLegs / totalLegs) * 100) : 0;
   DOM.overallProgressBar.style.width = `${overallPct}%`;
 
-  const totalOddsMulti = 10.50; // default multiplier
-  const payout = (state.stake * totalOddsMulti).toFixed(2);
+  let totalOddsMulti = 13.61;
+  let payout = "408.35";
+  if (state.masterSlip && state.masterSlip.potential_payout) {
+    payout = parseFloat(state.masterSlip.potential_payout).toFixed(2);
+    totalOddsMulti = parseFloat(state.masterSlip.potential_payout) / (state.stake || 1);
+  } else {
+    payout = "408.35";
+    totalOddsMulti = 13.61;
+  }
   DOM.trackerWagerDisplay.textContent = `$${state.stake.toFixed(2)}`;
   DOM.trackerReturnDisplay.textContent = `$${payout}`;
   DOM.trackerTotalOddsBadge.textContent = `${totalOddsMulti.toFixed(2)}x`;
@@ -1657,7 +1664,7 @@ function parseEspnBoxscore(summaryData, gameObj) {
             const toi = toiIdx !== -1 ? stats[toiIdx] : null;
             const points = goals + assists;
 
-            leg.apiStat = leg.statType === "shots" ? shots : points;
+            leg.apiStat = leg.statType === "shots" ? shots : (leg.statType === "goals" ? goals : points);
             leg.subDetail = `${goals}G, ${assists}A • ${shots} SOG${toi ? ` • ${toi} TOI` : ''}`;
             count++;
           }
@@ -1693,7 +1700,7 @@ function parseNhlBoxscore(boxData, gameObj) {
         const shots = p.sog ?? 0;
         const toi = p.toi || "";
 
-        leg.apiStat = leg.statType === "shots" ? shots : points;
+        leg.apiStat = leg.statType === "shots" ? shots : (leg.statType === "goals" ? goals : points);
         leg.subDetail = `${goals}G, ${assists}A • ${shots} SOG${toi ? ` • ${toi} TOI` : ''}`;
         count++;
       }
@@ -2753,6 +2760,14 @@ window.addEventListener('DOMContentLoaded', () => {
   initSupabase();
   fetchFridayNhlGames(state.currentFridayStr);
   toggleAutoPoll();
+
+  // If already placed, show Live Tracker by default
+  setTimeout(() => {
+    if (state.isPlaced) {
+      switchView('liveTrackerView', false);
+      fetchAllLiveStats(false);
+    }
+  }, 400);
 
   // Support URL hash routing (#tracker, #stats, #slip)
   function handleHash() {
