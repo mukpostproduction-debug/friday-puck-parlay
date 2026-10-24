@@ -31,14 +31,14 @@ function getActiveFridayDate(refDate = new Date()) {
   const day = d.getDay(); // 0 = Sun, 1 = Mon, 2 = Tue, 3 = Wed, 4 = Thu, 5 = Fri, 6 = Sat
 
   if (day === 0) {
-    // Sunday: automatically switches to the new upcoming Friday (in 5 days)
+    // Sunday: upcoming Friday (in 5 days)
     d.setDate(d.getDate() + 5);
+  } else if (day === 6) {
+    // Saturday: Friday betting is settled, advance directly to next Friday (in 6 days)
+    d.setDate(d.getDate() + 6);
   } else if (day >= 1 && day <= 5) {
     // Mon-Fri: upcoming or current Friday
     d.setDate(d.getDate() + (5 - day));
-  } else if (day === 6) {
-    // Saturday: still showing yesterday's Friday until Sunday rolls over
-    d.setDate(d.getDate() - 1);
   }
   d.setHours(12, 0, 0, 0);
   return d;
@@ -443,8 +443,8 @@ const DEFAULT_OCT23_SLATE = [
     awayName: "MTL Canadiens",
     homeTeam: "CHI",
     homeName: "CHI Blackhawks",
-    startTime: "Fri Oct 23 • 8:30 PM",
-    gameStateText: "Scheduled • 8:30 PM",
+    startTime: "Fri Oct 23 • 8:00 PM",
+    gameStateText: "Final • MTL 4 - CHI 1",
     legs: [
       {
         id: "caufield_sog",
@@ -454,9 +454,9 @@ const DEFAULT_OCT23_SLATE = [
         marketLabel: "Over 3.5 Shots on Goal",
         statType: "shots",
         target: 4,
-        apiStat: 0,
+        apiStat: 4,
         manualDelta: 0,
-        subDetail: "0 SOG • 0G, 0A"
+        subDetail: "0G, 0A • 4 SOG • 16:11 TOI"
       },
       {
         id: "slafkovsky_pts",
@@ -468,7 +468,7 @@ const DEFAULT_OCT23_SLATE = [
         target: 1,
         apiStat: 0,
         manualDelta: 0,
-        subDetail: "0G, 0A • 0 SOG"
+        subDetail: "0G, 0A • 3 SOG • 16:03 TOI"
       },
       {
         id: "hutson_sog",
@@ -480,7 +480,7 @@ const DEFAULT_OCT23_SLATE = [
         target: 2,
         apiStat: 0,
         manualDelta: 0,
-        subDetail: "0 SOG • 0G, 0A"
+        subDetail: "0G, 0A • 0 SOG • 22:04 TOI"
       }
     ]
   },
@@ -493,7 +493,7 @@ const DEFAULT_OCT23_SLATE = [
     homeTeam: "COL",
     homeName: "COL Avalanche",
     startTime: "Fri Oct 23 • 9:00 PM",
-    gameStateText: "Scheduled • 9:00 PM",
+    gameStateText: "Final • COL 6 - TBL 3",
     legs: [
       {
         id: "mackinnon_sog",
@@ -503,9 +503,9 @@ const DEFAULT_OCT23_SLATE = [
         marketLabel: "Over 3.5 Shots on Goal",
         statType: "shots",
         target: 4,
-        apiStat: 0,
+        apiStat: 4,
         manualDelta: 0,
-        subDetail: "0 SOG • 0G, 0A"
+        subDetail: "1G, 3A • 4 SOG • 18:10 TOI"
       },
       {
         id: "kucherov_goals",
@@ -517,7 +517,7 @@ const DEFAULT_OCT23_SLATE = [
         target: 1,
         apiStat: 0,
         manualDelta: 0,
-        subDetail: "0G • 0A, 0 SOG"
+        subDetail: "0G, 0A • 2 SOG • 20:43 TOI"
       },
       {
         id: "hagel_pts",
@@ -527,9 +527,9 @@ const DEFAULT_OCT23_SLATE = [
         marketLabel: "Over 0.5 Total Points",
         statType: "points",
         target: 1,
-        apiStat: 0,
+        apiStat: 1,
         manualDelta: 0,
-        subDetail: "0G, 0A • 0 SOG"
+        subDetail: "0G, 1A • 2 SOG • 20:33 TOI"
       }
     ]
   }
@@ -628,7 +628,10 @@ function getSlateForDate(dateStr) {
   if (dateStr === '2026-10-16') {
     return JSON.parse(JSON.stringify(DEFAULT_OCT16_SLATE));
   }
-  return JSON.parse(JSON.stringify(DEFAULT_OCT23_SLATE));
+  if (dateStr === '2026-10-23') {
+    return JSON.parse(JSON.stringify(DEFAULT_OCT23_SLATE));
+  }
+  return [];
 }
 
 const KNOWN_OCT23_PLAYERS = {
@@ -783,7 +786,7 @@ function loadAragonDemoSlate() {
 // =============================================================================
 // 7. SQUAD STATS & LEADERBOARD HISTORICAL ENGINE
 // =============================================================================
-const STATS_STORAGE_KEY = "bts_squad_stats_history_v6";
+const STATS_STORAGE_KEY = "bts_squad_stats_history_v7";
 
 const DEFAULT_STATS_HISTORY = [
   {
@@ -807,17 +810,27 @@ const DEFAULT_STATS_HISTORY = [
     dateStr: '2026-10-23',
     bettor: 'Jackson',
     stake: 30,
-    totalOdds: '+1150',
-    result: 'pending',
-    notes: 'Jackson on deck for Week 2! $30 pool ticket across 6 legs (welcoming Edward to the squad!).',
+    totalOdds: '+1261',
+    result: 'loss',
+    notes: 'Jackson placed on FanDuel ($30 SGP+ at +1261). 3 of 6 legs hit — Edward (Caufield 4 SOG), Jackson (MacKinnon 4 SOG, 4 PTS), and Axel (Hagel 1 PT) cashed, while Will (Slafkovsky 0 PTS), Ben (Hutson 0 SOG), and Alex (Kucherov 0 G) missed.',
     legs: [
-      { boy: 'Axel', pick: 'Cole Caufield 1+ Points', odds: '-135', result: 'pending' },
-      { boy: 'Jackson', pick: 'Connor Bedard 3+ Shots', odds: '-125', result: 'pending' },
-      { boy: 'Will', pick: 'Nikita Kucherov 1+ Points', odds: '-150', result: 'pending' },
-      { boy: 'Alex', pick: 'Nick Suzuki 1+ Points', odds: '-120', result: 'pending' },
-      { boy: 'Ben', pick: 'Nathan MacKinnon 4+ SOG', odds: '-130', result: 'pending' },
-      { boy: 'Edward', pick: 'Cale Makar 1+ Points', odds: '-135', result: 'pending' }
+      { boy: 'Axel', pick: 'Brandon Hagel Over 0.5 Total Points', odds: '-175', result: 'hit' },
+      { boy: 'Jackson', pick: 'Nathan MacKinnon Over 3.5 Total Shots On Goal', odds: '-145', result: 'hit' },
+      { boy: 'Will', pick: 'Juraj Slafkovsky Over 0.5 Total Points', odds: '-175', result: 'miss' },
+      { boy: 'Alex', pick: 'Nikita Kucherov Over 0.5 Total Goals', odds: '+170', result: 'miss' },
+      { boy: 'Ben', pick: 'Lane Hutson Over 1.5 Total Shots On Goal', odds: '-130', result: 'miss' },
+      { boy: 'Edward', pick: 'Cole Caufield Over 3.5 Shots on Goal', odds: '-145', result: 'hit' }
     ]
+  },
+  {
+    weekNum: 3,
+    dateStr: '2026-10-30',
+    bettor: 'Will',
+    stake: 30,
+    totalOdds: '--',
+    result: 'pending',
+    notes: 'Week 3 — Will is on deck to place the $30 parlay! Awaiting squad picks.',
+    legs: []
   }
 ];
 
@@ -1882,20 +1895,45 @@ function getFallbackGames(dateStr) {
       }
     ];
   }
+  if (dateStr === '2026-10-23') {
+    return [
+      {
+        id: 2026020160,
+        startTimeUTC: `${dateStr}T00:30:00Z`,
+        venue: 'United Center',
+        away: { abbrev: 'MTL', name: 'Canadiens', place: 'Montreal', logo: 'https://assets.nhle.com/logos/nhl/svg/MTL_light.svg' },
+        home: { abbrev: 'CHI', name: 'Blackhawks', place: 'Chicago', logo: 'https://assets.nhle.com/logos/nhl/svg/CHI_light.svg' }
+      },
+      {
+        id: 2026020161,
+        startTimeUTC: `${dateStr}T01:00:00Z`,
+        venue: 'Ball Arena',
+        away: { abbrev: 'TBL', name: 'Lightning', place: 'Tampa Bay', logo: 'https://assets.nhle.com/logos/nhl/svg/TBL_light.svg' },
+        home: { abbrev: 'COL', name: 'Avalanche', place: 'Colorado', logo: 'https://assets.nhle.com/logos/nhl/svg/COL_light.svg' }
+      }
+    ];
+  }
   return [
     {
-      id: 2026020160,
-      startTimeUTC: `${dateStr}T00:30:00Z`,
-      venue: 'United Center',
-      away: { abbrev: 'MTL', name: 'Canadiens', place: 'Montreal', logo: 'https://assets.nhle.com/logos/nhl/svg/MTL_light.svg' },
-      home: { abbrev: 'CHI', name: 'Blackhawks', place: 'Chicago', logo: 'https://assets.nhle.com/logos/nhl/svg/CHI_light.svg' }
+      id: 2026020180,
+      startTimeUTC: `${dateStr}T22:00:00Z`,
+      venue: 'T-Mobile Arena',
+      away: { abbrev: 'NJD', name: 'Devils', place: 'New Jersey', logo: 'https://assets.nhle.com/logos/nhl/svg/NJD_light.svg' },
+      home: { abbrev: 'VGK', name: 'Golden Knights', place: 'Vegas', logo: 'https://assets.nhle.com/logos/nhl/svg/VGK_light.svg' }
     },
     {
-      id: 2026020161,
-      startTimeUTC: `${dateStr}T01:00:00Z`,
-      venue: 'Ball Arena',
-      away: { abbrev: 'TBL', name: 'Lightning', place: 'Tampa Bay', logo: 'https://assets.nhle.com/logos/nhl/svg/TBL_light.svg' },
-      home: { abbrev: 'COL', name: 'Avalanche', place: 'Colorado', logo: 'https://assets.nhle.com/logos/nhl/svg/COL_light.svg' }
+      id: 2026020181,
+      startTimeUTC: `${dateStr}T23:00:00Z`,
+      venue: 'Amerant Bank Arena',
+      away: { abbrev: 'WPG', name: 'Jets', place: 'Winnipeg', logo: 'https://assets.nhle.com/logos/nhl/svg/WPG_light.svg' },
+      home: { abbrev: 'FLA', name: 'Panthers', place: 'Florida', logo: 'https://assets.nhle.com/logos/nhl/svg/FLA_light.svg' }
+    },
+    {
+      id: 2026020182,
+      startTimeUTC: `${dateStr}T00:00:00Z`,
+      venue: 'Scotiabank Saddledome',
+      away: { abbrev: 'SEA', name: 'Kraken', place: 'Seattle', logo: 'https://assets.nhle.com/logos/nhl/svg/SEA_light.svg' },
+      home: { abbrev: 'CGY', name: 'Flames', place: 'Calgary', logo: 'https://assets.nhle.com/logos/nhl/svg/CGY_light.svg' }
     }
   ];
 }
@@ -2343,7 +2381,7 @@ function renderSquadLegs() {
           </div>
 
           <div class="empty-action-row">
-            <span class="empty-state-text">No pick locked in yet for Week 2.</span>
+            <span class="empty-state-text">No pick locked in yet for Week ${state.weekNumber || 3}.</span>
             <button class="lock-in-leg-btn add-leg-btn" data-boy="${boy.name}">
               + Lock In Leg
             </button>
@@ -2393,7 +2431,7 @@ function renderBettorBanner() {
     DOM.slipStatusMsg.innerHTML = `<span class="msg-icon">${getIcon('fire')}</span> All 6 legs locked in! ${bettor.name} is clear to submit the $30 ticket to the book!`;
     DOM.slipStatusMsg.style.color = 'var(--b365-green)';
   } else if (legsCount === 0) {
-    DOM.slipStatusMsg.textContent = `No picks locked in yet for Week 2. Let's build the $30 ticket!`;
+    DOM.slipStatusMsg.textContent = `No picks locked in yet for Week ${weekNum}. Let's build the ${state.stake} ticket!`;
     DOM.slipStatusMsg.style.color = 'var(--text-muted)';
   } else {
     DOM.slipStatusMsg.textContent = `Need ${6 - legsCount} more leg${6 - legsCount === 1 ? '' : 's'} to complete the 6-legger ($30 stake).`;
