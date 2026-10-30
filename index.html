@@ -42,7 +42,7 @@
           </div>
         </div>
 
-        <div class="nhl-nav-right">
+        <div class="nhl-nav-right" style="display: none;">
           <!-- Live Cloud Sync Badge -->
           <button id="syncStatusBtn" class="nhl-nav-btn sync-btn live" title="Supabase Cloud Sync is active">
             <span class="status-dot"></span>
@@ -451,13 +451,16 @@
           <div class="section-title-bar">
             <div>
               <h3 class="section-title">THE SQUAD STANDINGS</h3>
-              <span class="section-subtitle">Ranked by Hit Rate % • Real-time Season Form</span>
+              <span class="section-subtitle">Tap any boy's name or profile chip to inspect his full pick history, odds &amp; analytics</span>
             </div>
             <div class="legend-pills">
               <span class="legend-pill hit"><svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Hit</span>
               <span class="legend-pill miss"><svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Miss</span>
             </div>
           </div>
+
+          <!-- Interactive Quick Profile Chips for All 6 Boys -->
+          <div class="squad-profiles-strip" id="squadProfilesStrip"></div>
 
           <div class="table-responsive">
             <table class="squad-table">
@@ -485,10 +488,13 @@
         <div class="history-section b365-card">
           <div class="section-title-bar">
             <div>
-              <h3 class="section-title">WEEKLY BET LOGS & RESULT GRADER</h3>
-              <span class="section-subtitle">Click "HIT" or "MISSED" on any leg to grade or recalculate live stats</span>
+              <h3 class="section-title">WEEKLY BET LOGS &amp; ARCHIVIST LEDGER</h3>
+              <span class="section-subtitle">Auto-graded from live NHL boxscores • Click "HIT" or "MISS" to manually override</span>
             </div>
-            <button onclick="resetStatsHistory()" class="text-xs text-zinc-400 hover:text-white underline">Reset to Season Baseline</button>
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+              <button onclick="exportSeasonStatsReport()" class="nhl-nav-btn" type="button">📊 Copy Season Report</button>
+              <button onclick="resetStatsHistory()" class="text-xs text-zinc-400 hover:text-white underline" type="button">Reset to Season Baseline</button>
+            </div>
           </div>
 
           <div class="history-weeks-list" id="historyWeeksContainer">
@@ -499,6 +505,24 @@
     </div>
 
   </main>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL 0: SQUAD MEMBER BETTING PROFILE & CAREER PICK LOG -->
+  <!-- ===================================================================== -->
+  <div class="nhl-modal-backdrop" id="playerProfileModalBackdrop">
+    <div class="nhl-modal-card b365-card">
+      <div class="modal-top">
+        <div class="modal-title-group">
+          <span class="modal-tag" id="profileModalRoleTag">SQUAD BETTING PROFILE</span>
+          <h3 class="modal-title" id="profileModalName">Player Name</h3>
+        </div>
+        <button id="closeProfileModalBtn" class="modal-close" aria-label="Close profile">&times;</button>
+      </div>
+      <div id="playerProfileModalBody" class="player-profile-modal-body">
+        <!-- Populated dynamically via openPlayerProfile(boyName) -->
+      </div>
+    </div>
+  </div>
 
   <!-- ===================================================================== -->
   <!-- MODAL 1: LOCK IN YOUR FRIDAY LEG -->

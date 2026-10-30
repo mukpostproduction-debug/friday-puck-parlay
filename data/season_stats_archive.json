@@ -1,0 +1,435 @@
+{
+  "generatedAt": "2026-10-30T23:46:56.399Z",
+  "season": "2026-2027",
+  "profiles": [
+    {
+      "name": "Axel",
+      "role": "Leg #3",
+      "hits": 3,
+      "misses": 0,
+      "pending": 0,
+      "totalGraded": 3,
+      "totalPicks": 3,
+      "winRate": 100,
+      "streak": "W3",
+      "avgGradedOdds": "-157",
+      "avgAllOdds": "-157",
+      "bestHitOdds": "-140",
+      "bestHitPick": "Brock Nelson 1+ Points (PIT @ COL)",
+      "favMarket": "Points",
+      "favMarketRecord": "3/3",
+      "flatBetPL": "+$19.11",
+      "flatBetRoi": "+64%",
+      "pickHistory": [
+        {
+          "weekNum": 1,
+          "dateStr": "2026-10-16",
+          "pick": "Brock Nelson 1+ Points (PIT @ COL)",
+          "odds": "-140",
+          "market": "Points",
+          "result": "hit"
+        },
+        {
+          "weekNum": 2,
+          "dateStr": "2026-10-23",
+          "pick": "Brandon Hagel Over 0.5 Points (TBL @ COL)",
+          "odds": "-175",
+          "market": "Points",
+          "result": "hit"
+        },
+        {
+          "weekNum": 3,
+          "dateStr": "2026-10-30",
+          "pick": "Carter Verhaeghe — Over 0.5 Points (WPG @ FLA)",
+          "odds": "-160",
+          "market": "Points",
+          "result": "hit"
+        }
+      ]
+    },
+    {
+      "name": "Jackson",
+      "role": "Leg #1",
+      "hits": 2,
+      "misses": 0,
+      "pending": 1,
+      "totalGraded": 2,
+      "totalPicks": 3,
+      "winRate": 100,
+      "streak": "W2",
+      "avgGradedOdds": "-137",
+      "avgAllOdds": "-124",
+      "bestHitOdds": "-130",
+      "bestHitPick": "Nathan MacKinnon 4+ Shots (PIT @ COL)",
+      "favMarket": "Shots on Goal",
+      "favMarketRecord": "2/3",
+      "flatBetPL": "+$14.59",
+      "flatBetRoi": "+73%",
+      "pickHistory": [
+        {
+          "weekNum": 1,
+          "dateStr": "2026-10-16",
+          "pick": "Nathan MacKinnon 4+ Shots (PIT @ COL)",
+          "odds": "-130",
+          "market": "Shots on Goal",
+          "result": "hit"
+        },
+        {
+          "weekNum": 2,
+          "dateStr": "2026-10-23",
+          "pick": "Nathan MacKinnon Over 3.5 SOG (TBL @ COL)",
+          "odds": "-145",
+          "market": "Shots on Goal",
+          "result": "hit"
+        },
+        {
+          "weekNum": 3,
+          "dateStr": "2026-10-30",
+          "pick": "Sam Bennett — Over 2.5 Shots on Goal (WPG @ FLA)",
+          "odds": "-105",
+          "market": "Shots on Goal",
+          "result": "pending"
+        }
+      ]
+    },
+    {
+      "name": "Will",
+      "role": "Leg #6",
+      "hits": 2,
+      "misses": 0,
+      "pending": 1,
+      "totalGraded": 2,
+      "totalPicks": 3,
+      "winRate": 100,
+      "streak": "W2",
+      "avgGradedOdds": "-113",
+      "avgAllOdds": "+111",
+      "bestHitOdds": "+120",
+      "bestHitPick": "Pavel Zacha 1+ Points (BOS @ ANA)",
+      "favMarket": "Points",
+      "favMarketRecord": "2/2",
+      "flatBetPL": "+$17.71",
+      "flatBetRoi": "+89%",
+      "pickHistory": [
+        {
+          "weekNum": 1,
+          "dateStr": "2026-10-16",
+          "pick": "Pavel Zacha 1+ Points (BOS @ ANA)",
+          "odds": "+120",
+          "market": "Points",
+          "result": "hit"
+        },
+        {
+          "weekNum": 2,
+          "dateStr": "2026-10-23",
+          "pick": "Nick Suzuki Over 0.5 Points (MTL @ CHI)",
+          "odds": "-175",
+          "market": "Points",
+          "result": "hit"
+        },
+        {
+          "weekNum": 3,
+          "dateStr": "2026-10-30",
+          "pick": "Chandler Stephenson — Over 0.5 Assists (SEA @ CGY)",
+          "odds": "+155",
+          "market": "Assists",
+          "result": "pending"
+        }
+      ]
+    },
+    {
+      "name": "Alex",
+      "role": "Leg #4",
+      "hits": 1,
+      "misses": 1,
+      "pending": 1,
+      "totalGraded": 2,
+      "totalPicks": 3,
+      "winRate": 50,
+      "streak": "L1",
+      "avgGradedOdds": "+140",
+      "avgAllOdds": "+132",
+      "bestHitOdds": "+110",
+      "bestHitPick": "Beckett Sennecke 1+ Points (BOS @ ANA)",
+      "favMarket": "Points",
+      "favMarketRecord": "1/1",
+      "flatBetPL": "+$1.00",
+      "flatBetRoi": "+5%",
+      "pickHistory": [
+        {
+          "weekNum": 1,
+          "dateStr": "2026-10-16",
+          "pick": "Beckett Sennecke 1+ Points (BOS @ ANA)",
+          "odds": "+110",
+          "market": "Points",
+          "result": "hit"
+        },
+        {
+          "weekNum": 2,
+          "dateStr": "2026-10-23",
+          "pick": "Nikita Kucherov Over 0.5 Goals (TBL @ COL)",
+          "odds": "+170",
+          "market": "Goals",
+          "result": "miss"
+        },
+        {
+          "weekNum": 3,
+          "dateStr": "2026-10-30",
+          "pick": "Seth Jones — Over 2.5 Shots on Goal (WPG @ FLA)",
+          "odds": "+115",
+          "market": "Shots on Goal",
+          "result": "pending"
+        }
+      ]
+    },
+    {
+      "name": "Ben",
+      "role": "Leg #5",
+      "hits": 1,
+      "misses": 1,
+      "pending": 1,
+      "totalGraded": 2,
+      "totalPicks": 3,
+      "winRate": 50,
+      "streak": "W1",
+      "avgGradedOdds": "-122",
+      "avgAllOdds": "-121",
+      "bestHitOdds": "-130",
+      "bestHitPick": "Lane Hutson Over 1.5 SOG (MTL @ CHI)",
+      "favMarket": "Points",
+      "favMarketRecord": "0/2",
+      "flatBetPL": "-$2.31",
+      "flatBetRoi": "-12%",
+      "pickHistory": [
+        {
+          "weekNum": 1,
+          "dateStr": "2026-10-16",
+          "pick": "Leo Carlsson 1+ Points (BOS @ ANA)",
+          "odds": "-115",
+          "market": "Points",
+          "result": "miss"
+        },
+        {
+          "weekNum": 2,
+          "dateStr": "2026-10-23",
+          "pick": "Lane Hutson Over 1.5 SOG (MTL @ CHI)",
+          "odds": "-130",
+          "market": "Shots on Goal",
+          "result": "hit"
+        },
+        {
+          "weekNum": 3,
+          "dateStr": "2026-10-30",
+          "pick": "Bobby McMann — Over 0.5 Points (SEA @ CGY)",
+          "odds": "-120",
+          "market": "Points",
+          "result": "pending"
+        }
+      ]
+    },
+    {
+      "name": "Edward",
+      "role": "Leg #2",
+      "hits": 0,
+      "misses": 1,
+      "pending": 1,
+      "totalGraded": 1,
+      "totalPicks": 2,
+      "winRate": 0,
+      "streak": "L1",
+      "avgGradedOdds": "-145",
+      "avgAllOdds": "-115",
+      "bestHitOdds": "--",
+      "bestHitPick": "",
+      "favMarket": "Shots on Goal",
+      "favMarketRecord": "0/1",
+      "flatBetPL": "-$10.00",
+      "flatBetRoi": "-100%",
+      "pickHistory": [
+        {
+          "weekNum": 2,
+          "dateStr": "2026-10-23",
+          "pick": "Connor Bedard Over 3.5 SOG (MTL @ CHI)",
+          "odds": "-145",
+          "market": "Shots on Goal",
+          "result": "miss"
+        },
+        {
+          "weekNum": 3,
+          "dateStr": "2026-10-30",
+          "pick": "Brandon Montour — Over 0.5 Points (SEA @ CGY)",
+          "odds": "+105",
+          "market": "Points",
+          "result": "pending"
+        }
+      ]
+    }
+  ],
+  "weeks": [
+    {
+      "weekNum": 1,
+      "dateStr": "2026-10-16",
+      "bettor": "Axel",
+      "stake": 25,
+      "totalOdds": "+950",
+      "potentialPayout": 262.5,
+      "book": "DraftKings / Bet365",
+      "result": "loss",
+      "legs": [
+        {
+          "boy": "Axel",
+          "pick": "Brock Nelson 1+ Points (PIT @ COL)",
+          "odds": "-140",
+          "result": "hit"
+        },
+        {
+          "boy": "Jackson",
+          "pick": "Nathan MacKinnon 4+ Shots (PIT @ COL)",
+          "odds": "-130",
+          "result": "hit"
+        },
+        {
+          "boy": "Will",
+          "pick": "Pavel Zacha 1+ Points (BOS @ ANA)",
+          "odds": "+120",
+          "result": "hit"
+        },
+        {
+          "boy": "Alex",
+          "pick": "Beckett Sennecke 1+ Points (BOS @ ANA)",
+          "odds": "+110",
+          "result": "hit"
+        },
+        {
+          "boy": "Ben",
+          "pick": "Leo Carlsson 1+ Points (BOS @ ANA)",
+          "odds": "-115",
+          "result": "miss"
+        }
+      ]
+    },
+    {
+      "weekNum": 2,
+      "dateStr": "2026-10-23",
+      "bettor": "Jackson",
+      "stake": 30,
+      "totalOdds": "+1261",
+      "potentialPayout": 408.35,
+      "book": "FanDuel",
+      "result": "loss",
+      "legs": [
+        {
+          "boy": "Edward",
+          "pick": "Connor Bedard Over 3.5 SOG (MTL @ CHI)",
+          "odds": "-145",
+          "result": "miss"
+        },
+        {
+          "boy": "Will",
+          "pick": "Nick Suzuki Over 0.5 Points (MTL @ CHI)",
+          "odds": "-175",
+          "result": "hit"
+        },
+        {
+          "boy": "Ben",
+          "pick": "Lane Hutson Over 1.5 SOG (MTL @ CHI)",
+          "odds": "-130",
+          "result": "hit"
+        },
+        {
+          "boy": "Jackson",
+          "pick": "Nathan MacKinnon Over 3.5 SOG (TBL @ COL)",
+          "odds": "-145",
+          "result": "hit"
+        },
+        {
+          "boy": "Alex",
+          "pick": "Nikita Kucherov Over 0.5 Goals (TBL @ COL)",
+          "odds": "+170",
+          "result": "miss"
+        },
+        {
+          "boy": "Axel",
+          "pick": "Brandon Hagel Over 0.5 Points (TBL @ COL)",
+          "odds": "-175",
+          "result": "hit"
+        }
+      ]
+    },
+    {
+      "weekNum": 3,
+      "dateStr": "2026-10-30",
+      "bettor": "Will",
+      "stake": 30,
+      "totalOdds": "+2394",
+      "potentialPayout": 748.2,
+      "book": "BET99 (SGP+)",
+      "result": "in-progress",
+      "legs": [
+        {
+          "boy": "Axel",
+          "pick": "Carter Verhaeghe — Over 0.5 Points (WPG @ FLA)",
+          "odds": "-160",
+          "result": "hit",
+          "playerName": "Carter Verhaeghe",
+          "statType": "points",
+          "target": 1,
+          "game": "WPG @ FLA",
+          "liveStat": "1/1"
+        },
+        {
+          "boy": "Jackson",
+          "pick": "Sam Bennett — Over 2.5 Shots on Goal (WPG @ FLA)",
+          "odds": "-105",
+          "result": "pending",
+          "playerName": "Sam Bennett",
+          "statType": "shots",
+          "target": 3,
+          "game": "WPG @ FLA",
+          "liveStat": "1/3"
+        },
+        {
+          "boy": "Alex",
+          "pick": "Seth Jones — Over 2.5 Shots on Goal (WPG @ FLA)",
+          "odds": "+115",
+          "result": "pending",
+          "playerName": "Seth Jones",
+          "statType": "shots",
+          "target": 3,
+          "game": "WPG @ FLA",
+          "liveStat": "0/3"
+        },
+        {
+          "boy": "Ben",
+          "pick": "Bobby McMann — Over 0.5 Points (SEA @ CGY)",
+          "odds": "-120",
+          "result": "pending",
+          "playerName": "Bobby McMann",
+          "statType": "points",
+          "target": 1,
+          "game": "SEA @ CGY"
+        },
+        {
+          "boy": "Will",
+          "pick": "Chandler Stephenson — Over 0.5 Assists (SEA @ CGY)",
+          "odds": "+155",
+          "result": "pending",
+          "playerName": "Chandler Stephenson",
+          "statType": "assists",
+          "target": 1,
+          "game": "SEA @ CGY"
+        },
+        {
+          "boy": "Edward",
+          "pick": "Brandon Montour — Over 0.5 Points (SEA @ CGY)",
+          "odds": "+105",
+          "result": "pending",
+          "playerName": "Brandon Montour",
+          "statType": "points",
+          "target": 1,
+          "game": "SEA @ CGY"
+        }
+      ]
+    }
+  ]
+}

@@ -241,72 +241,77 @@ body {
   margin-top: 2px;
 }
 
-/* Segmented View Tabs (Matching NHL App Standings & Stats Sub-Tabs) */
+/* 3 Distinct Navigation Buttons (Slip, Live Tracker, Squad Stats) */
 .view-nav-tabs {
-  display: flex;
-  align-items: center;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  align-items: stretch;
   width: 100%;
   gap: 8px;
   background: transparent;
-  padding: 0;
-  border-radius: 0;
+  padding: 8px 0 10px;
   border: none;
-  border-bottom: 1px solid var(--border-subtle);
-  margin-top: 4px;
+  margin-top: 2px;
 }
 
 .view-tab-btn {
-  flex: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 10px 12px 11px;
-  border: none;
-  border-bottom: 3px solid transparent;
-  background: transparent;
+  padding: 10px 10px;
+  border: 1.5px solid var(--border-medium);
+  border-radius: 10px;
+  background: var(--nhl-subcard);
   color: var(--text-secondary);
   font-family: var(--font-sports);
-  font-size: 0.88rem;
-  font-weight: 700;
-  letter-spacing: 0.2px;
+  font-size: 0.86rem;
+  font-weight: 800;
+  letter-spacing: 0.3px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.16s ease;
   white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
 }
 
 .view-tab-btn:hover {
   color: var(--text-main);
-  background: rgba(0, 0, 0, 0.02);
+  background: #ffffff;
+  border-color: var(--nhl-black);
+  transform: translateY(-1px);
 }
 
 .view-tab-btn.active {
-  background: transparent;
-  color: var(--text-main);
-  border-bottom: 3px solid var(--nhl-black);
-  box-shadow: none;
+  background: var(--nhl-black);
+  color: #ffffff;
+  border-color: var(--nhl-black);
+  box-shadow: 0 4px 10px rgba(17, 20, 24, 0.22);
 }
 
 .view-tab-btn.active .tab-label {
-  color: var(--text-main);
-  font-weight: 800;
+  color: #ffffff;
+  font-weight: 900;
+}
+
+.view-tab-btn.active .tab-icon {
+  color: #10b981;
 }
 
 .live-badge-mini {
-  font-size: 0.68rem;
+  font-size: 0.66rem;
   font-weight: 800;
   font-family: var(--font-mono);
-  background: var(--nhl-subcard);
+  background: #ffffff;
   color: var(--text-main);
   border: 1px solid var(--border-subtle);
-  padding: 2px 6px;
-  border-radius: 4px;
+  padding: 2px 5px;
+  border-radius: 5px;
 }
 
 .view-tab-btn.active .live-badge-mini {
-  background: var(--nhl-blue-subtle);
-  color: var(--nhl-blue);
-  border-color: var(--nhl-blue-border);
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  border-color: rgba(52, 211, 153, 0.4);
 }
 
 .nhl-nav-right {
@@ -456,8 +461,15 @@ body {
 .ticker-team-line {
   display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: space-between;
+  gap: 8px;
   line-height: 1;
+}
+
+.ticker-team-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .ticker-logo,
@@ -485,10 +497,33 @@ body {
 
 .ticker-score {
   font-family: var(--font-mono);
-  font-size: 0.78rem;
-  font-weight: 800;
+  font-size: 0.80rem;
+  font-weight: 900;
   color: var(--text-main);
-  margin-left: 4px;
+  min-width: 12px;
+  text-align: right;
+}
+
+.ticker-score.pre {
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.ticker-live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--red-alert);
+  display: inline-block;
+  margin-right: 4px;
+  box-shadow: 0 0 6px rgba(220, 38, 38, 0.7);
+}
+
+.ticker-time.live {
+  color: var(--red-alert);
+  font-weight: 800;
+  display: flex;
+  align-items: center;
 }
 
 .ticker-status {
@@ -3384,12 +3419,14 @@ body {
     font-size: 0.72rem;
   }
   .view-nav-tabs {
-    gap: 4px;
+    gap: 6px;
+    padding: 6px 0 8px;
   }
   .view-tab-btn {
-    padding: 9px 4px 10px;
-    font-size: 0.82rem;
+    padding: 9px 6px;
+    font-size: 0.80rem;
     gap: 4px;
+    border-radius: 9px;
   }
   .tab-icon svg {
     width: 14px;
@@ -3786,4 +3823,374 @@ body {
   background: var(--red-alert-light);
   color: var(--red-alert);
   border: 1px solid var(--red-alert-border);
+}
+
+/* Live NHL Game Scoreboard & Team Stats Bar inside Live Tracker */
+.tracker-live-scoreboard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: var(--nhl-subcard);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  margin-bottom: 10px;
+}
+
+.tls-team {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+
+.tls-team.home {
+  flex-direction: row-reverse;
+  text-align: right;
+}
+
+.tls-logo {
+  width: 22px !important;
+  height: 22px !important;
+  min-width: 22px;
+  max-width: 22px;
+  max-height: 22px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.tls-team-meta {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.tls-abbrev {
+  font-family: var(--font-sports);
+  font-size: 0.82rem;
+  font-weight: 900;
+  color: var(--text-main);
+}
+
+.tls-sog {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.tls-score {
+  font-family: var(--font-mono);
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: var(--text-main);
+  padding: 0 4px;
+}
+
+.tls-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.tls-clock-pill {
+  font-family: var(--font-sports);
+  font-size: 0.66rem;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: #ffffff;
+  color: var(--text-main);
+  border: 1px solid var(--border-subtle);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.tls-clock-pill.live {
+  background: rgba(220, 38, 38, 0.1);
+  color: var(--red-alert);
+  border-color: rgba(220, 38, 38, 0.3);
+}
+
+.tls-sub-stats {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+/* Squad Profiles Strip & Interactive Bettor Profile Modal */
+.squad-profiles-strip {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+@media (max-width: 780px) {
+  .squad-profiles-strip {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.squad-profile-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--nhl-subcard);
+  border: 1px solid var(--border-subtle);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+}
+
+.squad-profile-chip:hover {
+  background: #ffffff;
+  border-color: var(--nhl-black);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(15, 23, 42, 0.08);
+}
+
+.spc-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: var(--nhl-black);
+  color: #ffffff;
+  font-family: var(--font-sports);
+  font-size: 0.82rem;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.spc-meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.15;
+}
+
+.spc-name {
+  font-family: var(--font-sports);
+  font-size: 0.84rem;
+  font-weight: 900;
+  color: var(--text-main);
+}
+
+.spc-sub {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.table-player-cell.clickable {
+  cursor: pointer;
+}
+
+.table-player-cell.clickable:hover .player-name-link {
+  color: var(--nhl-blue);
+  text-decoration: underline;
+}
+
+.player-profile-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.profile-hero-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--nhl-subcard);
+  border: 1px solid var(--border-subtle);
+}
+
+.profile-hero-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.profile-avatar-lg {
+  width: 46px;
+  height: 46px;
+  border-radius: 10px;
+  background: var(--nhl-black);
+  color: #ffffff;
+  font-family: var(--font-sports);
+  font-size: 1.35rem;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.profile-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+@media (max-width: 480px) {
+  .profile-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.profile-stat-box {
+  background: var(--nhl-subcard);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xs);
+  padding: 9px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.psb-label {
+  font-family: var(--font-sports);
+  font-size: 0.64rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.psb-val {
+  font-family: var(--font-sports);
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: var(--text-main);
+  line-height: 1.1;
+}
+
+.psb-sub {
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  color: var(--text-secondary);
+}
+
+.profile-picks-header {
+  font-family: var(--font-sports);
+  font-size: 0.76rem;
+  font-weight: 900;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+}
+
+.profile-picks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 250px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.profile-pick-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: var(--radius-xs);
+  background: #ffffff;
+  border: 1px solid var(--border-subtle);
+}
+
+.profile-pick-row.hit {
+  border-left: 3.5px solid var(--green-win);
+}
+
+.profile-pick-row.miss {
+  border-left: 3.5px solid var(--red-alert);
+}
+
+.profile-pick-row.pending {
+  border-left: 3.5px solid var(--nhl-blue);
+}
+
+.ppr-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.ppr-week {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.ppr-pick {
+  font-family: var(--font-sports);
+  font-size: 0.86rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.ppr-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.ppr-odds {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--nhl-subcard);
+  color: var(--text-main);
+  border: 1px solid var(--border-subtle);
+}
+
+.ppr-badge {
+  font-family: var(--font-sports);
+  font-size: 0.66rem;
+  font-weight: 900;
+  padding: 2px 7px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.ppr-badge.hit {
+  background: var(--green-win-light);
+  color: var(--green-win);
+  border: 1px solid var(--green-win-border);
+}
+
+.ppr-badge.miss {
+  background: var(--red-alert-light);
+  color: var(--red-alert);
+  border: 1px solid var(--red-alert-border);
+}
+
+.ppr-badge.pending {
+  background: var(--nhl-blue-subtle);
+  color: var(--nhl-blue);
+  border: 1px solid var(--nhl-blue-border);
 }

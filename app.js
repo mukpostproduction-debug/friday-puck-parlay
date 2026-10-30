@@ -1570,6 +1570,25 @@ function renderStatsView() {
   if (DOM.trophyChalkLabel) DOM.trophyChalkLabel.textContent = 'THE PUCK ANCHOR';
   if (DOM.trophyChalkNote) DOM.trophyChalkNote.textContent = data.anchorData.note;
 
+  // 0. Squad Member Profile Strip (Click any guy's name to view his full betting profile)
+  const profilesStrip = document.getElementById('squadProfilesStrip');
+  if (profilesStrip) {
+    profilesStrip.innerHTML = data.players.map(p => {
+      const isDebut = p.total === 0;
+      const winRateStr = isDebut ? 'Debut' : `${p.rate}% (${p.hits}-${p.misses})`;
+      const avgOddsStr = isDebut ? '--' : `Avg ${p.avgAmerican}`;
+      return `
+        <div class="squad-profile-chip" onclick="openPlayerProfile('${p.name}')" title="View ${p.name}'s Full Betting Profile">
+          <div class="spc-avatar">${p.initials}</div>
+          <div class="spc-info">
+            <div class="spc-name">${p.name} <span>↗</span></div>
+            <div class="spc-meta">${winRateStr} • ${avgOddsStr}</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
   // Leaderboard table (with tie-aware rank display)
   let currentRank = 1;
   DOM.leaderboardTbody.innerHTML = data.players.map((p, idx) => {
@@ -1592,7 +1611,7 @@ function renderStatsView() {
       <tr>
         <td>${rankBadge}</td>
         <td>
-          <div class="table-player-cell">
+          <div class="table-player-cell clickable" onclick="openPlayerProfile('${p.name}')" title="Click to open ${p.name}'s full betting profile">
             <div class="player-avatar-small">${p.initials}</div>
             <span class="player-name-link">${p.name}</span>
           </div>
@@ -1642,7 +1661,7 @@ function renderStatsView() {
           ${week.legs.map((leg, lIdx) => `
             <div class="history-leg-card">
               <div class="h-leg-top">
-                <span class="h-leg-boy">${leg.boy}</span>
+                <span class="h-leg-boy" style="cursor:pointer; text-decoration:underline; text-decoration-style:dotted;" onclick="openPlayerProfile('${leg.boy}')">${leg.boy}</span>
                 <span class="h-leg-odds">${leg.odds}</span>
               </div>
               <div class="h-leg-pick">${escapeHTML(leg.pick)}</div>
@@ -1660,6 +1679,232 @@ function renderStatsView() {
     `;
   }).join('');
 }
+
+// =============================================================================
+// 7B. SQUAD MEMBER PROFILE MODAL & SEASON STATS EXPORT
+// =============================================================================
+function detectMarketFromPickText(pickText) {
+  const lower = String(pickText || '').toLowerCase();
+  if (lower.includes('save') || lower.includes(' sv')) return 'Goalie Saves';
+  if (lower.includes('shot') || lower.includes('sog')) return 'Shots on Goal';
+  if (lower.includes('assist')) return 'Assists';
+  if (lower.includes('goal')) return 'Goals';
+  if (lower.includes('block')) return 'Blocked Shots';
+  if (lower.includes('hit')) return 'Hits';
+  return 'Points';
+}
+
+window.openPlayerProfile = function(boyName) {
+  const data = computeSquadAnalytics();
+  const p = data.players.find(pl => pl.name === boyName);
+  if (!p) return;
+
+  const backdrop = document.getElementById('playerProfileModalBackdrop');
+  const roleTag = document.getElementById('profileModalRoleTag');
+  const modalName = document.getElementById('profileModalName');
+  const body = document.getElementById('playerProfileModalBody');
+  const closeBtn = document.getElementById('closeProfileModalBtn');
+  if (!backdrop || !body) return;
+
+  if (roleTag) roleTag.textContent = `${p.role || 'Squad Member'} • ${p.accolade.title}`;
+  if (modalName) modalName.textContent = `${p.name}'s Betting Profile`;
+
+  // Gather all historical + active picks for this squad member
+  const allPicks = [];
+  const sortedWeeks = [...state.statsHistory].sort((a, b) => a.weekNum - b.weekNum);
+  sortedWeeks.forEach(w => {
+    const leg = (w.legs || []).find(l => l.boy === boyName);
+    if (leg) {
+      allPicks.push({
+        weekNum: w.weekNum,
+        dateStr: w.dateStr,
+        bettor: w.bettor,
+        pick: leg.pick,
+        odds: leg.odds,
+        decimal: americanToDecimal(leg.odds),
+        result: leg.result || 'pending',
+        market: detectMarketFromPickText(leg.pick)
+      });
+    }
+  });
+
+  // Also include current active week pick if not already in statsHistory
+  const activeWeekInHistory = sortedWeeks.some(w => w.dateStr === state.currentFridayStr);
+  if (!activeWeekInHistory && state.legs && state.legs[boyName]) {
+    const activeLeg = state.legs[boyName];
+    allPicks.push({
+      weekNum: sortedWeeks.length + 1,
+      dateStr: state.currentFridayStr,
+      bettor: getMasterBettor(state.currentFriday).name,
+      pick: `${activeLeg.pick_text || activeLeg.pick || ''} (${activeLeg.game || ''})`.trim(),
+      odds: activeLeg.odds || '-110',
+      decimal: americanToDecimal(activeLeg.odds || '-110'),
+      result: 'live',
+      market: detectMarketFromPickText(activeLeg.pick_text || activeLeg.pick || '')
+    });
+  }
+
+  // Compute extended profile analytics
+  const allDecimals = allPicks.map(pk => pk.decimal).filter(Boolean);
+  const overallAvgDec = allDecimals.length > 0
+    ? allDecimals.reduce((a, b) => a + b, 0) / allDecimals.length
+    : 0;
+  const overallAvgAmerican = overallAvgDec > 0 ? decimalToAmerican(overallAvgDec) : '--';
+
+  // Implied $10 Flat-Bet Unit Profit & ROI on graded picks + Best Hit Odds
+  let flatStaked = 0;
+  let flatReturned = 0;
+  let bestHitDec = 0;
+  let bestHitOddsStr = p.maxWinningOddsStr || '--';
+  let bestHitPick = '';
+  const marketCounts = {};
+  const marketHits = {};
+
+  allPicks.forEach(pk => {
+    marketCounts[pk.market] = (marketCounts[pk.market] || 0) + 1;
+    if (pk.result === 'hit') {
+      marketHits[pk.market] = (marketHits[pk.market] || 0) + 1;
+      flatStaked += 10;
+      flatReturned += 10 * pk.decimal;
+      if (pk.decimal > bestHitDec) {
+        bestHitDec = pk.decimal;
+        bestHitOddsStr = pk.odds;
+        bestHitPick = pk.pick;
+      }
+    } else if (pk.result === 'miss') {
+      flatStaked += 10;
+    }
+  });
+
+  const netProfit = flatReturned - flatStaked;
+  const netProfitStr = flatStaked === 0 ? '$0.00' : `${netProfit >= 0 ? '+' : '-'}$${Math.abs(netProfit).toFixed(2)}`;
+  const roiPct = flatStaked > 0 ? Math.round((netProfit / flatStaked) * 100) : 0;
+
+  let favMarket = 'Points';
+  let bestMarketCount = 0;
+  Object.entries(marketCounts).forEach(([mkt, cnt]) => {
+    if (cnt > bestMarketCount) {
+      bestMarketCount = cnt;
+      favMarket = mkt;
+    }
+  });
+  const favMarketRecord = `${marketHits[favMarket] || 0}/${marketCounts[favMarket] || 0}`;
+
+  const weeksAsMaster = sortedWeeks.filter(w => w.bettor === boyName).length +
+    (!activeWeekInHistory && getMasterBettor(state.currentFriday).name === boyName ? 1 : 0);
+
+  const streakStr = p.total === 0 ? 'Debut' : (p.streak > 0 ? `${p.streakType}${p.streak}` : 'Even');
+
+  body.innerHTML = `
+    <div class="profile-hero-banner">
+      <div class="profile-hero-avatar">${p.initials}</div>
+      <div class="profile-hero-details">
+        <div class="profile-hero-title">
+          ${p.name}
+          <span class="title-tag-pill ${p.accolade.pillClass}">${getIcon(p.accolade.icon)} ${p.accolade.title}</span>
+        </div>
+        <div class="profile-hero-sub">
+          ${p.role || 'Squad Member'} • ${allPicks.length} Total Picks Logged • ${weeksAsMaster}x Master Bettor
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-stats-grid">
+      <div class="profile-stat-box">
+        <span class="psb-label">Win Rate & Record</span>
+        <span class="psb-val ${p.rate >= 60 ? 'green' : ''}">${p.rate}% (${p.hits}-${p.misses})</span>
+        <span class="psb-sub">Current Streak: ${streakStr}</span>
+      </div>
+      <div class="profile-stat-box">
+        <span class="psb-label">Avg Pick Odds</span>
+        <span class="psb-val gold">${overallAvgAmerican}</span>
+        <span class="psb-sub">${overallAvgDec > 0 ? `${overallAvgDec.toFixed(2)}x Decimal Avg` : 'Graded + Active'}</span>
+      </div>
+      <div class="profile-stat-box">
+        <span class="psb-label">Best Odds Cashed</span>
+        <span class="psb-val green">${bestHitOddsStr}</span>
+        <span class="psb-sub">${bestHitPick ? escapeHTML(bestHitPick) : 'No cashed leg yet'}</span>
+      </div>
+      <div class="profile-stat-box">
+        <span class="psb-label">Solo $10 Flat P/L</span>
+        <span class="psb-val ${netProfit >= 0 ? 'green' : 'red'}">${netProfitStr}</span>
+        <span class="psb-sub">ROI: ${roiPct >= 0 ? '+' : ''}${roiPct}% on graded legs</span>
+      </div>
+      <div class="profile-stat-box">
+        <span class="psb-label">Favorite Market</span>
+        <span class="psb-val">${favMarket}</span>
+        <span class="psb-sub">${favMarketRecord} cashed in ${favMarket}</span>
+      </div>
+      <div class="profile-stat-box">
+        <span class="psb-label">Graded Avg Odds</span>
+        <span class="psb-val">${p.avgAmerican}</span>
+        <span class="psb-sub">${p.hits} Hits • ${p.misses} Misses</span>
+      </div>
+    </div>
+
+    <div class="profile-section-title">All Picks & Odds History (${allPicks.length})</div>
+    <div class="profile-picks-list">
+      ${allPicks.slice().reverse().map(pk => {
+        const resClass = pk.result === 'hit' ? 'hit' : (pk.result === 'miss' ? 'miss' : 'live');
+        const resLabel = pk.result === 'hit' ? 'HIT ✓' : (pk.result === 'miss' ? 'MISS ✕' : 'LIVE • ON ICE');
+        return `
+          <div class="profile-pick-row">
+            <div class="ppr-left">
+              <span class="ppr-week">WEEK ${pk.weekNum} • ${formatWeekDateStr(pk.dateStr)} • ${pk.market.toUpperCase()}</span>
+              <span class="ppr-pick">${escapeHTML(pk.pick)}</span>
+            </div>
+            <div class="ppr-right">
+              <span class="ppr-odds">${pk.odds}</span>
+              <span class="ppr-badge ${resClass}">${resLabel}</span>
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+
+  backdrop.classList.remove('hidden');
+
+  if (closeBtn) {
+    closeBtn.onclick = () => backdrop.classList.add('hidden');
+  }
+  backdrop.onclick = (e) => {
+    if (e.target === backdrop) backdrop.classList.add('hidden');
+  };
+};
+
+window.exportSeasonStatsReport = function() {
+  const data = computeSquadAnalytics();
+  const lines = [];
+  lines.push(`# 🏒 FRIDAY NIGHT PUCK — OFFICIAL SEASON STATS LEDGER`);
+  lines.push(`Last Updated: ${new Date().toLocaleString()}`);
+  lines.push(`Parlays Cashed: ${data.wonParlays}/${data.totalParlays} | Total Leg Hits: ${data.totalHitsCount}/${data.totalLegsCount} (${data.pickWinRate}%) | Total Wagered: $${data.totalWagered.toFixed(2)}`);
+  lines.push(``);
+  lines.push(`## 🏆 SQUAD LEADERBOARD`);
+  data.players.forEach((p, i) => {
+    lines.push(`${i + 1}. **${p.name}** (${p.accolade.title}) — ${p.rate}% (${p.hits}-${p.misses}) | Streak: ${p.streakType}${p.streak} | Avg Odds: ${p.avgAmerican} | Best Hit: ${p.maxWinningOddsStr || '--'}`);
+  });
+  lines.push(``);
+  lines.push(`## 📅 WEEKLY PARLAY ARCHIVE`);
+  state.statsHistory.forEach(w => {
+    lines.push(`### Week ${w.weekNum} (${w.dateStr}) — Bettor: ${w.bettor} | Stake: $${w.stake} | Odds: ${w.totalOdds} | Status: ${String(w.result).toUpperCase()}`);
+    (w.legs || []).forEach(l => {
+      lines.push(`- **${l.boy}**: ${l.pick} (${l.odds}) -> **${String(l.result).toUpperCase()}**`);
+    });
+    lines.push(``);
+  });
+
+  const reportText = lines.join('\n');
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(reportText).then(() => {
+      showToast('📊 Full Season Stats Ledger copied to clipboard!');
+    }).catch(() => {
+      showToast('📊 Season Stats Ledger ready!');
+    });
+  } else {
+    showToast('📊 Season Stats Ledger generated!');
+  }
+};
 
 // =============================================================================
 // 8. LIVE BET TRACKER ENGINE (BET365 UI WITH ESPN/NHL BOXSCORE INTEGRATION)
@@ -1790,16 +2035,52 @@ function renderTracker() {
       }
     });
 
+    const isGameLive = game.gameStatus === 'live';
+    const awayLogoUrl = `https://assets.nhle.com/logos/nhl/svg/${normalizeTeamAbbr(game.awayTeam)}_light.svg`;
+    const homeLogoUrl = `https://assets.nhle.com/logos/nhl/svg/${normalizeTeamAbbr(game.homeTeam)}_light.svg`;
+    const awayScoreDisplay = (isGameLive || isGameFinal || game.awayScore !== undefined) ? (game.awayScore ?? 0) : 0;
+    const homeScoreDisplay = (isGameLive || isGameFinal || game.homeScore !== undefined) ? (game.homeScore ?? 0) : 0;
+    const awaySogDisplay = game.awaySog ?? 0;
+    const homeSogDisplay = game.homeSog ?? 0;
+    const awayHitsDisplay = game.awayHits ?? 0;
+    const homeHitsDisplay = game.homeHits ?? 0;
+    const clockBadgeText = isGameLive
+      ? `● ${game.statusDetail || 'LIVE'}`
+      : (isGameFinal ? 'FINAL' : (game.statusDetail || game.startTime || 'TONIGHT'));
+
     gameBlock.innerHTML = `
       <div class="tracker-game-top">
         <div class="tracker-game-tag">
-          <span class="live-dot-mini" style="background:${allGameLegsHit ? '#00ff87' : (isGameFinal ? '#ef4444' : '#6b7280')};"></span>
+          <span class="live-dot-mini" style="background:${allGameLegsHit ? '#00ff87' : (isGameLive ? '#ef4444' : (isGameFinal ? '#ef4444' : '#6b7280'))};"></span>
           <span>SAME GAME <span class="b365-green">PARLAY</span></span>
           <span class="tracker-game-mult">${game.odds}${String(game.odds).endsWith('x') || game.odds === 'SGP' ? '' : 'x'}</span>
         </div>
         <span class="tracker-game-state-badge">
           ${game.gameStateText}
         </span>
+      </div>
+
+      <div class="tracker-live-scoreboard">
+        <div class="tls-team away">
+          <img src="${awayLogoUrl}" class="tls-logo" alt="${game.awayTeam}" onerror="this.style.display='none'" />
+          <div class="tls-team-meta">
+            <span class="tls-abbrev">${game.awayTeam}</span>
+            <span class="tls-sog">${awaySogDisplay} SOG</span>
+          </div>
+          <span class="tls-score">${awayScoreDisplay}</span>
+        </div>
+        <div class="tls-center">
+          <span class="tls-clock-pill ${isGameLive ? 'live' : ''}">${clockBadgeText}</span>
+          <span class="tls-sub-stats">SOG ${awaySogDisplay}-${homeSogDisplay}${awayHitsDisplay || homeHitsDisplay ? ` • HITS ${awayHitsDisplay}-${homeHitsDisplay}` : ''}</span>
+        </div>
+        <div class="tls-team home">
+          <img src="${homeLogoUrl}" class="tls-logo" alt="${game.homeTeam}" onerror="this.style.display='none'" />
+          <div class="tls-team-meta">
+            <span class="tls-abbrev">${game.homeTeam}</span>
+            <span class="tls-sog">${homeSogDisplay} SOG</span>
+          </div>
+          <span class="tls-score">${homeScoreDisplay}</span>
+        </div>
       </div>
 
       <div class="tracker-legs-wrap">
@@ -2042,11 +2323,22 @@ async function fetchAllLiveStats(isManualClick = false) {
           const isCompleted = !!event.status?.type?.completed || stateType === 'post';
 
           matchingGame.gameStatus = isCompleted ? 'final' : (stateType === 'in' ? 'live' : 'pre');
+          matchingGame.statusDetail = statusDetail;
 
           if (awayObj && homeObj) {
+            const aScore = parseInt(awayObj.score || '0', 10) || 0;
+            const hScore = parseInt(homeObj.score || '0', 10) || 0;
+            const aSaves = parseInt(awayObj.statistics?.find(s => s.name === 'saves')?.displayValue || '0', 10) || 0;
+            const hSaves = parseInt(homeObj.statistics?.find(s => s.name === 'saves')?.displayValue || '0', 10) || 0;
+            matchingGame.awayScore = aScore;
+            matchingGame.homeScore = hScore;
+            if (stateType !== 'pre') {
+              matchingGame.awaySog = matchingGame.awaySog || (aScore + hSaves);
+              matchingGame.homeSog = matchingGame.homeSog || (hScore + aSaves);
+            }
             matchingGame.gameStateText = stateType === 'pre'
               ? statusDetail
-              : `${matchingGame.awayTeam} ${awayObj.score || 0} - ${matchingGame.homeTeam} ${homeObj.score || 0} (${statusDetail})`;
+              : `${matchingGame.awayTeam} ${aScore} - ${matchingGame.homeTeam} ${hScore} (${statusDetail})`;
           }
 
           const summaryResp = await fetch(`https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/summary?event=${event.id}`);
@@ -2119,6 +2411,50 @@ async function fetchAllLiveStats(isManualClick = false) {
 
 function parseEspnBoxscore(summaryData, gameObj) {
   let count = 0;
+
+  // 1. Extract Team-Level Boxscore Stats (Shots on Goal, Hits, Blocked Shots, Power Play, Faceoff %)
+  const boxTeams = summaryData.boxscore?.teams || [];
+  for (const t of boxTeams) {
+    const tAbbr = normalizeTeamAbbr(t.team?.abbreviation);
+    const tStats = t.statistics || [];
+    const getTeamStat = (name) => {
+      const found = tStats.find(s => s.name === name || s.label === name || s.abbreviation === name);
+      return found ? found.displayValue : null;
+    };
+    const sogVal = getTeamStat('shotsTotal') ?? getTeamStat('S');
+    const hitsVal = getTeamStat('hits') ?? getTeamStat('HT');
+    const blocksVal = getTeamStat('blockedShots') ?? getTeamStat('BS');
+
+    if (tAbbr === normalizeTeamAbbr(gameObj.awayTeam)) {
+      if (sogVal !== null) gameObj.awaySog = parseInt(sogVal, 10) || 0;
+      if (hitsVal !== null) gameObj.awayHits = parseInt(hitsVal, 10) || 0;
+      if (blocksVal !== null) gameObj.awayBlocks = parseInt(blocksVal, 10) || 0;
+    } else if (tAbbr === normalizeTeamAbbr(gameObj.homeTeam)) {
+      if (sogVal !== null) gameObj.homeSog = parseInt(sogVal, 10) || 0;
+      if (hitsVal !== null) gameObj.homeHits = parseInt(hitsVal, 10) || 0;
+      if (blocksVal !== null) gameObj.homeBlocks = parseInt(blocksVal, 10) || 0;
+    }
+  }
+
+  // Sync team SOG & scores back to state.games so the top scoreboard ticker also shows exact boxscore SOG
+  if (state.games && state.games.length > 0) {
+    const tickerGame = state.games.find(tg =>
+      normalizeTeamAbbr(tg.away?.abbrev) === normalizeTeamAbbr(gameObj.awayTeam) &&
+      normalizeTeamAbbr(tg.home?.abbrev) === normalizeTeamAbbr(gameObj.homeTeam)
+    );
+    if (tickerGame) {
+      if (gameObj.awayScore !== undefined) tickerGame.away.score = gameObj.awayScore;
+      if (gameObj.homeScore !== undefined) tickerGame.home.score = gameObj.homeScore;
+      if (gameObj.awaySog !== undefined) tickerGame.away.sog = gameObj.awaySog;
+      if (gameObj.homeSog !== undefined) tickerGame.home.sog = gameObj.homeSog;
+      if (gameObj.statusDetail) tickerGame.statusDetail = gameObj.statusDetail;
+      if (gameObj.gameStatus === 'live') tickerGame.state = 'in';
+      else if (gameObj.gameStatus === 'final') tickerGame.state = 'post';
+      renderGamesTicker(state.games);
+    }
+  }
+
+  // 2. Extract Player-Level Stats
   const teams = summaryData.boxscore?.players || [];
   for (const teamBlock of teams) {
     const statGroups = teamBlock.statistics || [];
@@ -2188,6 +2524,11 @@ function parseEspnBoxscore(summaryData, gameObj) {
 
 function parseNhlBoxscore(boxData, gameObj) {
   let count = 0;
+  if (boxData.awayTeam?.sog !== undefined) gameObj.awaySog = boxData.awayTeam.sog;
+  if (boxData.homeTeam?.sog !== undefined) gameObj.homeSog = boxData.homeTeam.sog;
+  if (boxData.awayTeam?.score !== undefined) gameObj.awayScore = boxData.awayTeam.score;
+  if (boxData.homeTeam?.score !== undefined) gameObj.homeScore = boxData.homeTeam.score;
+
   const pStats = boxData.playerByGameStats;
   if (!pStats) return 0;
 
@@ -2250,14 +2591,15 @@ function parseNhlBoxscore(boxData, gameObj) {
   return count;
 }
 
-// Auto-Polling Loop (every 20 seconds)
+// Auto-Polling Loop (every 20 seconds for both Top Scoreboard Ticker & Live Tracker)
 let pollInterval = null;
 function toggleAutoPoll() {
   const enabled = DOM.autoPollToggle ? DOM.autoPollToggle.checked : true;
   if (enabled) {
     if (!pollInterval) {
       pollInterval = setInterval(() => {
-        if (state.currentView === 'liveTrackerView') fetchAllLiveStats(false);
+        fetchAllLiveStats(false);
+        fetchFridayNhlGames(state.currentFridayStr, true);
       }, 20000);
     }
   } else if (pollInterval) {
@@ -2269,14 +2611,15 @@ function toggleAutoPoll() {
 // =============================================================================
 // 9. FRIDAY NHL GAMES FETCH (SCOREBOARD TICKER & MATCHUPS EXPLORER)
 // =============================================================================
-async function fetchFridayNhlGames(dateStr) {
-  // Render fallback games immediately so the scoreboard ticker never hangs on "Loading..."
-  let gamesList = getFallbackGames(dateStr);
-  state.games = gamesList;
-  DOM.tickerGamesCount.textContent = `${gamesList.length} GAME${gamesList.length === 1 ? '' : 'S'}`;
-  renderGamesTicker(gamesList);
-  renderMatchupsPanel(gamesList);
-  populateGameSelect(gamesList);
+async function fetchFridayNhlGames(dateStr, isSilentRefresh = false) {
+  if (!isSilentRefresh) {
+    let gamesList = getFallbackGames(dateStr);
+    state.games = gamesList;
+    DOM.tickerGamesCount.textContent = `${gamesList.length} GAME${gamesList.length === 1 ? '' : 'S'}`;
+    renderGamesTicker(gamesList);
+    renderMatchupsPanel(gamesList);
+    populateGameSelect(gamesList);
+  }
 
   const compactDate = dateStr.replace(/-/g, '');
   const espnScheduleUrl = `https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/scoreboard?dates=${compactDate}`;
@@ -2287,28 +2630,52 @@ async function fetchFridayNhlGames(dateStr) {
       const data = await res.json();
       const events = data.events || [];
       if (events.length > 0) {
-        gamesList = events.map(ev => {
+        const gamesList = events.map(ev => {
           const comp = ev.competitions?.[0] || {};
           const competitors = comp.competitors || [];
           const awayComp = competitors.find(c => c.homeAway === 'away') || competitors[0] || {};
           const homeComp = competitors.find(c => c.homeAway === 'home') || competitors[1] || {};
           const awayAbbrev = normalizeTeamAbbr(awayComp.team?.abbreviation || 'NHL');
           const homeAbbrev = normalizeTeamAbbr(homeComp.team?.abbreviation || 'NHL');
+
+          const stateType = ev.status?.type?.state || 'pre'; // 'pre', 'in', 'post'
+          const statusDetail = ev.status?.type?.shortDetail || '';
+          const awayScore = parseInt(awayComp.score || '0', 10) || 0;
+          const homeScore = parseInt(homeComp.score || '0', 10) || 0;
+
+          const getStatVal = (compObj, statName) => {
+            const st = (compObj.statistics || []).find(s => s.name === statName || s.abbreviation === statName);
+            return st ? (parseInt(st.displayValue, 10) || 0) : null;
+          };
+          const awaySaves = getStatVal(awayComp, 'saves');
+          const homeSaves = getStatVal(homeComp, 'saves');
+
+          // Preserve any exact SOG already fetched from boxscore summary
+          const prevGame = (state.games || []).find(pg => pg.away?.abbrev === awayAbbrev && pg.home?.abbrev === homeAbbrev);
+          const awaySog = prevGame?.away?.sog ?? (homeSaves !== null ? awayScore + homeSaves : null);
+          const homeSog = prevGame?.home?.sog ?? (awaySaves !== null ? homeScore + awaySaves : null);
+
           return {
             id: ev.id,
             startTimeUTC: ev.date,
             venue: comp.venue?.fullName || 'NHL Arena',
+            state: stateType,
+            statusDetail: statusDetail,
             away: {
               abbrev: awayAbbrev,
               name: awayComp.team?.shortDisplayName || awayAbbrev,
               place: awayComp.team?.location || '',
-              logo: awayComp.team?.logo || `https://assets.nhle.com/logos/nhl/svg/${awayAbbrev}_light.svg`
+              logo: awayComp.team?.logo || `https://assets.nhle.com/logos/nhl/svg/${awayAbbrev}_light.svg`,
+              score: awayScore,
+              sog: awaySog
             },
             home: {
               abbrev: homeAbbrev,
               name: homeComp.team?.shortDisplayName || homeAbbrev,
               place: homeComp.team?.location || '',
-              logo: homeComp.team?.logo || `https://assets.nhle.com/logos/nhl/svg/${homeAbbrev}_light.svg`
+              logo: homeComp.team?.logo || `https://assets.nhle.com/logos/nhl/svg/${homeAbbrev}_light.svg`,
+              score: homeScore,
+              sog: homeSog
             }
           };
         });
@@ -2316,7 +2683,7 @@ async function fetchFridayNhlGames(dateStr) {
         DOM.tickerGamesCount.textContent = `${gamesList.length} GAME${gamesList.length === 1 ? '' : 'S'}`;
         renderGamesTicker(gamesList);
         renderMatchupsPanel(gamesList);
-        populateGameSelect(gamesList);
+        if (!isSilentRefresh) populateGameSelect(gamesList);
       }
     }
   } catch (err) {
@@ -2425,21 +2792,44 @@ function renderGamesTicker(games) {
 
   DOM.gamesTicker.innerHTML = games.map(g => {
     const timeStr = formatGameTime(g.startTimeUTC);
+    const isLive = g.state === 'in';
+    const isFinal = g.state === 'post';
+    const showScores = isLive || isFinal || g.away.score !== undefined || g.home.score !== undefined;
+    const awayScore = g.away.score ?? 0;
+    const homeScore = g.home.score ?? 0;
+    const hasSog = g.away.sog !== null && g.away.sog !== undefined && g.home.sog !== null && g.home.sog !== undefined;
+
+    const topStatusHtml = isLive
+      ? `<div class="ticker-time live"><span class="ticker-live-dot"></span>${g.statusDetail || 'LIVE'}</div>`
+      : (isFinal
+        ? `<div class="ticker-time">${g.statusDetail || 'FINAL'}</div>`
+        : `<div class="ticker-time">${timeStr}</div>`);
+
+    const subStatusHtml = hasSog
+      ? `<div class="ticker-state">SOG ${g.away.sog}-${g.home.sog}</div>`
+      : `<div class="ticker-state">${isLive ? 'ON ICE' : (isFinal ? 'FINAL' : 'SOG 0-0')}</div>`;
+
     return `
       <div class="ticker-game-chip" data-game="${g.away.abbrev} @ ${g.home.abbrev}">
         <div class="ticker-teams">
           <div class="ticker-team-line">
-            <img src="${g.away.logo}" class="ticker-team-logo" alt="${g.away.abbrev}" onerror="this.style.display='none'" />
-            <span class="ticker-team-abbrev">${g.away.abbrev}</span>
+            <div class="ticker-team-left">
+              <img src="${g.away.logo}" class="ticker-team-logo" alt="${g.away.abbrev}" onerror="this.style.display='none'" />
+              <span class="ticker-team-abbrev">${g.away.abbrev}</span>
+            </div>
+            ${showScores ? `<span class="ticker-score ${awayScore > homeScore ? 'leading' : ''}">${awayScore}</span>` : ''}
           </div>
           <div class="ticker-team-line">
-            <img src="${g.home.logo}" class="ticker-team-logo" alt="${g.home.abbrev}" onerror="this.style.display='none'" />
-            <span class="ticker-team-abbrev">${g.home.abbrev}</span>
+            <div class="ticker-team-left">
+              <img src="${g.home.logo}" class="ticker-team-logo" alt="${g.home.abbrev}" onerror="this.style.display='none'" />
+              <span class="ticker-team-abbrev">${g.home.abbrev}</span>
+            </div>
+            ${showScores ? `<span class="ticker-score ${homeScore > awayScore ? 'leading' : ''}">${homeScore}</span>` : ''}
           </div>
         </div>
         <div class="ticker-status">
-          <div class="ticker-time">${timeStr}</div>
-          <div class="ticker-state">LIVE / SET</div>
+          ${topStatusHtml}
+          ${subStatusHtml}
         </div>
       </div>
     `;
@@ -2464,6 +2854,13 @@ function renderMatchupsPanel(games) {
   DOM.matchupsList.innerHTML = games.map(g => {
     const timeStr = formatGameTime(g.startTimeUTC);
     const gameTitle = `${g.away.abbrev} @ ${g.home.abbrev}`;
+    const isLive = g.state === 'in';
+    const isFinal = g.state === 'post';
+    const hasSog = g.away.sog !== null && g.away.sog !== undefined && g.home.sog !== null && g.home.sog !== undefined;
+    const scoreBadge = (isLive || isFinal)
+      ? `${g.away.abbrev} ${g.away.score ?? 0} - ${g.home.abbrev} ${g.home.score ?? 0} (${g.statusDetail || (isFinal ? 'FINAL' : 'LIVE')})${hasSog ? ` • SOG ${g.away.sog}-${g.home.sog}` : ''}`
+      : timeStr;
+
     return `
       <div class="matchup-row-card">
         <div class="teams-strip">
@@ -2479,7 +2876,7 @@ function renderMatchupsPanel(games) {
         </div>
 
         <div style="display: flex; align-items: center; gap: 12px;">
-          <div class="matchup-time-box">${timeStr}</div>
+          <div class="matchup-time-box">${scoreBadge}</div>
           <button class="btn-pick-matchup" data-game="${gameTitle}">+ Pick Leg</button>
         </div>
       </div>
