@@ -690,7 +690,7 @@
 
       <div class="scan-slip-body">
         <p class="modal-desc" style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 14px;">
-          Drop your placed bet slip screenshot from <strong>FanDuel, BetMGM, Bet365, or DraftKings</strong>. The built-in OCR engine extracts the stake, odds, and potential payout to prime the Live Tracker instantly.
+          Drop your placed bet slip screenshot from <strong>BET99, FanDuel, BetMGM, Bet365, or DraftKings</strong>. The OCR engine extracts the stake, odds, payout, and individual player legs + live slider targets automatically.
         </p>
 
         <!-- Drag & Drop Target Area -->
@@ -753,6 +753,18 @@
                 <option value="theScore Bet">theScore Bet</option>
               </select>
             </div>
+          </div>
+
+          <div id="slipDetectedLegsWrap" class="slip-detected-legs-wrap" style="display: none; margin-top: 14px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+              <span style="font-family: var(--font-sports); font-size: 0.72rem; font-weight: 800; letter-spacing: 0.5px; color: var(--text-secondary); text-transform: uppercase;">
+                Detected Player Legs &amp; Slider Targets
+              </span>
+              <span id="slipDetectedCountBadge" style="font-family: var(--font-mono); font-size: 0.68rem; font-weight: 800; color: var(--green-win); background: var(--green-win-light); border: 1px solid var(--green-win-border); padding: 2px 6px; border-radius: 4px;">
+                0 LEGS
+              </span>
+            </div>
+            <div id="slipDetectedLegsList" class="slip-detected-legs-list"></div>
           </div>
         </div>
 

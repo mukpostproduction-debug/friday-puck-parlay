@@ -326,6 +326,9 @@ const DOM = {
   slipOddsInput: document.getElementById('slipOddsInput'),
   slipPayoutInput: document.getElementById('slipPayoutInput'),
   slipBookInput: document.getElementById('slipBookInput'),
+  slipDetectedLegsWrap: document.getElementById('slipDetectedLegsWrap'),
+  slipDetectedCountBadge: document.getElementById('slipDetectedCountBadge'),
+  slipDetectedLegsList: document.getElementById('slipDetectedLegsList'),
   trophySniperLabel: document.getElementById('trophySniperLabel'),
   trophySniperNote: document.getElementById('trophySniperNote'),
   trophySlumpName: document.getElementById('trophySlumpName'),
@@ -762,107 +765,152 @@ const KNOWN_OCT23_PLAYERS = {
   Axel: { name: 'Brandon Hagel', target: 1, type: 'points', label: 'Over 0.5 Total Points' }
 };
 
+function getUnitLabelForStat(statType) {
+  switch (statType) {
+    case 'saves': return 'SAVES';
+    case 'shots': return 'SOG';
+    case 'goals': return 'GOALS';
+    case 'assists': return 'AST';
+    case 'blocks': return 'BLK';
+    case 'hits': return 'HITS';
+    default: return 'PTS';
+  }
+}
+
 // Convert any squad member's pick string into an NHL API-trackable leg
 function parsePickIntoLeg(boyName, pickObj) {
   const pickText = (pickObj.pick_text || '').trim();
+  const oddsStr = (pickObj.odds || '').trim();
 
-  // If this is the active Oct 30 week, prioritize the known boy -> player mapping
+  // If this is the active Oct 30 week and matches the official Oct 30 player, use known mapping
   if (state.currentFridayStr === '2026-10-30' && KNOWN_OCT30_PLAYERS[boyName]) {
     const known = KNOWN_OCT30_PLAYERS[boyName];
-    return {
-      id: `${boyName.toLowerCase()}_${known.type}_oct30`,
-      boyName: boyName,
-      playerName: known.name,
-      odds: pickObj.odds || known.odds,
-      marketLabel: known.label,
-      statType: known.type,
-      target: known.target,
-      apiStat: 0,
-      subDetail: '0G, 0A • 0 SOG'
-    };
+    if (!pickText || pickText.toLowerCase().includes(known.name.split(' ').slice(-1)[0].toLowerCase())) {
+      return {
+        id: `${boyName.toLowerCase()}_${known.type}_oct30`,
+        boyName: boyName,
+        playerName: known.name,
+        odds: oddsStr || known.odds,
+        marketLabel: known.label,
+        statType: known.type,
+        target: known.target,
+        apiStat: 0,
+        subDetail: '0G, 0A • 0 SOG'
+      };
+    }
   }
 
-  // If this is the active Oct 23 week, prioritize the known boy -> player mapping
+  // If this is the active Oct 23 week and matches the official Oct 23 player, use known mapping
   if (state.currentFridayStr === '2026-10-23' && KNOWN_OCT23_PLAYERS[boyName]) {
     const known = KNOWN_OCT23_PLAYERS[boyName];
-    return {
-      id: `${boyName.toLowerCase()}_${known.type}_oct23`,
-      boyName: boyName,
-      playerName: known.name,
-      marketLabel: known.label,
-      statType: known.type,
-      target: known.target,
-      apiStat: 0,
-      subDetail: known.type === 'shots' ? '0 SOG • 0G, 0A' : (known.type === 'goals' ? '0G • 0A, 0 SOG' : '0G, 0A • 0 SOG')
-    };
+    if (!pickText || pickText.toLowerCase().includes(known.name.split(' ').slice(-1)[0].toLowerCase()) || pickText.toLowerCase().startsWith('over ')) {
+      return {
+        id: `${boyName.toLowerCase()}_${known.type}_oct23`,
+        boyName: boyName,
+        playerName: known.name,
+        odds: oddsStr,
+        marketLabel: known.label,
+        statType: known.type,
+        target: known.target,
+        apiStat: 0,
+        subDetail: known.type === 'shots' ? '0 SOG • 0G, 0A' : (known.type === 'goals' ? '0G • 0A, 0 SOG' : '0G, 0A • 0 SOG')
+      };
+    }
   }
 
   let statType = 'points';
   let target = 1;
   let playerName = pickText;
-  let marketLabel = '1+ Points';
+  let marketLabel = 'Over 0.5 Total Points';
 
-  const isShot = /shot|sog/i.test(pickText);
-  const isAssist = /assist/i.test(pickText);
-  const isGoal = /\bgoal/i.test(pickText) && !isShot;
+  const isSave = /\b(saves?|sv|goalie\s*saves?)\b/i.test(pickText);
+  const isBlock = /\b(blocks?|blocked\s*shots?|blk)\b/i.test(pickText);
+  const isHit = /\b(hits?)\b/i.test(pickText);
+  const isShot = !isBlock && /\b(shots?\s*on\s*goal|shots?|sog)\b/i.test(pickText);
+  const isAssist = /\b(assists?|ast)\b/i.test(pickText);
+  const isGoal = !isShot && /\b(goals?|anytime\s*goal(?:scorer)?|atgs)\b/i.test(pickText);
 
-  if (isShot) {
-    statType = 'shots';
-    const overMatch = pickText.match(/over\s*(\d+(?:\.\d+)?)/i);
-    const plusMatch = pickText.match(/(\d+)\+?\s*(shot|sog)/i);
+  const overMatch = pickText.match(/(?:over|o)\s*(\d+(?:\.\d+)?)/i);
+  const plusMatch = pickText.match(/(\d+)\+\s*(?:saves?|sv|shots?|sog|goals?|assists?|ast|points?|pts|blocks?|blk|hits?)/i);
+
+  function extractTarget(defaultVal) {
     if (overMatch) {
-      target = Math.floor(parseFloat(overMatch[1])) + 1;
-      marketLabel = `Over ${overMatch[1]} Shots on Goal`;
-    } else if (plusMatch) {
-      target = parseInt(plusMatch[1] || "3", 10);
-      marketLabel = `${target}+ Shots on Goal`;
-    } else {
-      target = 3;
-      marketLabel = "3+ Shots on Goal";
+      const val = parseFloat(overMatch[1]);
+      return Math.floor(val) + 1;
     }
-    playerName = pickText.replace(/[—\-]\s*over.*/i, '').replace(/(\d+)\+?\s*(shot|sog).*/i, '').replace(/(over|under)\s*\d+(\.\d+)?\s*(shot|sog).*/i, '').trim();
-  } else if (isAssist) {
-    statType = 'assists';
-    target = 1;
-    marketLabel = 'Over 0.5 Total Assists';
-    playerName = pickText.replace(/[—\-]\s*over.*/i, '').replace(/(\d+)\+?\s*assist.*/i, '').replace(/(over|under)\s*\d*(\.\d+)?\s*assist.*/i, '').trim();
-  } else if (isGoal) {
-    statType = 'goals';
-    target = 1;
-    marketLabel = 'Over 0.5 Total Goals';
-    playerName = pickText.replace(/[—\-]\s*over.*/i, '').replace(/(\d+)\+?\s*goal.*/i, '').replace(/(over|under)\s*\d*(\.\d+)?\s*goal.*/i, '').trim();
-  } else {
-    statType = 'points';
-    const match = pickText.match(/(\d+)\+?\s*(point|pts|goal|assist)/i) || pickText.match(/(over|under)\s*(\d*(\.\d+)?)\s*(point|pts)/i);
-    if (match) {
-      const rawNum = parseFloat(match[1] || match[2] || "1");
-      target = rawNum < 1 ? 1 : Math.floor(rawNum);
-      marketLabel = rawNum < 1 ? `Over 0.5 Total Points` : `${target}+ Points`;
-    } else {
-      target = 1;
-      marketLabel = "1+ Points";
+    if (plusMatch) {
+      return Math.max(1, parseInt(plusMatch[1], 10));
     }
-    playerName = pickText.replace(/[—\-]\s*over.*/i, '').replace(/(\d+)\+?\s*(point|pts|goal|assist).*/i, '').replace(/(over|under)\s*\d*(\.\d+)?\s*(point|pts).*/i, '').trim();
+    return defaultVal;
   }
 
+  if (isSave) {
+    statType = 'saves';
+    target = extractTarget(25);
+    marketLabel = overMatch ? `Over ${overMatch[1]} Goalie Saves` : `${target}+ Goalie Saves`;
+  } else if (isBlock) {
+    statType = 'blocks';
+    target = extractTarget(2);
+    marketLabel = overMatch ? `Over ${overMatch[1]} Blocked Shots` : `${target}+ Blocked Shots`;
+  } else if (isHit) {
+    statType = 'hits';
+    target = extractTarget(3);
+    marketLabel = overMatch ? `Over ${overMatch[1]} Hits` : `${target}+ Hits`;
+  } else if (isShot) {
+    statType = 'shots';
+    target = extractTarget(3);
+    marketLabel = overMatch ? `Over ${overMatch[1]} Shots on Goal` : `${target}+ Shots on Goal`;
+  } else if (isAssist) {
+    statType = 'assists';
+    target = extractTarget(1);
+    marketLabel = overMatch ? `Over ${overMatch[1]} Total Assists` : (target === 1 ? 'Over 0.5 Total Assists' : `${target}+ Total Assists`);
+  } else if (isGoal) {
+    statType = 'goals';
+    target = extractTarget(1);
+    marketLabel = overMatch ? `Over ${overMatch[1]} Total Goals` : (target === 1 ? 'Over 0.5 Total Goals' : `${target}+ Total Goals`);
+  } else {
+    statType = 'points';
+    target = extractTarget(1);
+    marketLabel = overMatch ? `Over ${overMatch[1]} Total Points` : (target === 1 ? 'Over 0.5 Total Points' : `${target}+ Total Points`);
+  }
+
+  if (oddsStr) {
+    marketLabel = `${marketLabel} (${oddsStr})`;
+  }
+
+  // Clean player name from market descriptors
+  playerName = pickText
+    .replace(/^[•©@*\-\s]+/, '')
+    .replace(/\s*[—\-–]\s*(?:points?|shots?(?:\s*on\s*goal)?|sog|goals?|assists?|saves?|blocks?|blocked\s*shots?|hits?|over|under|\d+\+|anytime).*/i, '')
+    .replace(/\s+(?:over|under)\s+\d+(?:\.\d+)?.*/i, '')
+    .replace(/\s+\d+\+\s*(?:points?|pts|shots?|sog|goals?|assists?|ast|saves?|sv|blocks?|blk|hits?).*/i, '')
+    .replace(/\s+anytime\s*goal.*/i, '')
+    .replace(/\s*@\s*[+-]\d+.*/i, '')
+    .replace(/\s*\([+-]\d+\)\s*$/, '')
+    .trim();
+
   if (!playerName || playerName === pickText) {
-    const splitMatch = pickText.match(/^([A-Za-z\s.'-]+?)\s+(\d+.*)$/);
+    const splitMatch = pickText.match(/^([A-Za-z\s.'-]+?)\s+(?:[—\-–]\s*)?(?:over|under|\d+)/i);
     if (splitMatch) {
       playerName = splitMatch[1].trim();
     }
   }
 
   const id = `${boyName.toLowerCase()}_${statType}_${Date.now() % 10000}`;
+  const defaultSubDetail = statType === 'saves'
+    ? '0 SV • 0 SA, 0 GA'
+    : (statType === 'blocks' ? '0 BLK • 0G, 0A' : (statType === 'hits' ? '0 HITS • 0G, 0A' : '0G, 0A • 0 SOG'));
 
   return {
     id: id,
     boyName: boyName,
     playerName: playerName || pickText,
+    odds: oddsStr,
     marketLabel: marketLabel,
     statType: statType,
     target: target,
     apiStat: 0,
-    subDetail: statType === 'shots' ? '0 SOG • 0G, 0A' : '0G, 0A • 0 SOG'
+    subDetail: defaultSubDetail
   };
 }
 
@@ -883,19 +931,62 @@ function syncTrackerFromRealPicks() {
     return;
   }
 
-  // Preserve any existing live apiStat / gameStateText if already synced
+  // Preserve any existing live apiStat / gameStateText / gameStatus if already synced
   const prevGamesMap = {};
   const prevLegsMap = {};
   (state.trackerData || []).forEach(g => {
-    prevGamesMap[g.gameId] = g.gameStateText;
+    prevGamesMap[g.gameId] = { gameStateText: g.gameStateText, gameStatus: g.gameStatus };
     (g.legs || []).forEach(l => {
       prevLegsMap[l.boyName] = { apiStat: l.apiStat, subDetail: l.subDetail };
     });
   });
 
+  // Check if this is a future/custom week where picks belong to games outside the default slate
+  const isKnownWeek = state.currentFridayStr === '2026-10-23' || state.currentFridayStr === '2026-10-30';
+  if (!isKnownWeek) {
+    const groupedGames = {};
+    SQUAD.forEach(boy => {
+      const realPick = state.legs[boy.name];
+      if (!realPick || !realPick.pick_text) return;
+      const rawGame = realPick.game_title || realPick.game || 'NHL Matchup';
+      if (!groupedGames[rawGame]) {
+        const parts = rawGame.split('@').map(s => s.trim());
+        const awayTokens = (parts[0] || 'AWAY').split(/\s+/);
+        const homeTokens = (parts[1] || 'HOME').split(/\s+/);
+        const awayTeam = normalizeTeamAbbr(awayTokens[0] || 'AWAY');
+        const homeTeam = normalizeTeamAbbr(homeTokens[0] || 'HOME');
+        const gameKey = `${awayTeam}_${homeTeam}`;
+        groupedGames[rawGame] = {
+          gameId: gameKey,
+          awayTeam: awayTeam,
+          homeTeam: homeTeam,
+          awayName: parts[0] || awayTeam,
+          homeName: parts[1] || homeTeam,
+          startTime: `Friday, ${state.currentFridayStr}`,
+          gameStateText: prevGamesMap[gameKey]?.gameStateText || 'Scheduled',
+          gameStatus: prevGamesMap[gameKey]?.gameStatus || 'pre',
+          odds: 'SGP',
+          legs: []
+        };
+      }
+      const parsed = parsePickIntoLeg(boy.name, realPick);
+      const prev = prevLegsMap[boy.name];
+      if (prev && prev.apiStat) parsed.apiStat = prev.apiStat;
+      if (prev && prev.subDetail) parsed.subDetail = prev.subDetail;
+      groupedGames[rawGame].legs.push(parsed);
+    });
+    const dynamicSlate = Object.values(groupedGames);
+    if (dynamicSlate.length > 0) {
+      state.trackerData = dynamicSlate;
+      saveTrackerData();
+      return;
+    }
+  }
+
   slate.forEach(game => {
     if (prevGamesMap[game.gameId]) {
-      game.gameStateText = prevGamesMap[game.gameId];
+      game.gameStateText = prevGamesMap[game.gameId].gameStateText;
+      game.gameStatus = prevGamesMap[game.gameId].gameStatus;
     }
     game.legs.forEach(leg => {
       const realPick = state.legs[leg.boyName];
@@ -1679,25 +1770,32 @@ function renderTracker() {
 
   let totalLegs = 0;
   let hitLegs = 0;
+  let missedFinalLegs = 0;
+  let allGamesFinal = state.trackerData.length > 0;
 
   state.trackerData.forEach(game => {
     const gameBlock = document.createElement("div");
     gameBlock.className = "tracker-game-block";
+    const isGameFinal = game.gameStatus === 'final' || /final/i.test(game.gameStateText || '');
+    if (!isGameFinal) allGamesFinal = false;
 
     let allGameLegsHit = true;
     game.legs.forEach(l => {
       totalLegs++;
       const val = Math.max(0, l.apiStat || 0);
       if (val >= l.target) hitLegs++;
-      else allGameLegsHit = false;
+      else {
+        allGameLegsHit = false;
+        if (isGameFinal) missedFinalLegs++;
+      }
     });
 
     gameBlock.innerHTML = `
       <div class="tracker-game-top">
         <div class="tracker-game-tag">
-          <span class="live-dot-mini" style="background:${allGameLegsHit ? '#00ff87' : '#6b7280'};"></span>
+          <span class="live-dot-mini" style="background:${allGameLegsHit ? '#00ff87' : (isGameFinal ? '#ef4444' : '#6b7280')};"></span>
           <span>SAME GAME <span class="b365-green">PARLAY</span></span>
-          <span class="tracker-game-mult">${game.odds}x</span>
+          <span class="tracker-game-mult">${game.odds}${String(game.odds).endsWith('x') || game.odds === 'SGP' ? '' : 'x'}</span>
         </div>
         <span class="tracker-game-state-badge">
           ${game.gameStateText}
@@ -1709,21 +1807,24 @@ function renderTracker() {
           const currentVal = Math.max(0, leg.apiStat || 0);
           const pct = Math.min(100, Math.round((currentVal / leg.target) * 100));
           const isHit = currentVal >= leg.target;
-          const unitLabel = leg.statType === "shots" ? "SOG" : (leg.statType === "goals" ? "GOALS" : (leg.statType === "assists" ? "AST" : "PTS"));
+          const isMissedFinal = !isHit && isGameFinal;
+          const unitLabel = getUnitLabelForStat(leg.statType);
           const remaining = Math.max(0, leg.target - currentVal);
           const statusText = isHit
             ? "✓ LEG HIT"
-            : (currentVal > 0 ? `${remaining} TO GO` : `NEED ${leg.target} ${unitLabel}`);
-          const statusClass = isHit ? "hit" : (currentVal > 0 ? "in-progress" : "");
+            : (isMissedFinal
+                ? "✗ MISSED (FINAL)"
+                : (currentVal > 0 ? `${remaining} TO GO` : `NEED ${leg.target} ${unitLabel}`));
+          const statusClass = isHit ? "hit" : (isMissedFinal ? "miss" : (currentVal > 0 ? "in-progress" : ""));
 
           return `
-            <div class="tracker-leg-card ${isHit ? 'hit' : ''}">
+            <div class="tracker-leg-card ${isHit ? 'hit' : (isMissedFinal ? 'miss' : '')}">
               <div class="tracker-leg-tier1">
                 <div class="tracker-leg-person">
-                  <div class="tracker-hit-indicator">${getIcon('check')}</div>
+                  <div class="tracker-hit-indicator">${isMissedFinal ? getIcon('cross') : getIcon('check')}</div>
                   <span class="tracker-player-title">${leg.playerName}</span>
                 </div>
-                <div class="tracker-stat-box ${isHit ? 'hit' : ''}">
+                <div class="tracker-stat-box ${isHit ? 'hit' : (isMissedFinal ? 'miss' : '')}">
                   <span class="tracker-current-num">${currentVal}</span>
                   <span class="tracker-target-num">/ ${leg.target} ${unitLabel}</span>
                 </div>
@@ -1737,7 +1838,7 @@ function renderTracker() {
               <div class="tracker-slider-wrap">
                 <div class="tracker-progress-track">
                   <div class="tracker-progress-fill ${statusClass}" style="width: ${pct}%">
-                    ${pct > 0 && !isHit ? '<span class="tracker-slider-thumb"></span>' : ''}
+                    ${pct > 0 && !isHit && !isMissedFinal ? '<span class="tracker-slider-thumb"></span>' : ''}
                   </div>
                 </div>
               </div>
@@ -1793,11 +1894,84 @@ function renderTracker() {
   if (hitLegs === totalLegs && totalLegs > 0) {
     DOM.ticketStatusBanner.innerHTML = `<span class="banner-icon-wrap">${getIcon('trophy')}</span> ALL ${totalLegs} LEGS HIT! PAYOUT: $${payout}`;
     DOM.ticketStatusBanner.className = "tracker-cashout-btn all-hit";
+  } else if (allGamesFinal && totalLegs > 0) {
+    DOM.ticketStatusBanner.textContent = `PARLAY SETTLED • ${hitLegs} OF ${totalLegs} LEGS HIT (${missedFinalLegs} MISSED)`;
+    DOM.ticketStatusBanner.className = "tracker-cashout-btn settled-loss";
   } else {
     DOM.ticketStatusBanner.textContent = `Cash Out $${state.stake.toFixed(2)} • ${hitLegs} of ${totalLegs} Legs Hit`;
     DOM.ticketStatusBanner.className = "tracker-cashout-btn active";
   }
 }
+
+// Automatically grade legs & settle week in Squad Stats when live boxscores hit or finish
+function autoSettleFromLiveTracker() {
+  if (!state.trackerData || state.trackerData.length === 0) return;
+
+  let weekEntry = (state.statsHistory || []).find(w => w.dateStr === state.currentFridayStr);
+  if (!weekEntry) {
+    const bettor = getBettorForFriday(state.currentFriday);
+    const weekNum = Math.max(1, getFridayDiffWeeks(state.currentFriday) + 1);
+    weekEntry = {
+      weekNum: weekNum,
+      dateStr: state.currentFridayStr,
+      bettor: state.masterSlip?.bettor_name || bettor.name,
+      stake: state.stake || 30,
+      totalOdds: state.masterSlip?.total_odds || '+2394',
+      result: 'pending',
+      notes: state.masterSlip?.notes || `Placed by ${bettor.name}`,
+      legs: SQUAD.map(b => {
+        const l = state.legs[b.name];
+        return {
+          boy: b.name,
+          pick: l?.pick_text || 'Friday Pick',
+          odds: l?.odds || '-110',
+          result: 'pending'
+        };
+      })
+    };
+    state.statsHistory.push(weekEntry);
+  }
+
+  let changed = false;
+  let allGamesFinal = state.trackerData.length > 0;
+
+  state.trackerData.forEach(game => {
+    const isGameFinal = game.gameStatus === 'final' || /final/i.test(game.gameStateText || '');
+    if (!isGameFinal) allGamesFinal = false;
+
+    (game.legs || []).forEach(leg => {
+      const histLeg = (weekEntry.legs || []).find(hl => hl.boy === leg.boyName);
+      if (!histLeg) return;
+
+      const val = Math.max(0, leg.apiStat || 0);
+      if (val >= leg.target && histLeg.result !== 'hit') {
+        histLeg.result = 'hit';
+        changed = true;
+      } else if (isGameFinal && val < leg.target && histLeg.result !== 'miss') {
+        histLeg.result = 'miss';
+        changed = true;
+      }
+    });
+  });
+
+  const hits = (weekEntry.legs || []).filter(l => l.result === 'hit').length;
+  const misses = (weekEntry.legs || []).filter(l => l.result === 'miss').length;
+  const total = (weekEntry.legs || []).length;
+
+  if (total > 0 && hits === total && weekEntry.result !== 'win') {
+    weekEntry.result = 'win';
+    changed = true;
+  } else if (allGamesFinal && misses > 0 && weekEntry.result !== 'loss') {
+    weekEntry.result = 'loss';
+    changed = true;
+  }
+
+  if (changed) {
+    saveStatsHistory();
+    renderStatsView();
+  }
+}
+
 // Team Abbreviation Normalizer (maps ESPN/NHL variations e.g. TB -> TBL, MON -> MTL)
 const TEAM_ABBR_ALIASES = {
   TB: "TBL",
@@ -1837,9 +2011,13 @@ async function fetchAllLiveStats(isManualClick = false) {
 
   let updatedPlayers = 0;
   let espnSucceeded = false;
+  const compactDate = (state.currentFridayStr || '').replace(/-/g, '');
+  const espnScoreboardUrl = compactDate
+    ? `https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/scoreboard?dates=${compactDate}`
+    : "https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/scoreboard";
 
   try {
-    const espnResp = await fetch("https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/scoreboard");
+    const espnResp = await fetch(espnScoreboardUrl);
     if (espnResp.ok) {
       espnSucceeded = true;
       const scoreboard = await espnResp.json();
@@ -1860,9 +2038,15 @@ async function fetchAllLiveStats(isManualClick = false) {
           const awayObj = competitors.find(c => normalizeTeamAbbr(c.team?.abbreviation) === normalizeTeamAbbr(matchingGame.awayTeam));
           const homeObj = competitors.find(c => normalizeTeamAbbr(c.team?.abbreviation) === normalizeTeamAbbr(matchingGame.homeTeam));
           const statusDetail = event.status?.type?.shortDetail || matchingGame.startTime;
+          const stateType = event.status?.type?.state || 'pre';
+          const isCompleted = !!event.status?.type?.completed || stateType === 'post';
+
+          matchingGame.gameStatus = isCompleted ? 'final' : (stateType === 'in' ? 'live' : 'pre');
 
           if (awayObj && homeObj) {
-            matchingGame.gameStateText = `${matchingGame.awayTeam} ${awayObj.score || 0} - ${matchingGame.homeTeam} ${homeObj.score || 0} (${statusDetail})`;
+            matchingGame.gameStateText = stateType === 'pre'
+              ? statusDetail
+              : `${matchingGame.awayTeam} ${awayObj.score || 0} - ${matchingGame.homeTeam} ${homeObj.score || 0} (${statusDetail})`;
           }
 
           const summaryResp = await fetch(`https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/summary?event=${event.id}`);
@@ -1897,11 +2081,13 @@ async function fetchAllLiveStats(isManualClick = false) {
 
           if (matchingGame) {
             const stateText = g.gameState;
+            const isFinal = stateText === "OFF" || stateText === "FINAL";
+            matchingGame.gameStatus = isFinal ? 'final' : ((stateText === "FUT" || stateText === "PRE") ? 'pre' : 'live');
             const period = g.periodDescriptor?.number ? `P${g.periodDescriptor.number}` : "";
-            const clock = g.clock?.timeRemaining || "";
+            const clock = g.clock?.timeRemaining || (isFinal ? "FINAL" : "");
             matchingGame.gameStateText = stateText === "FUT" || stateText === "PRE"
               ? matchingGame.startTime
-              : `${away} ${g.awayTeam?.score ?? 0} - ${home} ${g.homeTeam?.score ?? 0} (${period} ${clock})`;
+              : `${away} ${g.awayTeam?.score ?? 0} - ${home} ${g.homeTeam?.score ?? 0} (${isFinal ? 'FINAL' : `${period} ${clock}`.trim()})`;
 
             const boxUrl = encodeURIComponent(`https://api-web.nhle.com/v1/gamecenter/${g.id}/boxscore`);
             const boxResp = await fetch(`https://api.allorigins.win/raw?url=${boxUrl}`, {
@@ -1926,6 +2112,7 @@ async function fetchAllLiveStats(isManualClick = false) {
   }
 
   isFetchingLiveStats = false;
+  autoSettleFromLiveTracker();
   saveTrackerData();
   renderTracker();
 }
@@ -1940,6 +2127,11 @@ function parseEspnBoxscore(summaryData, gameObj) {
       const gIdx = labels.indexOf("G");
       const aIdx = labels.indexOf("A");
       const sIdx = labels.indexOf("S") !== -1 ? labels.indexOf("S") : labels.indexOf("SOG");
+      const bsIdx = labels.indexOf("BS");
+      const htIdx = labels.indexOf("HT");
+      const svIdx = labels.indexOf("SV") !== -1 ? labels.indexOf("SV") : labels.indexOf("SAVES");
+      const saIdx = labels.indexOf("SA");
+      const gaIdx = labels.indexOf("GA");
       const toiIdx = labels.indexOf("TOI");
 
       for (const athleteRow of (group.athletes || [])) {
@@ -1949,14 +2141,42 @@ function parseEspnBoxscore(summaryData, gameObj) {
         gameObj.legs.forEach(leg => {
           if (normalizeName(leg.playerName) === normTarget) {
             const stats = athleteRow.stats || [];
+            const toi = toiIdx !== -1 ? stats[toiIdx] : null;
+
+            if (leg.statType === "saves" || svIdx !== -1) {
+              const rawSv = svIdx !== -1 ? String(stats[svIdx] || "0") : "0";
+              const saves = parseInt(rawSv.split("-")[0] || "0", 10) || 0;
+              const shotsAgainst = saIdx !== -1 ? parseInt(stats[saIdx] || "0", 10) : saves;
+              const goalsAgainst = gaIdx !== -1 ? parseInt(stats[gaIdx] || "0", 10) : 0;
+              if (leg.statType === "saves") {
+                leg.apiStat = saves;
+                leg.subDetail = `${saves} SV • ${shotsAgainst} SA, ${goalsAgainst} GA${toi ? ` • ${toi} TOI` : ''}`;
+                count++;
+                return;
+              }
+            }
+
             const goals = gIdx !== -1 ? parseInt(stats[gIdx] || "0", 10) : 0;
             const assists = aIdx !== -1 ? parseInt(stats[aIdx] || "0", 10) : 0;
             const shots = sIdx !== -1 ? parseInt(stats[sIdx] || "0", 10) : 0;
-            const toi = toiIdx !== -1 ? stats[toiIdx] : null;
+            const blocks = bsIdx !== -1 ? parseInt(stats[bsIdx] || "0", 10) : 0;
+            const hits = htIdx !== -1 ? parseInt(stats[htIdx] || "0", 10) : 0;
             const points = goals + assists;
 
-            leg.apiStat = leg.statType === "shots" ? shots : (leg.statType === "goals" ? goals : (leg.statType === "assists" ? assists : points));
-            leg.subDetail = `${goals}G, ${assists}A • ${shots} SOG${toi ? ` • ${toi} TOI` : ''}`;
+            if (leg.statType === "shots") leg.apiStat = shots;
+            else if (leg.statType === "goals") leg.apiStat = goals;
+            else if (leg.statType === "assists") leg.apiStat = assists;
+            else if (leg.statType === "blocks") leg.apiStat = blocks;
+            else if (leg.statType === "hits") leg.apiStat = hits;
+            else leg.apiStat = points;
+
+            if (leg.statType === "blocks") {
+              leg.subDetail = `${blocks} BLK • ${goals}G, ${assists}A${toi ? ` • ${toi} TOI` : ''}`;
+            } else if (leg.statType === "hits") {
+              leg.subDetail = `${hits} HITS • ${goals}G, ${assists}A${toi ? ` • ${toi} TOI` : ''}`;
+            } else {
+              leg.subDetail = `${goals}G, ${assists}A • ${shots} SOG${toi ? ` • ${toi} TOI` : ''}`;
+            }
             count++;
           }
         });
@@ -1978,6 +2198,28 @@ function parseNhlBoxscore(boxData, gameObj) {
     ...(pStats.homeTeam?.defense || [])
   ];
 
+  const allGoalies = [
+    ...(pStats.awayTeam?.goalies || []),
+    ...(pStats.homeTeam?.goalies || [])
+  ];
+
+  for (const g of allGoalies) {
+    const name = g.name?.default || "";
+    const lastName = name.split(" ").slice(-1)[0]?.toLowerCase();
+    gameObj.legs.forEach(leg => {
+      const legLast = leg.playerName.split(" ").slice(-1)[0]?.toLowerCase();
+      if (leg.statType === "saves" && lastName && legLast && lastName === legLast) {
+        const saves = g.saves ?? (parseInt(String(g.saveShotsAgainst || "0").split("/")[0], 10) || 0);
+        const sa = g.shotsAgainst ?? (parseInt(String(g.saveShotsAgainst || "0").split("/")[1], 10) || saves);
+        const ga = g.goalsAgainst ?? 0;
+        const toi = g.toi || "";
+        leg.apiStat = saves;
+        leg.subDetail = `${saves} SV • ${sa} SA, ${ga} GA${toi ? ` • ${toi} TOI` : ''}`;
+        count++;
+      }
+    });
+  }
+
   for (const p of allSkaters) {
     const name = p.name?.default || "";
     const lastName = name.split(" ").slice(-1)[0]?.toLowerCase();
@@ -1989,9 +2231,17 @@ function parseNhlBoxscore(boxData, gameObj) {
         const assists = p.assists ?? 0;
         const points = p.points ?? (goals + assists);
         const shots = p.sog ?? 0;
+        const blocks = p.blockedShots ?? 0;
+        const hits = p.hits ?? 0;
         const toi = p.toi || "";
 
-        leg.apiStat = leg.statType === "shots" ? shots : (leg.statType === "goals" ? goals : (leg.statType === "assists" ? assists : points));
+        if (leg.statType === "shots") leg.apiStat = shots;
+        else if (leg.statType === "goals") leg.apiStat = goals;
+        else if (leg.statType === "assists") leg.apiStat = assists;
+        else if (leg.statType === "blocks") leg.apiStat = blocks;
+        else if (leg.statType === "hits") leg.apiStat = hits;
+        else leg.apiStat = points;
+
         leg.subDetail = `${goals}G, ${assists}A • ${shots} SOG${toi ? ` • ${toi} TOI` : ''}`;
         count++;
       }
@@ -2982,6 +3232,277 @@ function escapeHTML(str) {
 // =============================================================================
 // AUTOMATED BET SLIP INTAKE & OCR MODAL CONTROLLER
 // =============================================================================
+const NHL_TEAM_NAME_TO_ABBR = {
+  'anaheim ducks': 'ANA Ducks', 'ducks': 'ANA Ducks',
+  'boston bruins': 'BOS Bruins', 'bruins': 'BOS Bruins',
+  'buffalo sabres': 'BUF Sabres', 'sabres': 'BUF Sabres',
+  'calgary flames': 'CGY Flames', 'flames': 'CGY Flames',
+  'carolina hurricanes': 'CAR Hurricanes', 'hurricanes': 'CAR Hurricanes',
+  'chicago blackhawks': 'CHI Blackhawks', 'blackhawks': 'CHI Blackhawks',
+  'colorado avalanche': 'COL Avalanche', 'avalanche': 'COL Avalanche',
+  'columbus blue jackets': 'CBJ Blue Jackets', 'blue jackets': 'CBJ Blue Jackets',
+  'dallas stars': 'DAL Stars', 'stars': 'DAL Stars',
+  'detroit red wings': 'DET Red Wings', 'red wings': 'DET Red Wings',
+  'edmonton oilers': 'EDM Oilers', 'oilers': 'EDM Oilers',
+  'florida panthers': 'FLA Panthers', 'panthers': 'FLA Panthers',
+  'los angeles kings': 'LAK Kings', 'kings': 'LAK Kings',
+  'minnesota wild': 'MIN Wild', 'wild': 'MIN Wild',
+  'montreal canadiens': 'MTL Canadiens', 'canadiens': 'MTL Canadiens',
+  'nashville predators': 'NSH Predators', 'predators': 'NSH Predators',
+  'new jersey devils': 'NJD Devils', 'devils': 'NJD Devils',
+  'new york islanders': 'NYI Islanders', 'islanders': 'NYI Islanders',
+  'new york rangers': 'NYR Rangers', 'rangers': 'NYR Rangers',
+  'ottawa senators': 'OTT Senators', 'senators': 'OTT Senators',
+  'philadelphia flyers': 'PHI Flyers', 'flyers': 'PHI Flyers',
+  'pittsburgh penguins': 'PIT Penguins', 'penguins': 'PIT Penguins',
+  'san jose sharks': 'SJS Sharks', 'sharks': 'SJS Sharks',
+  'seattle kraken': 'SEA Kraken', 'kraken': 'SEA Kraken',
+  'st. louis blues': 'STL Blues', 'st louis blues': 'STL Blues', 'blues': 'STL Blues',
+  'tampa bay lightning': 'TBL Lightning', 'lightning': 'TBL Lightning',
+  'toronto maple leafs': 'TOR Maple Leafs', 'maple leafs': 'TOR Maple Leafs',
+  'utah hockey club': 'UTA Hockey Club', 'utah mammoth': 'UTA Mammoth',
+  'vancouver canucks': 'VAN Canucks', 'canucks': 'VAN Canucks',
+  'vegas golden knights': 'VGK Golden Knights', 'golden knights': 'VGK Golden Knights',
+  'washington capitals': 'WSH Capitals', 'capitals': 'WSH Capitals',
+  'winnipeg jets': 'WPG Jets', 'jets': 'WPG Jets'
+};
+
+function normalizeMatchupLine(rawLine) {
+  if (!rawLine) return '';
+  const cleaned = rawLine.replace(/^[^A-Za-z]+/, '').trim();
+  const parts = cleaned.split(/\s*(?:@|\bvs\.?\b|\bv\.?\b)\s*/i);
+  if (parts.length !== 2) return '';
+  const resolveSide = (str) => {
+    const low = str.toLowerCase().trim();
+    if (NHL_TEAM_NAME_TO_ABBR[low]) return NHL_TEAM_NAME_TO_ABBR[low];
+    for (const [k, v] of Object.entries(NHL_TEAM_NAME_TO_ABBR)) {
+      if (low.includes(k)) return v;
+    }
+    return str.trim();
+  };
+  const away = resolveSide(parts[0]);
+  const home = resolveSide(parts[1]);
+  return `${away} @ ${home}`;
+}
+
+function normalizeMarketCategory(rawMarket) {
+  const m = (rawMarket || '').toLowerCase().trim();
+  if (m.includes('save') || m === 'sv') return 'Saves';
+  if (m.includes('block') || m === 'blk') return 'Blocked Shots';
+  if (m.includes('hit')) return 'Hits';
+  if (m.includes('shot') || m === 'sog') return 'Shots on Goal';
+  if (m.includes('assist') || m === 'ast') return 'Assists';
+  if (m.includes('goal')) return 'Goals';
+  return 'Points';
+}
+
+function parseSportsbookOcrText(text) {
+  const result = {
+    stake: null,
+    totalOdds: null,
+    payout: null,
+    book: null,
+    legs: []
+  };
+
+  if (!text) return result;
+
+  // 1. Detect Sportsbook
+  const low = text.toLowerCase();
+  if (low.includes('bet99')) result.book = 'BET99';
+  else if (low.includes('fanduel')) result.book = 'FanDuel';
+  else if (low.includes('betmgm')) result.book = 'BetMGM';
+  else if (low.includes('bet365')) result.book = 'Bet365';
+  else if (low.includes('draftkings')) result.book = 'DraftKings';
+  else if (low.includes('thescore')) result.book = 'theScore Bet';
+
+  // 2. Extract Stake, Total Odds, and Payout
+  const stakeLabelMatch = text.match(/(?:stake|wager|total\s*wager|bet\s*amount|risk)[:\s]*\$([0-9,]+(?:\.[0-9]{1,2})?)/i);
+  const returnLabelMatch = text.match(/(?:returns?|to\s*return|payout|potential\s*payout|to\s*win|est\.?\s*payout)[:\s]*\$([0-9,]+(?:\.[0-9]{1,2})?)/i);
+  const sgpOddsMatch = text.match(/(?:sgp\+?|\bparlay\b|total\s*odds)\s*(?:@|:)?\s*([+-][0-9]{3,6})/i);
+  const summaryMatch = text.match(/\$([0-9]+(?:\.[0-9]{2})?)\s+([+-][0-9]{3,6})\s+\$([0-9,]+(?:\.[0-9]{2})?)/);
+
+  if (stakeLabelMatch) {
+    result.stake = parseFloat(stakeLabelMatch[1].replace(/,/g, ''));
+  }
+  if (returnLabelMatch) {
+    result.payout = parseFloat(returnLabelMatch[1].replace(/,/g, ''));
+  }
+  if (sgpOddsMatch) {
+    result.totalOdds = sgpOddsMatch[1];
+  }
+
+  if (summaryMatch) {
+    if (!result.stake) result.stake = parseFloat(summaryMatch[1]);
+    if (!result.totalOdds) result.totalOdds = summaryMatch[2];
+    if (!result.payout) result.payout = parseFloat(summaryMatch[3].replace(/,/g, ''));
+  }
+
+  // Fallback for dollar amounts: ignore $0.00 (e.g. Cash $0.00 / Bonus $0.00 in app header)
+  if (!result.stake || !result.payout) {
+    const rawDollarMatches = [...text.matchAll(/\$([0-9,]+(?:\.[0-9]{2})?)/g)]
+      .map(m => parseFloat(m[1].replace(/,/g, '')))
+      .filter(v => !isNaN(v) && v > 0);
+    if (rawDollarMatches.length >= 2) {
+      if (!result.stake) result.stake = rawDollarMatches[0];
+      if (!result.payout) result.payout = Math.max(...rawDollarMatches);
+    } else if (rawDollarMatches.length === 1 && !result.stake) {
+      result.stake = rawDollarMatches[0];
+    }
+  }
+
+  if (!result.totalOdds) {
+    const bigPlusOdds = text.match(/([+][0-9]{3,6})/);
+    if (bigPlusOdds) result.totalOdds = bigPlusOdds[1];
+  }
+
+  // 3. Extract Individual Player Legs & Matchups
+  const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  const extracted = [];
+
+  const patternBet99 = /^(?:[©•@*\-—oO0]+\s+)?([A-Z][a-zA-Z.'-]+(?:\s+[A-Z][a-zA-Z.'-]+)+)\s*[-—–]\s*(Points?|Shots?(?:\s*on\s*Goal)?|SOG|Goals?|Assists?|Saves?|Blocks?|Blocked\s*Shots?|Hits?)\s*[-—–]\s*((?:Over|Under)\s*\d+(?:\.\d+)?|\d+\+)\s*(?:@\s*([+-]\d{3,4}))?/i;
+  const patternGeneric = /^(?:[©•@*\-—oO0]+\s+)?([A-Z][a-zA-Z.'-]+(?:\s+[A-Z][a-zA-Z.'-]+)+)\s*[-—–]?\s*((?:Over|Under)\s*\d+(?:\.\d+)?|\d+\+)\s+(?:Total\s+)?(Points?|Shots?(?:\s*on\s*Goal)?|SOG|Goals?|Assists?|Saves?|Blocks?|Blocked\s*Shots?|Hits?)(?:\s*(?:@|\()?\s*([+-]\d{3,4})\)?)?/i;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    let playerName = '';
+    let marketRaw = '';
+    let lineTargetRaw = '';
+    let legOdds = '';
+
+    const m1 = line.match(patternBet99);
+    const m2 = !m1 ? line.match(patternGeneric) : null;
+
+    if (m1) {
+      playerName = m1[1].trim();
+      marketRaw = m1[2].trim();
+      lineTargetRaw = m1[3].trim();
+      legOdds = (m1[4] || '').trim();
+    } else if (m2) {
+      playerName = m2[1].trim();
+      lineTargetRaw = m2[2].trim();
+      marketRaw = m2[3].trim();
+      legOdds = (m2[4] || '').trim();
+    }
+
+    if (playerName && marketRaw && lineTargetRaw) {
+      const marketClean = normalizeMarketCategory(marketRaw);
+      const targetClean = lineTargetRaw.replace(/^over\s*/i, 'Over ').replace(/^under\s*/i, 'Under ');
+      const pickText = `${playerName} — ${targetClean} ${marketClean}`;
+
+      let gameTitle = '';
+      for (let j = i + 1; j <= Math.min(lines.length - 1, i + 2); j++) {
+        if (/(@|\bvs\.?\b)/i.test(lines[j]) && !patternBet99.test(lines[j]) && !patternGeneric.test(lines[j])) {
+          gameTitle = normalizeMatchupLine(lines[j]);
+          break;
+        }
+      }
+
+      if (!legOdds && i + 1 < lines.length) {
+        const nextOdds = lines[i + 1].match(/^([+-]\d{3,4})$/);
+        if (nextOdds) legOdds = nextOdds[1];
+      }
+
+      extracted.push({
+        playerName,
+        pick_text: pickText,
+        odds: legOdds || '-110',
+        game_title: gameTitle || 'Friday NHL Game',
+        bet_type: 'Player Prop'
+      });
+    }
+  }
+
+  // Match extracted legs to boys in SQUAD
+  const usedBoys = new Set();
+  extracted.forEach(item => {
+    const itemLast = item.playerName.split(' ').slice(-1)[0].toLowerCase();
+    let matchedBoy = null;
+
+    // 1. Check current state.legs for matching player name
+    for (const boy of SQUAD) {
+      if (usedBoys.has(boy.name)) continue;
+      const existing = state.legs[boy.name];
+      if (existing && existing.pick_text && existing.pick_text.toLowerCase().includes(itemLast)) {
+        matchedBoy = boy.name;
+        break;
+      }
+    }
+
+    // 2. Check KNOWN_OCT30_PLAYERS if still unmatched
+    if (!matchedBoy && state.currentFridayStr === '2026-10-30') {
+      for (const [bName, kObj] of Object.entries(KNOWN_OCT30_PLAYERS)) {
+        if (!usedBoys.has(bName) && kObj.name.toLowerCase().includes(itemLast)) {
+          matchedBoy = bName;
+          break;
+        }
+      }
+    }
+
+    if (matchedBoy) {
+      usedBoys.add(matchedBoy);
+      item.boyName = matchedBoy;
+    }
+  });
+
+  // 3. Assign any remaining legs to unassigned boys in squad order
+  extracted.forEach(item => {
+    if (!item.boyName) {
+      const nextBoy = SQUAD.find(b => !usedBoys.has(b.name)) || SQUAD[0];
+      usedBoys.add(nextBoy.name);
+      item.boyName = nextBoy.name;
+    }
+    const parsedSlider = parsePickIntoLeg(item.boyName, item);
+    item.statType = parsedSlider.statType;
+    item.target = parsedSlider.target;
+    item.unitLabel = getUnitLabelForStat(parsedSlider.statType);
+  });
+
+  result.legs = extracted;
+  return result;
+}
+
+function renderDetectedSlipLegs(legs) {
+  state.pendingScannedLegs = legs || [];
+  if (!DOM.slipDetectedLegsWrap || !DOM.slipDetectedLegsList) return;
+
+  if (!legs || legs.length === 0) {
+    DOM.slipDetectedLegsWrap.style.display = 'none';
+    DOM.slipDetectedLegsList.innerHTML = '';
+    return;
+  }
+
+  DOM.slipDetectedLegsWrap.style.display = 'block';
+  if (DOM.slipDetectedCountBadge) {
+    DOM.slipDetectedCountBadge.textContent = `${legs.length} LEG${legs.length === 1 ? '' : 'S'} READY`;
+  }
+
+  DOM.slipDetectedLegsList.innerHTML = legs.map((leg, idx) => `
+    <div class="slip-detected-leg-row" data-idx="${idx}">
+      <select class="slip-boy-select" data-leg-idx="${idx}">
+        ${SQUAD.map(b => `<option value="${b.name}" ${b.name === leg.boyName ? 'selected' : ''}>${b.name}</option>`).join('')}
+      </select>
+      <div class="slip-leg-main">
+        <div class="slip-leg-pick-title">${escapeHTML(leg.pick_text)}</div>
+        <div class="slip-leg-sub">${escapeHTML(leg.game_title)}</div>
+      </div>
+      <div class="slip-leg-badges">
+        <span class="slip-slider-pill">0 / ${leg.target} ${leg.unitLabel}</span>
+        <span class="slip-odds-pill">${escapeHTML(leg.odds)}</span>
+      </div>
+    </div>
+  `).join('');
+
+  DOM.slipDetectedLegsList.querySelectorAll('.slip-boy-select').forEach(sel => {
+    sel.addEventListener('change', (e) => {
+      const idx = parseInt(e.target.getAttribute('data-leg-idx'), 10);
+      if (state.pendingScannedLegs && state.pendingScannedLegs[idx]) {
+        state.pendingScannedLegs[idx].boyName = e.target.value;
+      }
+    });
+  });
+}
+
 function openScanSlipModal() {
   if (DOM.scanSlipModalBackdrop) {
     DOM.scanSlipModalBackdrop.classList.add('open');
@@ -3017,38 +3538,26 @@ async function handleSlipFile(file) {
 
     if (window.Tesseract) {
       if (DOM.slipOcrStatus) DOM.slipOcrStatus.style.display = "flex";
-      if (DOM.slipOcrStatusText) DOM.slipOcrStatusText.textContent = "Scanning odds, wager & payout via Tesseract OCR...";
+      if (DOM.slipOcrStatusText) DOM.slipOcrStatusText.textContent = "Scanning odds, wager, payout & 6 player legs via OCR...";
       try {
         const result = await Tesseract.recognize(dataUrl, "eng");
         const text = result?.data?.text || "";
+        const parsed = parseSportsbookOcrText(text);
 
-        const summaryMatch = text.match(/\$([0-9]+(?:\.[0-9]{2})?)\s+([+-][0-9]{3,5})\s+\$([0-9]+(?:\.[0-9]{2})?)/);
-        if (summaryMatch) {
-          if (DOM.slipStakeInput) DOM.slipStakeInput.value = parseFloat(summaryMatch[1]).toFixed(2);
-          if (DOM.slipOddsInput) DOM.slipOddsInput.value = summaryMatch[2];
-          if (DOM.slipPayoutInput) DOM.slipPayoutInput.value = parseFloat(summaryMatch[3]).toFixed(2);
-        } else {
-          const moneyMatches = text.match(/\$([0-9]+(?:\.[0-9]{2})?)/g);
-          if (moneyMatches && moneyMatches.length >= 2) {
-            const clean1 = moneyMatches[0].replace("$", "");
-            const clean2 = moneyMatches[moneyMatches.length - 1].replace("$", "");
-            if (DOM.slipStakeInput) DOM.slipStakeInput.value = parseFloat(clean1).toFixed(2);
-            if (DOM.slipPayoutInput) DOM.slipPayoutInput.value = parseFloat(clean2).toFixed(2);
-          }
-          const oddsMatch = text.match(/([+-][0-9]{3,5})/);
-          if (oddsMatch && DOM.slipOddsInput) {
-            DOM.slipOddsInput.value = oddsMatch[1];
-          }
+        if (parsed.stake && DOM.slipStakeInput) DOM.slipStakeInput.value = parsed.stake.toFixed(2);
+        if (parsed.totalOdds && DOM.slipOddsInput) DOM.slipOddsInput.value = parsed.totalOdds;
+        if (parsed.payout && DOM.slipPayoutInput) DOM.slipPayoutInput.value = parsed.payout.toFixed(2);
+        if (parsed.book && DOM.slipBookInput) DOM.slipBookInput.value = parsed.book;
+
+        renderDetectedSlipLegs(parsed.legs);
+
+        const legCount = parsed.legs.length;
+        if (DOM.slipOcrStatusText) {
+          DOM.slipOcrStatusText.textContent = legCount > 0
+            ? `✓ OCR Complete! Extracted ${legCount} player leg${legCount === 1 ? '' : 's'}, odds & slider targets.`
+            : "✓ OCR Complete! Wager, odds & payout extracted from screenshot.";
         }
-
-        if (text.toLowerCase().includes("bet99") && DOM.slipBookInput) DOM.slipBookInput.value = "BET99";
-        else if (text.toLowerCase().includes("fanduel") && DOM.slipBookInput) DOM.slipBookInput.value = "FanDuel";
-        else if (text.toLowerCase().includes("betmgm") && DOM.slipBookInput) DOM.slipBookInput.value = "BetMGM";
-        else if (text.toLowerCase().includes("bet365") && DOM.slipBookInput) DOM.slipBookInput.value = "Bet365";
-        else if (text.toLowerCase().includes("draftkings") && DOM.slipBookInput) DOM.slipBookInput.value = "DraftKings";
-
-        if (DOM.slipOcrStatusText) DOM.slipOcrStatusText.textContent = "✓ OCR Complete! Values auto-filled from screenshot.";
-        showToast("Slip scanned & values extracted!", "checkCircle");
+        showToast(legCount > 0 ? `Scanned ${legCount} legs & slip values!` : "Slip scanned & values extracted!", "checkCircle");
       } catch (ocrErr) {
         console.warn("OCR error:", ocrErr);
         if (DOM.slipOcrStatusText) DOM.slipOcrStatusText.textContent = "Screenshot loaded. Review & confirm below.";
@@ -3067,6 +3576,7 @@ function clearSlipFile() {
   if (DOM.slipPreviewWrap) DOM.slipPreviewWrap.style.display = 'none';
   if (DOM.slipDropzone) DOM.slipDropzone.style.display = 'block';
   if (DOM.slipOcrStatus) DOM.slipOcrStatus.style.display = 'none';
+  renderDetectedSlipLegs([]);
 }
 
 async function confirmAndLockInSlip() {
@@ -3075,6 +3585,49 @@ async function confirmAndLockInSlip() {
   const payout = parseFloat(DOM.slipPayoutInput?.value || 748.20);
   const book = DOM.slipBookInput?.value || 'BET99';
   const bettor = getBettorForFriday(state.currentFriday);
+
+  // If OCR extracted individual legs, update state.legs (preserving existing chirps)
+  if (Array.isArray(state.pendingScannedLegs) && state.pendingScannedLegs.length > 0) {
+    for (const scanned of state.pendingScannedLegs) {
+      if (!scanned.boyName) continue;
+      const prevLeg = state.legs[scanned.boyName] || {};
+      const shortGame = (scanned.game_title || '').split('@').map(s => s.trim().split(/\s+/)[0]).join(' @ ');
+      const updatedLeg = {
+        ...prevLeg,
+        user_name: scanned.boyName,
+        boy: scanned.boyName,
+        game: shortGame || prevLeg.game || 'NHL',
+        game_title: scanned.game_title || prevLeg.game_title || 'Friday NHL Game',
+        bet_type: 'Player Prop',
+        pick_text: scanned.pick_text || prevLeg.pick_text,
+        odds: scanned.odds || prevLeg.odds || '-110',
+        chirp: prevLeg.chirp || '',
+        locked: true
+      };
+      state.legs[scanned.boyName] = updatedLeg;
+
+      if (state.supabase) {
+        try {
+          await state.supabase
+            .from('parlay_legs')
+            .upsert({
+              id: `${state.currentFridayStr}_${scanned.boyName}`,
+              week_date: state.currentFridayStr,
+              user_name: scanned.boyName,
+              game_title: updatedLeg.game_title,
+              bet_type: updatedLeg.bet_type,
+              pick_text: updatedLeg.pick_text,
+              odds: updatedLeg.odds,
+              chirp: updatedLeg.chirp,
+              locked: true,
+              updated_at: new Date().toISOString()
+            });
+        } catch (legErr) {
+          console.warn('Could not sync scanned leg to Supabase:', legErr);
+        }
+      }
+    }
+  }
 
   state.stake = stake;
   state.isPlaced = true;
@@ -3086,7 +3639,7 @@ async function confirmAndLockInSlip() {
     stake: stake,
     total_odds: odds,
     potential_payout: payout,
-    notes: `Placed on ${book} by ${bettor.name}`
+    notes: `Placed on ${book} by ${bettor.name} (SGP+ @ ${odds})`
   };
 
   saveLocalData(state.currentFridayStr);
@@ -3105,7 +3658,7 @@ async function confirmAndLockInSlip() {
           stake: stake,
           total_odds: odds,
           potential_payout: payout,
-          notes: `Placed on ${book} by ${bettor.name}`,
+          notes: `Placed on ${book} by ${bettor.name} (SGP+ @ ${odds})`,
           updated_at: new Date().toISOString()
         });
     } catch (e) {
@@ -3114,12 +3667,12 @@ async function confirmAndLockInSlip() {
   }
 
   closeScanSlipModal();
-  renderSportsbookTicket();
+  renderAll();
   renderTracker();
 
   if (window.confetti) confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
   playSound('triumph');
-  showToast(`Slip locked in on ${book}! Payout: ${payout.toFixed(2)}`, 'checkCircle');
+  showToast(`Slip locked in on ${book}! Payout: $${payout.toFixed(2)}`, 'checkCircle');
 
   setTimeout(() => {
     switchView('liveTrackerView');
