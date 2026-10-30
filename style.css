@@ -428,10 +428,10 @@ body {
   background: #ffffff;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
-  padding: 6px 12px;
-  display: flex;
+  padding: 6px 10px;
+  display: inline-flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   white-space: nowrap;
   flex-shrink: 0;
   cursor: pointer;
@@ -448,27 +448,39 @@ body {
 .ticker-teams {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
+  flex-shrink: 0;
 }
 
-.ticker-team-row {
+.ticker-team-row,
+.ticker-team-line {
   display: flex;
   align-items: center;
   gap: 6px;
+  line-height: 1;
 }
 
-.ticker-logo {
-  width: 16px;
-  height: 16px;
+.ticker-logo,
+.ticker-team-logo {
+  width: 18px !important;
+  height: 18px !important;
+  min-width: 18px;
+  max-width: 18px;
+  max-height: 18px;
   object-fit: contain;
+  flex-shrink: 0;
+  display: block;
 }
 
-.ticker-name {
+.ticker-name,
+.ticker-team-abbrev {
   font-family: var(--font-sports);
   font-size: 0.78rem;
   font-weight: 800;
   color: var(--text-main);
-  width: 32px;
+  letter-spacing: 0.3px;
+  min-width: 28px;
+  line-height: 1.1;
 }
 
 .ticker-score {
@@ -476,36 +488,58 @@ body {
   font-size: 0.78rem;
   font-weight: 800;
   color: var(--text-main);
+  margin-left: 4px;
 }
 
-.ticker-state {
+.ticker-status {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
+  justify-content: center;
+  gap: 3px;
   border-left: 1px solid var(--border-subtle);
   padding-left: 10px;
+  flex-shrink: 0;
 }
 
-.period-chip {
-  font-family: var(--font-sports);
-  font-size: 0.70rem;
-  font-weight: 800;
-  color: var(--text-main);
-  text-transform: uppercase;
-}
-
-.period-chip.live {
-  color: var(--red-alert);
-}
-
-.period-chip.final {
-  color: var(--text-secondary);
-}
-
+.ticker-time,
 .game-time-chip {
   font-family: var(--font-mono);
-  font-size: 0.65rem;
-  color: var(--text-muted);
+  font-size: 0.66rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.ticker-state,
+.period-chip {
+  font-family: var(--font-sports);
+  font-size: 0.62rem;
+  font-weight: 800;
+  color: var(--nhl-blue);
+  background: var(--nhl-blue-subtle);
+  border: 1px solid var(--nhl-blue-border);
+  padding: 2px 5px;
+  border-radius: 4px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.period-chip.live,
+.ticker-state.live {
+  color: var(--red-alert);
+  background: rgba(220, 38, 38, 0.08);
+  border-color: rgba(220, 38, 38, 0.25);
+}
+
+.period-chip.final,
+.ticker-state.final {
+  color: var(--text-secondary);
+  background: var(--nhl-subcard);
+  border-color: var(--border-subtle);
 }
 
 /* ==========================================================================
@@ -1161,9 +1195,10 @@ body {
   border-radius: var(--radius-sm);
   padding: 10px 14px;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 10px 12px;
   transition: all 0.15s ease;
 }
 
@@ -1174,6 +1209,7 @@ body {
 
 .teams-strip {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
 }
@@ -1185,9 +1221,14 @@ body {
 }
 
 .team-logo-small {
-  width: 20px;
-  height: 20px;
+  width: 22px !important;
+  height: 22px !important;
+  min-width: 22px;
+  max-width: 22px;
+  max-height: 22px;
   object-fit: contain;
+  flex-shrink: 0;
+  display: block;
 }
 
 .team-name-bold {
