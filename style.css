@@ -2055,6 +2055,7 @@ body {
 .tracker-leg-tier2 {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
   margin-top: 4px;
   padding-left: 30px;
@@ -2086,7 +2087,9 @@ body {
   color: var(--nhl-blue);
   font-family: var(--font-sports);
   letter-spacing: 0.1px;
-  white-space: nowrap;
+  white-space: normal;
+  word-break: break-word;
+  min-width: 0;
 }
 
 .tracker-leg-card.hit .tracker-market-desc {
@@ -3400,15 +3403,17 @@ body {
   }
   .stats-hero-meta {
     width: 100%;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
   }
   .meta-stat-pill {
-    flex: 1;
-    padding: 8px 6px;
+    padding: 12px 10px;
     min-width: 0;
+    overflow: hidden;
   }
   .meta-val {
-    font-size: 1.30rem;
+    font-size: 1.45rem;
   }
   .trophies-grid {
     grid-template-columns: 1fr;
@@ -3464,6 +3469,13 @@ body {
   }
   .tracker-metric-val {
     font-size: 1.30rem;
+  }
+  .tracker-leg-tier2 {
+    padding-left: 0;
+    gap: 6px;
+  }
+  .tracker-market-desc {
+    font-size: 0.74rem;
   }
 
   /* History Section & Week Headers */

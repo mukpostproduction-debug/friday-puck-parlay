@@ -56,8 +56,8 @@ async function runQA() {
 
     // 1. Desktop 1280x900
     await page.setViewport({ width: 1280, height: 900, deviceScaleFactor: 2 });
-    await page.goto(targetUrl, { waitUntil: 'networkidle0' });
-    await new Promise(r => setTimeout(r, 500));
+    await page.goto(targetUrl, { waitUntil: 'domcontentloaded' });
+    await new Promise(r => setTimeout(r, 1200));
 
     // Desktop Slip
     await page.screenshot({ path: path.join(OUT_DIR, 'qa_desktop_slip.png') });
@@ -77,12 +77,20 @@ async function runQA() {
 
     // 2. iPhone 15 Pro (393x852 @ 2x)
     await page.setViewport({ width: 393, height: 852, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+    await new Promise(r => setTimeout(r, 600));
+    await page.evaluate(() => document.getElementById('tabStats').click());
     await new Promise(r => setTimeout(r, 400));
     await page.screenshot({ path: path.join(OUT_DIR, 'qa_mobile_stats.png') });
     console.log('📸 Captured: qa_mobile_stats.png');
 
+    // Mobile Live Tracker
+    await page.evaluate(() => document.getElementById('tabLiveTracker').click());
+    await new Promise(r => setTimeout(r, 400));
+    await page.screenshot({ path: path.join(OUT_DIR, 'qa_mobile_live.png') });
+    console.log('📸 Captured: qa_mobile_live.png');
+
     // Mobile Slip
-    await page.click('#tabSlipBuilder');
+    await page.evaluate(() => document.getElementById('tabSlipBuilder').click());
     await new Promise(r => setTimeout(r, 400));
     await page.screenshot({ path: path.join(OUT_DIR, 'qa_mobile_slip.png') });
     console.log('📸 Captured: qa_mobile_slip.png');

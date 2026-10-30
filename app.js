@@ -1446,6 +1446,11 @@ function renderStatsView() {
   if (DOM.statsParlayRecord) {
     DOM.statsParlayRecord.textContent = `${data.wonParlays} / ${data.totalParlays} Parlays`;
   }
+  const settledSubEl = document.getElementById('statsSettledSub');
+  const wageredSubEl = document.getElementById('statsWageredSub');
+  const weeksLabel = data.totalParlays > 1 ? `Weeks 1–${data.totalParlays}` : 'Week 1';
+  if (settledSubEl) settledSubEl.textContent = `${weeksLabel} Locked`;
+  if (wageredSubEl) wageredSubEl.textContent = `${weeksLabel} Pool`;
 
   // Trophies
   // 1. Sharpshooters
@@ -2769,6 +2774,7 @@ function renderAll() {
   renderSportsbookTicket();
   renderRotationSchedule();
   renderStatsView();
+  renderTracker();
 }
 
 // =============================================================================
@@ -3283,9 +3289,9 @@ window.addEventListener('DOMContentLoaded', () => {
   fetchFridayNhlGames(state.currentFridayStr);
   toggleAutoPoll();
 
-  // If already placed, show Live Tracker by default
+  // If already placed, show Live Tracker by default (unless explicit URL hash was provided)
   setTimeout(() => {
-    if (state.isPlaced) {
+    if (state.isPlaced && !window.location.hash) {
       switchView('liveTrackerView', false);
       fetchAllLiveStats(false);
     }
