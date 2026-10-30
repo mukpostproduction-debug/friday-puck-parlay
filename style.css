@@ -3495,6 +3495,25 @@ body {
   .h-result-badge {
     align-self: flex-start;
   }
+  .squad-table th,
+  .squad-table td {
+    padding: 10px 8px;
+    white-space: nowrap;
+  }
+  .squad-table th:nth-child(2) {
+    position: sticky;
+    left: 0;
+    z-index: 3;
+    background: var(--nhl-subcard);
+    box-shadow: 2px 0 5px rgba(15, 23, 42, 0.06);
+  }
+  .squad-table td:nth-child(2) {
+    position: sticky;
+    left: 0;
+    z-index: 2;
+    background: #ffffff;
+    box-shadow: 2px 0 5px rgba(15, 23, 42, 0.06);
+  }
 }
 
 @media (max-width: 390px) {

@@ -1229,6 +1229,7 @@ function computeSquadAnalytics() {
       oddsList: [],
       maxWinningOdds: 0,
       maxWinningOddsStr: '--',
+      lastMissedPick: '',
       parlaysSold: 0,
       plusMoneyHits: 0
     };
@@ -1265,6 +1266,7 @@ function computeSquadAnalytics() {
         p.total++;
         p.misses++;
         p.oddsList.push(dec);
+        p.lastMissedPick = `W${w.weekNum} (${leg.pick})`;
         if (w.result === 'loss') {
           p.parlaysSold++;
         }
@@ -1363,8 +1365,8 @@ function computeSquadAnalytics() {
   const hotSeatWinner = slumpSorted[0] || null;
   const hotSeatData = hotSeatWinner ? {
     name: hotSeatWinner.name,
-    stat: `${hotSeatWinner.misses} Miss${hotSeatWinner.misses === 1 ? '' : 'es'} • Sold W1 by 1 Leg`,
-    note: `Missed on Leo Carlsson by just 1 leg — locked in for revenge in Week ${currentWeekNum}!`
+    stat: `${hotSeatWinner.misses} Miss${hotSeatWinner.misses === 1 ? '' : 'es'} (${hotSeatWinner.hits}-${hotSeatWinner.misses} • ${hotSeatWinner.streakType}${hotSeatWinner.streak})`,
+    note: `Last missed ${hotSeatWinner.lastMissedPick || 'a leg'} — locked in for a bounce-back in Week ${currentWeekNum}!`
   } : {
     name: 'Nobody (Clean Sheet)',
     stat: '0 Misses Recorded',
@@ -1816,6 +1818,7 @@ function normalizeTeamAbbr(abbr) {
 }
 
 // Live API Fetching (ESPN NHL Public API + NHL Web API fallback)
+let isFetchingLiveStats = false;
 async function fetchAllLiveStats(isManualClick = false) {
   if (!state.isPlaced) {
     if (DOM.syncStatus) DOM.syncStatus.textContent = "Awaiting Bet Placement • Live NHL API ready to sync upon lock-in";
@@ -1826,14 +1829,19 @@ async function fetchAllLiveStats(isManualClick = false) {
     return;
   }
 
+  if (isFetchingLiveStats && !isManualClick) return;
+  isFetchingLiveStats = true;
+
   if (isManualClick && DOM.refreshIcon) DOM.refreshIcon.classList.add("animate-spin");
   if (DOM.syncStatus) DOM.syncStatus.textContent = "Checking live NHL boxscores...";
 
   let updatedPlayers = 0;
+  let espnSucceeded = false;
 
   try {
     const espnResp = await fetch("https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/scoreboard");
     if (espnResp.ok) {
+      espnSucceeded = true;
       const scoreboard = await espnResp.json();
       const events = scoreboard.events || [];
 
@@ -1869,11 +1877,13 @@ async function fetchAllLiveStats(isManualClick = false) {
     console.warn("ESPN live feed check fallback:", err);
   }
 
-  // Fallback: NHL Official Web API via CORS Proxy
-  if (updatedPlayers === 0) {
+  // Fallback: NHL Official Web API via CORS Proxy (only if ESPN request failed)
+  if (!espnSucceeded && updatedPlayers === 0) {
     try {
       const nhlUrl = encodeURIComponent("https://api-web.nhle.com/v1/score/now");
-      const resp = await fetch(`https://api.allorigins.win/raw?url=${nhlUrl}`);
+      const resp = await fetch(`https://api.allorigins.win/raw?url=${nhlUrl}`, {
+        signal: AbortSignal.timeout ? AbortSignal.timeout(2500) : undefined
+      });
       if (resp.ok) {
         const data = await resp.json();
         const games = data.games || [];
@@ -1894,7 +1904,9 @@ async function fetchAllLiveStats(isManualClick = false) {
               : `${away} ${g.awayTeam?.score ?? 0} - ${home} ${g.homeTeam?.score ?? 0} (${period} ${clock})`;
 
             const boxUrl = encodeURIComponent(`https://api-web.nhle.com/v1/gamecenter/${g.id}/boxscore`);
-            const boxResp = await fetch(`https://api.allorigins.win/raw?url=${boxUrl}`);
+            const boxResp = await fetch(`https://api.allorigins.win/raw?url=${boxUrl}`, {
+              signal: AbortSignal.timeout ? AbortSignal.timeout(2500) : undefined
+            });
             if (boxResp.ok) {
               const boxData = await boxResp.json();
               updatedPlayers += parseNhlBoxscore(boxData, matchingGame);
@@ -1913,6 +1925,7 @@ async function fetchAllLiveStats(isManualClick = false) {
     setTimeout(() => DOM.refreshIcon.classList.remove("animate-spin"), 350);
   }
 
+  isFetchingLiveStats = false;
   saveTrackerData();
   renderTracker();
 }
@@ -2007,33 +2020,58 @@ function toggleAutoPoll() {
 // 9. FRIDAY NHL GAMES FETCH (SCOREBOARD TICKER & MATCHUPS EXPLORER)
 // =============================================================================
 async function fetchFridayNhlGames(dateStr) {
-  DOM.gamesTicker.innerHTML = `<div class="ticker-loading">Loading Friday NHL slate...</div>`;
-  DOM.matchupsList.innerHTML = `<div class="loading-state">Loading Friday games from NHL.com...</div>`;
-
-  let gamesList = [];
-  const directUrl = `https://api-web.nhle.com/v1/schedule/${dateStr}`;
-  const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(directUrl)}`;
-
-  try {
-    const res = await fetch(proxyUrl, { cache: 'no-cache' });
-    if (!res.ok) throw new Error('Proxy status ' + res.status);
-    const data = await res.json();
-    gamesList = parseNhlScheduleData(data, dateStr);
-  } catch (err) {
-    try {
-      const res = await fetch(directUrl);
-      const data = await res.json();
-      gamesList = parseNhlScheduleData(data, dateStr);
-    } catch (e) {
-      gamesList = getFallbackGames(dateStr);
-    }
-  }
-
+  // Render fallback games immediately so the scoreboard ticker never hangs on "Loading..."
+  let gamesList = getFallbackGames(dateStr);
   state.games = gamesList;
   DOM.tickerGamesCount.textContent = `${gamesList.length} GAME${gamesList.length === 1 ? '' : 'S'}`;
   renderGamesTicker(gamesList);
   renderMatchupsPanel(gamesList);
   populateGameSelect(gamesList);
+
+  const compactDate = dateStr.replace(/-/g, '');
+  const espnScheduleUrl = `https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/scoreboard?dates=${compactDate}`;
+
+  try {
+    const res = await fetch(espnScheduleUrl);
+    if (res.ok) {
+      const data = await res.json();
+      const events = data.events || [];
+      if (events.length > 0) {
+        gamesList = events.map(ev => {
+          const comp = ev.competitions?.[0] || {};
+          const competitors = comp.competitors || [];
+          const awayComp = competitors.find(c => c.homeAway === 'away') || competitors[0] || {};
+          const homeComp = competitors.find(c => c.homeAway === 'home') || competitors[1] || {};
+          const awayAbbrev = normalizeTeamAbbr(awayComp.team?.abbreviation || 'NHL');
+          const homeAbbrev = normalizeTeamAbbr(homeComp.team?.abbreviation || 'NHL');
+          return {
+            id: ev.id,
+            startTimeUTC: ev.date,
+            venue: comp.venue?.fullName || 'NHL Arena',
+            away: {
+              abbrev: awayAbbrev,
+              name: awayComp.team?.shortDisplayName || awayAbbrev,
+              place: awayComp.team?.location || '',
+              logo: awayComp.team?.logo || `https://assets.nhle.com/logos/nhl/svg/${awayAbbrev}_light.svg`
+            },
+            home: {
+              abbrev: homeAbbrev,
+              name: homeComp.team?.shortDisplayName || homeAbbrev,
+              place: homeComp.team?.location || '',
+              logo: homeComp.team?.logo || `https://assets.nhle.com/logos/nhl/svg/${homeAbbrev}_light.svg`
+            }
+          };
+        });
+        state.games = gamesList;
+        DOM.tickerGamesCount.textContent = `${gamesList.length} GAME${gamesList.length === 1 ? '' : 'S'}`;
+        renderGamesTicker(gamesList);
+        renderMatchupsPanel(gamesList);
+        populateGameSelect(gamesList);
+      }
+    }
+  } catch (err) {
+    // Fallback games already rendered above
+  }
 }
 
 function parseNhlScheduleData(data, targetDateStr) {
@@ -2257,7 +2295,42 @@ const DEFAULT_OCT16_PICKS = {
   Ben: { boy: 'Ben', game: 'BOS @ ANA', betType: 'prop', pick_text: 'Leo Carlsson 1+ Points', odds: '-115', chirp: 'Sold the parlay' }
 };
 
+const DEFAULT_MASTER_SLIPS = {
+  '2026-10-16': {
+    id: '2026-10-16',
+    week_date: '2026-10-16',
+    bettor_name: 'Axel',
+    status: 'placed',
+    stake: 25,
+    total_odds: '+950',
+    potential_payout: 262.50,
+    notes: 'Placed by Axel'
+  },
+  '2026-10-23': {
+    id: '2026-10-23',
+    week_date: '2026-10-23',
+    bettor_name: 'Jackson',
+    status: 'placed',
+    stake: 30,
+    total_odds: '+1261',
+    potential_payout: 408.35,
+    notes: 'Placed on FanDuel by Jackson'
+  },
+  '2026-10-30': {
+    id: '2026-10-30',
+    week_date: '2026-10-30',
+    bettor_name: 'Will',
+    status: 'placed',
+    stake: 30,
+    total_odds: '+2394',
+    potential_payout: 748.20,
+    notes: 'Placed on BET99 by Will (SGP+ @ +2394)'
+  }
+};
+
 function loadLocalData(dateStr) {
+  state.masterSlip = DEFAULT_MASTER_SLIPS[dateStr] ? JSON.parse(JSON.stringify(DEFAULT_MASTER_SLIPS[dateStr])) : null;
+
   const key = `bet_the_show_${dateStr}_v5`;
   const saved = localStorage.getItem(key);
   if (saved) {
@@ -2275,16 +2348,6 @@ function loadLocalData(dateStr) {
     state.legs = JSON.parse(JSON.stringify(DEFAULT_OCT30_PICKS));
     state.stake = 30;
     state.isPlaced = true;
-    state.masterSlip = {
-      id: '2026-10-30',
-      week_date: '2026-10-30',
-      bettor_name: 'Will',
-      status: 'placed',
-      stake: 30,
-      total_odds: '+2394',
-      potential_payout: 748.20,
-      notes: 'Placed on BET99 by Will (SGP+ @ +2394)'
-    };
   } else if (dateStr === '2026-10-23') {
     state.legs = JSON.parse(JSON.stringify(DEFAULT_OCT23_PICKS));
     state.stake = 30;
@@ -3293,7 +3356,6 @@ window.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => {
     if (state.isPlaced && !window.location.hash) {
       switchView('liveTrackerView', false);
-      fetchAllLiveStats(false);
     }
   }, 400);
 
