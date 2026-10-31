@@ -931,11 +931,23 @@ function syncTrackerFromRealPicks() {
     return;
   }
 
-  // Preserve any existing live apiStat / gameStateText / gameStatus if already synced
+  // Preserve any existing live apiStat / gameStateText / gameStatus / live scores & SOG if already synced
   const prevGamesMap = {};
   const prevLegsMap = {};
   (state.trackerData || []).forEach(g => {
-    prevGamesMap[g.gameId] = { gameStateText: g.gameStateText, gameStatus: g.gameStatus };
+    prevGamesMap[g.gameId] = {
+      gameStateText: g.gameStateText,
+      gameStatus: g.gameStatus,
+      statusDetail: g.statusDetail,
+      awayScore: g.awayScore,
+      homeScore: g.homeScore,
+      awaySog: g.awaySog,
+      homeSog: g.homeSog,
+      awayHits: g.awayHits,
+      homeHits: g.homeHits,
+      awayBlocks: g.awayBlocks,
+      homeBlocks: g.homeBlocks
+    };
     (g.legs || []).forEach(l => {
       prevLegsMap[l.boyName] = { apiStat: l.apiStat, subDetail: l.subDetail };
     });
@@ -985,8 +997,7 @@ function syncTrackerFromRealPicks() {
 
   slate.forEach(game => {
     if (prevGamesMap[game.gameId]) {
-      game.gameStateText = prevGamesMap[game.gameId].gameStateText;
-      game.gameStatus = prevGamesMap[game.gameId].gameStatus;
+      Object.assign(game, prevGamesMap[game.gameId]);
     }
     game.legs.forEach(leg => {
       const realPick = state.legs[leg.boyName];
@@ -2352,7 +2363,19 @@ async function fetchAllLiveStats(isManualClick = false) {
             const summaryResp = await fetch(`https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/summary?event=${event.id}`);
             if (summaryResp.ok) {
               const summaryData = await summaryResp.json();
-              updatedPlayers += parseEspnBoxscore(summaryData, matchingGame);
+              const latestGame = state.trackerData.find(g =>
+                abbrevs.includes(normalizeTeamAbbr(g.awayTeam)) && abbrevs.includes(normalizeTeamAbbr(g.homeTeam))
+              ) || matchingGame;
+              Object.assign(latestGame, {
+                gameStatus: matchingGame.gameStatus,
+                statusDetail: matchingGame.statusDetail,
+                awayScore: matchingGame.awayScore,
+                homeScore: matchingGame.homeScore,
+                awaySog: matchingGame.awaySog,
+                homeSog: matchingGame.homeSog,
+                gameStateText: matchingGame.gameStateText
+              });
+              updatedPlayers += parseEspnBoxscore(summaryData, latestGame);
             }
           }
         }
