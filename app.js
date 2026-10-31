@@ -2056,7 +2056,7 @@ function renderTracker() {
           <span class="tracker-game-mult">${game.odds}${String(game.odds).endsWith('x') || game.odds === 'SGP' ? '' : 'x'}</span>
         </div>
         <span class="tracker-game-state-badge">
-          ${game.gameStateText}
+          ${game.awayTeam} @ ${game.homeTeam}
         </span>
       </div>
 
@@ -2071,7 +2071,7 @@ function renderTracker() {
         </div>
         <div class="tls-center">
           <span class="tls-clock-pill ${isGameLive ? 'live' : ''}">${clockBadgeText}</span>
-          <span class="tls-sub-stats">SOG ${awaySogDisplay}-${homeSogDisplay}${awayHitsDisplay || homeHitsDisplay ? ` • HITS ${awayHitsDisplay}-${homeHitsDisplay}` : ''}</span>
+          <span class="tls-sub-stats">${(awayHitsDisplay || homeHitsDisplay) ? `HITS ${awayHitsDisplay}-${homeHitsDisplay}` : `SOG ${awaySogDisplay}-${homeSogDisplay}`}</span>
         </div>
         <div class="tls-team home">
           <img src="${homeLogoUrl}" class="tls-logo" alt="${game.homeTeam}" onerror="this.style.display='none'" />
@@ -2335,16 +2335,21 @@ async function fetchAllLiveStats(isManualClick = false) {
             if (stateType !== 'pre') {
               matchingGame.awaySog = matchingGame.awaySog || (aScore + hSaves);
               matchingGame.homeSog = matchingGame.homeSog || (hScore + aSaves);
+            } else {
+              matchingGame.awaySog = 0;
+              matchingGame.homeSog = 0;
             }
             matchingGame.gameStateText = stateType === 'pre'
               ? statusDetail
               : `${matchingGame.awayTeam} ${aScore} - ${matchingGame.homeTeam} ${hScore} (${statusDetail})`;
           }
 
-          const summaryResp = await fetch(`https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/summary?event=${event.id}`);
-          if (summaryResp.ok) {
-            const summaryData = await summaryResp.json();
-            updatedPlayers += parseEspnBoxscore(summaryData, matchingGame);
+          if (stateType !== 'pre') {
+            const summaryResp = await fetch(`https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/summary?event=${event.id}`);
+            if (summaryResp.ok) {
+              const summaryData = await summaryResp.json();
+              updatedPlayers += parseEspnBoxscore(summaryData, matchingGame);
+            }
           }
         }
       }
@@ -2650,10 +2655,10 @@ async function fetchFridayNhlGames(dateStr, isSilentRefresh = false) {
           const awaySaves = getStatVal(awayComp, 'saves');
           const homeSaves = getStatVal(homeComp, 'saves');
 
-          // Preserve any exact SOG already fetched from boxscore summary
+          // Preserve any exact SOG already fetched from boxscore summary (only for live/final games)
           const prevGame = (state.games || []).find(pg => pg.away?.abbrev === awayAbbrev && pg.home?.abbrev === homeAbbrev);
-          const awaySog = prevGame?.away?.sog ?? (homeSaves !== null ? awayScore + homeSaves : null);
-          const homeSog = prevGame?.home?.sog ?? (awaySaves !== null ? homeScore + awaySaves : null);
+          const awaySog = stateType === 'pre' ? null : (prevGame?.away?.sog ?? (homeSaves !== null ? awayScore + homeSaves : null));
+          const homeSog = stateType === 'pre' ? null : (prevGame?.home?.sog ?? (awaySaves !== null ? homeScore + awaySaves : null));
 
           return {
             id: ev.id,
