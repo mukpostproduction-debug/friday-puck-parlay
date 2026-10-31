@@ -3827,35 +3827,50 @@ body {
 
 /* Live NHL Game Scoreboard & Team Stats Bar inside Live Tracker */
 .tracker-live-scoreboard {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
   gap: 8px;
   background: var(--nhl-subcard);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
-  padding: 8px 12px;
-  margin-bottom: 10px;
+  padding: 9px 12px;
+  margin-bottom: 12px;
 }
 
 .tls-team {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 6px;
   min-width: 0;
+}
+
+.tls-team.away {
+  justify-content: flex-start;
+}
+
+.tls-team.away .tls-score {
+  margin-left: auto;
+  padding-left: 6px;
 }
 
 .tls-team.home {
   flex-direction: row-reverse;
   text-align: right;
+  justify-content: flex-start;
+}
+
+.tls-team.home .tls-score {
+  margin-right: auto;
+  padding-right: 6px;
 }
 
 .tls-logo {
-  width: 22px !important;
-  height: 22px !important;
-  min-width: 22px;
-  max-width: 22px;
-  max-height: 22px;
+  width: 20px !important;
+  height: 20px !important;
+  min-width: 20px;
+  max-width: 20px;
+  max-height: 20px;
   object-fit: contain;
   flex-shrink: 0;
 }
@@ -3863,7 +3878,9 @@ body {
 .tls-team-meta {
   display: flex;
   flex-direction: column;
-  line-height: 1.1;
+  line-height: 1.15;
+  min-width: 0;
+  flex-shrink: 0;
 }
 
 .tls-abbrev {
@@ -3871,21 +3888,24 @@ body {
   font-size: 0.82rem;
   font-weight: 900;
   color: var(--text-main);
+  white-space: nowrap;
 }
 
 .tls-sog {
   font-family: var(--font-mono);
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   font-weight: 700;
   color: var(--text-secondary);
+  white-space: nowrap;
 }
 
 .tls-score {
   font-family: var(--font-mono);
-  font-size: 1.25rem;
+  font-size: 1.22rem;
   font-weight: 900;
   color: var(--text-main);
-  padding: 0 4px;
+  line-height: 1;
+  flex-shrink: 0;
 }
 
 .tls-center {
@@ -3893,22 +3913,24 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
+  gap: 3px;
   text-align: center;
   flex-shrink: 0;
+  padding: 0 4px;
 }
 
 .tls-clock-pill {
   font-family: var(--font-sports);
   font-size: 0.66rem;
   font-weight: 800;
-  padding: 2px 7px;
+  padding: 2px 8px;
   border-radius: 999px;
   background: #ffffff;
   color: var(--text-main);
   border: 1px solid var(--border-subtle);
   text-transform: uppercase;
   letter-spacing: 0.4px;
+  white-space: nowrap;
 }
 
 .tls-clock-pill.live {
@@ -3919,36 +3941,39 @@ body {
 
 .tls-sub-stats {
   font-family: var(--font-mono);
-  font-size: 0.62rem;
+  font-size: 0.63rem;
   font-weight: 700;
   color: var(--text-secondary);
+  white-space: nowrap;
 }
 
 /* Squad Profiles Strip & Interactive Bettor Profile Modal */
 .squad-profiles-strip {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 8px;
-  margin-bottom: 14px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
 }
 
 @media (max-width: 780px) {
   .squad-profiles-strip {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
   }
 }
 
 .squad-profile-chip {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
+  gap: 9px;
+  padding: 9px 11px;
   border-radius: var(--radius-sm);
   background: var(--nhl-subcard);
   border: 1px solid var(--border-subtle);
   cursor: pointer;
   transition: all 0.15s ease;
   text-align: left;
+  min-width: 0;
 }
 
 .squad-profile-chip:hover {
@@ -3959,9 +3984,9 @@ body {
 }
 
 .spc-avatar {
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
   background: var(--nhl-black);
   color: #ffffff;
   font-family: var(--font-sports);
@@ -3973,26 +3998,40 @@ body {
   flex-shrink: 0;
 }
 
-.spc-meta {
+.spc-info {
   display: flex;
   flex-direction: column;
+  gap: 2px;
   min-width: 0;
+  flex: 1;
   line-height: 1.15;
 }
 
 .spc-name {
   font-family: var(--font-sports);
-  font-size: 0.84rem;
+  font-size: 0.88rem;
   font-weight: 900;
   color: var(--text-main);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  white-space: nowrap;
 }
 
-.spc-sub {
+.spc-name span {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.spc-meta {
   font-family: var(--font-mono);
-  font-size: 0.65rem;
+  font-size: 0.66rem;
   font-weight: 700;
   color: var(--text-secondary);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .table-player-cell.clickable {
@@ -4013,7 +4052,6 @@ body {
 .profile-hero-banner {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 12px;
   padding: 12px 14px;
   border-radius: var(--radius-sm);
@@ -4021,25 +4059,44 @@ body {
   border: 1px solid var(--border-subtle);
 }
 
-.profile-hero-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.profile-avatar-lg {
-  width: 46px;
-  height: 46px;
+.profile-hero-avatar {
+  width: 44px;
+  height: 44px;
   border-radius: 10px;
   background: var(--nhl-black);
   color: #ffffff;
   font-family: var(--font-sports);
-  font-size: 1.35rem;
+  font-size: 1.25rem;
   font-weight: 900;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+}
+
+.profile-hero-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  flex: 1;
+}
+
+.profile-hero-title {
+  font-family: var(--font-sports);
+  font-size: 1.12rem;
+  font-weight: 900;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.profile-hero-sub {
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--text-secondary);
 }
 
 .profile-stats-grid {
@@ -4062,6 +4119,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  min-width: 0;
 }
 
 .psb-label {
@@ -4075,21 +4133,36 @@ body {
 
 .psb-val {
   font-family: var(--font-sports);
-  font-size: 1.15rem;
+  font-size: 1.12rem;
   font-weight: 900;
   color: var(--text-main);
-  line-height: 1.1;
+  line-height: 1.15;
+}
+
+.psb-val.green {
+  color: var(--green-win);
+}
+
+.psb-val.red {
+  color: var(--red-alert);
+}
+
+.psb-val.gold {
+  color: var(--nhl-blue);
 }
 
 .psb-sub {
   font-family: var(--font-mono);
   font-size: 0.64rem;
   color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.profile-picks-header {
+.profile-section-title {
   font-family: var(--font-sports);
-  font-size: 0.76rem;
+  font-size: 0.78rem;
   font-weight: 900;
   color: var(--text-secondary);
   text-transform: uppercase;
@@ -4101,7 +4174,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  max-height: 250px;
+  max-height: 260px;
   overflow-y: auto;
   padding-right: 2px;
 }
@@ -4117,37 +4190,27 @@ body {
   border: 1px solid var(--border-subtle);
 }
 
-.profile-pick-row.hit {
-  border-left: 3.5px solid var(--green-win);
-}
-
-.profile-pick-row.miss {
-  border-left: 3.5px solid var(--red-alert);
-}
-
-.profile-pick-row.pending {
-  border-left: 3.5px solid var(--nhl-blue);
-}
-
 .ppr-left {
   display: flex;
   flex-direction: column;
   gap: 2px;
   min-width: 0;
+  flex: 1;
 }
 
 .ppr-week {
   font-family: var(--font-mono);
-  font-size: 0.65rem;
+  font-size: 0.64rem;
   font-weight: 700;
   color: var(--text-muted);
 }
 
 .ppr-pick {
   font-family: var(--font-sports);
-  font-size: 0.86rem;
+  font-size: 0.84rem;
   font-weight: 800;
   color: var(--text-main);
+  line-height: 1.2;
 }
 
 .ppr-right {
@@ -4175,6 +4238,7 @@ body {
   padding: 2px 7px;
   border-radius: 4px;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .ppr-badge.hit {
@@ -4189,8 +4253,175 @@ body {
   border: 1px solid var(--red-alert-border);
 }
 
-.ppr-badge.pending {
+.ppr-badge.live {
   background: var(--nhl-blue-subtle);
   color: var(--nhl-blue);
   border: 1px solid var(--nhl-blue-border);
+}
+
+/* ==========================================================================
+   16. GLOBAL TEXT SPACING, INLINE SVG & MOBILE ALIGNMENT POLISH
+   ========================================================================== */
+/* Prevent Tailwind's `svg { display: block }` from breaking inline icons onto a separate line */
+button svg,
+span svg,
+.week-status-text svg,
+#weekStatusText svg,
+.grade-btn svg,
+.legend-pill svg,
+.leg-status-tag svg,
+.nhl-btn svg,
+.status-msg svg {
+  display: inline-block !important;
+  vertical-align: -2px;
+  flex-shrink: 0;
+}
+
+/* Keep status pills, lock tags, and grade buttons on one crisp horizontal line */
+#weekStatusText,
+.week-status-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.leg-status-tag {
+  white-space: nowrap !important;
+  flex-shrink: 0;
+}
+
+.grade-btn {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  white-space: nowrap !important;
+}
+
+.grade-btn svg {
+  width: 11px;
+  height: 11px;
+}
+
+.standings-legend,
+.legend-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.legend-pill,
+.standings-header span {
+  white-space: nowrap;
+}
+
+/* Fix #4 TIE clipping in Leaderboard Rank Column */
+.rank-badge {
+  width: auto !important;
+  min-width: 28px;
+  white-space: nowrap !important;
+}
+
+.squad-table th:first-child,
+.squad-table td:first-child {
+  padding-right: 10px;
+  white-space: nowrap;
+}
+
+/* Keep Live Tracker Game Top Header & Player Titles from clipping or wrapping awkwardly */
+.tracker-game-top {
+  flex-wrap: nowrap !important;
+  gap: 8px;
+}
+
+.tracker-game-tag {
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.tracker-game-state-badge {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.tracker-player-title {
+  font-size: 0.96rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.tracker-matchup-bar {
+  gap: 10px;
+  flex-wrap: nowrap;
+}
+
+.tracker-matchup-bar > div:first-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tracker-matchup-bar > div:last-child {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Live Tracker Header alignment */
+.tracker-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tracker-header-sub {
+  max-width: none !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Schedule & Lines Card Header on Mobile */
+.schedule-header,
+.card-header-flex {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+}
+
+#scheduleDateSubtitle {
+  white-space: nowrap;
+}
+
+/* Top 3 Navigation Buttons mobile breathing room */
+@media (max-width: 480px) {
+  .view-nav-tabs {
+    gap: 6px;
+    padding: 6px 0 8px;
+  }
+  .view-tab-btn {
+    padding: 9px 4px !important;
+    font-size: 0.76rem !important;
+    gap: 4px !important;
+  }
+  .live-badge-mini {
+    display: none !important;
+  }
+  .tracker-live-scoreboard {
+    padding: 8px 10px;
+    gap: 6px;
+  }
+  .tls-score {
+    font-size: 1.15rem;
+  }
+  .tls-clock-pill {
+    font-size: 0.62rem;
+    padding: 2px 6px;
+  }
 }

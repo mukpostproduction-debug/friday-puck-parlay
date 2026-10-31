@@ -1298,7 +1298,7 @@ function resolvePlayerAccolade(p, ctx) {
     pillClass: 'contender',
     icon: 'puck',
     statTag: `${p.hits}-${p.misses} (${p.rate}%)`,
-    blurb: `${p.streakType}${p.streak} form • ${p.avgAmerican} avg odds`,
+    blurb: `${p.streakType}${p.streak} form • ${p.avgAmerican} avg`,
     statClass: p.rate >= 50 ? 'hit' : 'miss'
   };
 }
@@ -1576,7 +1576,7 @@ function renderStatsView() {
     profilesStrip.innerHTML = data.players.map(p => {
       const isDebut = p.total === 0;
       const winRateStr = isDebut ? 'Debut' : `${p.rate}% (${p.hits}-${p.misses})`;
-      const avgOddsStr = isDebut ? '--' : `Avg ${p.avgAmerican}`;
+      const avgOddsStr = isDebut ? '--' : `${p.avgAmerican}`;
       return `
         <div class="squad-profile-chip" onclick="openPlayerProfile('${p.name}')" title="View ${p.name}'s Full Betting Profile">
           <div class="spc-avatar">${p.initials}</div>
@@ -1864,12 +1864,13 @@ window.openPlayerProfile = function(boyName) {
   `;
 
   backdrop.classList.remove('hidden');
+  backdrop.classList.add('open');
 
   if (closeBtn) {
-    closeBtn.onclick = () => backdrop.classList.add('hidden');
+    closeBtn.onclick = () => backdrop.classList.remove('open');
   }
   backdrop.onclick = (e) => {
-    if (e.target === backdrop) backdrop.classList.add('hidden');
+    if (e.target === backdrop) backdrop.classList.remove('open');
   };
 };
 
@@ -2044,9 +2045,12 @@ function renderTracker() {
     const homeSogDisplay = game.homeSog ?? 0;
     const awayHitsDisplay = game.awayHits ?? 0;
     const homeHitsDisplay = game.homeHits ?? 0;
+    const shortStart = String(game.statusDetail || game.startTime || 'TONIGHT')
+      .replace(/^Fri(?:day)?,?\s+Oct\s+\d+\s*[•·-]\s*/i, '')
+      .replace(/^\d+\/\d+\s*-\s*/i, '');
     const clockBadgeText = isGameLive
       ? `● ${game.statusDetail || 'LIVE'}`
-      : (isGameFinal ? 'FINAL' : (game.statusDetail || game.startTime || 'TONIGHT'));
+      : (isGameFinal ? 'FINAL' : shortStart);
 
     gameBlock.innerHTML = `
       <div class="tracker-game-top">
@@ -2403,7 +2407,7 @@ async function fetchAllLiveStats(isManualClick = false) {
   }
 
   const nowStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-  if (DOM.syncStatus) DOM.syncStatus.textContent = `Last synced: ${nowStr} • Auto-updates every 20s`;
+  if (DOM.syncStatus) DOM.syncStatus.textContent = `Synced ${nowStr} • 20s live poll`;
   if (isManualClick && DOM.refreshIcon) {
     setTimeout(() => DOM.refreshIcon.classList.remove("animate-spin"), 350);
   }
