@@ -216,7 +216,11 @@ async function main() {
     }
   }
 
-  // Compute Squad Member Career Profiles
+  // Master Bettor 6-Week Rotation Order
+  const ROTATION_ORDER = ['Axel', 'Jackson', 'Will', 'Alex', 'Ben', 'Edward'];
+  const settledRotationCount = weeks.filter(w => w.result === 'win' || w.result === 'loss').length;
+
+  // Compute Squad Member Career Profiles & Individual Bankroll Ledger
   const profiles = SQUAD_MEMBERS.map(boy => {
     let hits = 0;
     let misses = 0;
@@ -230,11 +234,33 @@ async function main() {
     let bestHitPick = '';
     let flatStaked = 0;
     let flatReturned = 0;
+    let placedAmount = 0;
+    let ticketsPlacedCount = 0;
+    const ticketsPlacedWeeks = [];
+    let earningsShare = 0;
     const marketCounts = {};
     const marketHits = {};
     const pickHistory = [];
 
     weeks.forEach(w => {
+      const isSettledOrActive = w.result === 'win' || w.result === 'loss' || w.result === 'in-progress';
+      const wStake = Number(w.stake || 0);
+      if (isSettledOrActive && wStake > 0 && String(w.bettor || '').toLowerCase() === boy.name.toLowerCase()) {
+        placedAmount += wStake;
+        ticketsPlacedCount++;
+        ticketsPlacedWeeks.push({ weekNum: w.weekNum, dateStr: w.dateStr, stake: wStake, book: w.book });
+      }
+
+      if (w.result === 'win') {
+        const weekPayout = Number(w.actualPayout ?? w.potentialPayout ?? 0);
+        const uniqueBoys = Array.from(new Set((w.legs || []).map(l => l.boy).filter(Boolean)));
+        const splitCount = uniqueBoys.length > 0 ? uniqueBoys.length : SQUAD_MEMBERS.length;
+        const perBoyShare = Math.round(((weekPayout / splitCount) + 1e-9) * 100) / 100;
+        if (uniqueBoys.includes(boy.name) || uniqueBoys.length === 0) {
+          earningsShare = Math.round((earningsShare + perBoyShare + 1e-9) * 100) / 100;
+        }
+      }
+
       const leg = w.legs.find(l => l.boy === boy.name);
       if (!leg) return;
       const dec = americanToDecimal(leg.odds);
@@ -281,6 +307,15 @@ async function main() {
     const avgAllDec = allDecimals.length > 0 ? allDecimals.reduce((a, b) => a + b, 0) / allDecimals.length : 0;
     const netFlatPL = flatReturned - flatStaked;
     const flatRoiPct = flatStaked > 0 ? Math.round((netFlatPL / flatStaked) * 100) : 0;
+    const netPoolPL = Math.round(((earningsShare - placedAmount) + 1e-9) * 100) / 100;
+
+    const rotIdx = ROTATION_ORDER.indexOf(boy.name);
+    let nextTurnWeekNum = settledRotationCount + 1;
+    if (rotIdx >= 0) {
+      const currentCycleStart = Math.floor(settledRotationCount / ROTATION_ORDER.length) * ROTATION_ORDER.length;
+      const candidate = currentCycleStart + rotIdx + 1;
+      nextTurnWeekNum = candidate > settledRotationCount ? candidate : candidate + ROTATION_ORDER.length;
+    }
 
     let favMarket = 'Points';
     let bestCnt = 0;
@@ -306,6 +341,13 @@ async function main() {
       favMarketRecord: `${marketHits[favMarket] || 0}/${marketCounts[favMarket] || 0}`,
       flatBetPL: `${netFlatPL >= 0 ? '+' : '-'}$${Math.abs(netFlatPL).toFixed(2)}`,
       flatBetRoi: `${flatRoiPct >= 0 ? '+' : ''}${flatRoiPct}%`,
+      ticketsPlacedCount,
+      ticketsPlacedWeeks,
+      placedAmount: Number(placedAmount.toFixed(2)),
+      earningsShare: Number(earningsShare.toFixed(2)),
+      netPoolProfit: Number(netPoolPL.toFixed(2)),
+      netPoolProfitFormatted: `${netPoolPL >= 0 ? '+' : '-'}$${Math.abs(netPoolPL).toFixed(2)}`,
+      nextTurnWeekNum,
       pickHistory
     };
   });
@@ -367,18 +409,36 @@ async function main() {
   md.push(`| :--- | :--- |`);
   md.push(`| **Parlay Tickets Cashed** | **${poolSummary.parlaysWon} / ${poolSummary.settledParlays}** (\`${poolSummary.parlayWinPct}\`) |`);
   md.push(`| **Individual Legs Hit** | **${poolSummary.totalHitLegs} / ${poolSummary.totalGradedLegs}** (\`${poolSummary.overallLegWinPct}\`) |`);
-  md.push(`| **Total Pool Staked** | \`\\$${poolSummary.totalStaked.toFixed(2)}\` |`);
-  md.push(`| **Total Payouts Cashed** | \`\\$${poolSummary.totalCashed.toFixed(2)}\` |`);
+  md.push(`| **Total Pool Staked** | \`$${poolSummary.totalStaked.toFixed(2)}\` |`);
+  md.push(`| **Total Payouts Cashed** | \`$${poolSummary.totalCashed.toFixed(2)}\` |`);
   md.push(`| **Net Pool Profit** | **${poolSummary.netPoolProfit >= 0 ? '+' : '-'}\\$${Math.abs(poolSummary.netPoolProfit).toFixed(2)}** |`);
+  md.push(``);
+  md.push(`---`);
+  md.push(``);
+  md.push(`## 💵 INDIVIDUAL BANKROLL & EQUAL-SPLIT PROFIT LEDGER`);
+  md.push(`> **How Pool Accounting Works:** One Master Bettor fronts the full ticket stake on their sportsbook each Friday (6-week rotation: \`Axel -> Jackson -> Will -> Alex -> Ben -> Edward\`). Every winning ticket payout is split equally 6 ways across the squad, and **Net Profit = Equal Payout Share − Tickets Placed Out-of-Pocket**.`);
+  md.push(``);
+  md.push(`| Rotation | Squad Member | Tickets Placed | Out-of-Pocket Placed | Equal Payout Share | Actual Net Profit | Next Master Bettor Turn |`);
+  md.push(`| :---: | :--- | :--- | :---: | :---: | :---: | :---: |`);
+  const rotationProfiles = ROTATION_ORDER.map(name => profiles.find(p => p.name === name)).filter(Boolean);
+  rotationProfiles.forEach((p, idx) => {
+    const ticketDetail = p.ticketsPlacedCount > 0
+      ? `${p.ticketsPlacedCount}x (${p.ticketsPlacedWeeks.map(tw => `WK ${tw.weekNum}: $${tw.stake}`).join(', ')})`
+      : `0x (On Deck)`;
+    const netFormatted = `${p.netPoolProfit >= 0 ? '+' : '-'}\\$${Math.abs(p.netPoolProfit).toFixed(2)}`;
+    md.push(`| **#${idx + 1}** | **${p.name}** (${p.role}) | \`${ticketDetail}\` | \`$${p.placedAmount.toFixed(2)}\` | \`$${p.earningsShare.toFixed(2)}\` | **${netFormatted}** | \`WK ${p.nextTurnWeekNum}\` |`);
+  });
   md.push(``);
   md.push(`---`);
   md.push(``);
   md.push(`## 🏆 SQUAD STANDINGS & CAREER ANALYTICS`);
   md.push(``);
-  md.push(`| Rank | Squad Member | Win % | Record | Streak | Graded Avg Odds | All-Weeks Avg Odds | Best Odds Cashed | Solo \\$10 Flat P/L (ROI) | Favorite Market |`);
+  md.push(`| Rank | Squad Member | Win % | Record | Streak | Actual Net Profit | Placed / Earned | Graded Avg Odds | Best Odds Cashed | Favorite Market |`);
   md.push(`| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |`);
   profiles.forEach((p, idx) => {
-    md.push(`| **#${idx + 1}** | **${p.name}** (${p.role}) | **${p.winRate}%** | \`${p.hits}-${p.misses}\` | \`${p.streak}\` | \`${p.avgGradedOdds}\` | \`${p.avgAllOdds}\` | \`${p.bestHitOdds}\` | **${p.flatBetPL}** (\`${p.flatBetRoi}\`) | ${p.favMarket} (\`${p.favMarketRecord}\`) |`);
+    const netFormatted = `${p.netPoolProfit >= 0 ? '+' : '-'}\\$${Math.abs(p.netPoolProfit).toFixed(2)}`;
+    const flatFormatted = p.flatBetPL.replace('$', '\\$');
+    md.push(`| **#${idx + 1}** | **${p.name}** (${p.role}) | **${p.winRate}%** | \`${p.hits}-${p.misses}\` | \`${p.streak}\` | **${netFormatted}** | \`$${p.placedAmount.toFixed(2)}\` / \`$${p.earningsShare.toFixed(2)}\` | \`${p.avgGradedOdds}\` | \`${p.bestHitOdds}\` | ${p.favMarket} (\`${p.favMarketRecord}\`) |`);
   });
   md.push(``);
   md.push(`---`);
@@ -386,11 +446,17 @@ async function main() {
   md.push(`## 👤 INDIVIDUAL SQUAD BETTING PROFILES`);
   md.push(``);
   profiles.forEach(p => {
+    const netFormatted = `${p.netPoolProfit >= 0 ? '+' : '-'}\\$${Math.abs(p.netPoolProfit).toFixed(2)}`;
+    const flatFormatted = p.flatBetPL.replace('$', '\\$');
+    const placedLog = p.ticketsPlacedCount > 0
+      ? p.ticketsPlacedWeeks.map(tw => `WK ${tw.weekNum} ($${tw.stake.toFixed(2)})`).join(', ')
+      : `None yet (Next turn: WK ${p.nextTurnWeekNum})`;
     md.push(`### 🏒 ${p.name} (${p.role})`);
+    md.push(`- **Actual Pool Bankroll:** **${netFormatted}** Net Profit (\`$${p.earningsShare.toFixed(2)}\` Equal Share Won − \`$${p.placedAmount.toFixed(2)}\` Placed • Tickets: \`${placedLog}\`)`);
     md.push(`- **Career Record:** \`${p.hits}-${p.misses}\` (**${p.winRate}%** Win Rate) • **Active/Pending:** ${p.pending}`);
     md.push(`- **Average Odds:** \`${p.avgAllOdds}\` across all ${p.totalPicks} picks (\`${p.avgGradedOdds}\` on graded legs)`);
     md.push(`- **Best Odds Cashed:** \`${p.bestHitOdds}\` ${p.bestHitPick ? `— *${p.bestHitPick}*` : ''}`);
-    md.push(`- **Implied Solo \\$10 Flat-Bet Profit:** **${p.flatBetPL}** (\`${p.flatBetRoi}\` ROI)`);
+    md.push(`- **Implied Solo \\$10 Flat-Bet Profit:** **${flatFormatted}** (\`${p.flatBetRoi}\` ROI)`);
     md.push(`- **Favorite Market:** ${p.favMarket} (\`${p.favMarketRecord}\` cashed)`);
     md.push(`- **Complete Pick Log:**`);
     p.pickHistory.forEach(pk => {

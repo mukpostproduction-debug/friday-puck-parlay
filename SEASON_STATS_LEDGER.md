@@ -1,6 +1,6 @@
 # 🏒 FRIDAY NIGHT PUCK — OFFICIAL SEASON STATS LEDGER
 > **Maintained by the Friday Puck Stats Archivist Agent (`scripts/stats_agent.js`)**
-> **Last Synced:** Sat, 07 Nov 2026 04:10:33 GMT
+> **Last Synced:** Sat, 07 Nov 2026 04:23:07 GMT
 
 ---
 
@@ -10,32 +10,47 @@
 | :--- | :--- |
 | **Parlay Tickets Cashed** | **1 / 4** (`25.0%`) |
 | **Individual Legs Hit** | **15 / 23** (`65.2%`) |
-| **Total Pool Staked** | `\$115.00` |
-| **Total Payouts Cashed** | `\$454.41` |
+| **Total Pool Staked** | `$115.00` |
+| **Total Payouts Cashed** | `$454.41` |
 | **Net Pool Profit** | **+\$339.41** |
+
+---
+
+## 💵 INDIVIDUAL BANKROLL & EQUAL-SPLIT PROFIT LEDGER
+> **How Pool Accounting Works:** One Master Bettor fronts the full ticket stake on their sportsbook each Friday (6-week rotation: `Axel -> Jackson -> Will -> Alex -> Ben -> Edward`). Every winning ticket payout is split equally 6 ways across the squad, and **Net Profit = Equal Payout Share − Tickets Placed Out-of-Pocket**.
+
+| Rotation | Squad Member | Tickets Placed | Out-of-Pocket Placed | Equal Payout Share | Actual Net Profit | Next Master Bettor Turn |
+| :---: | :--- | :--- | :---: | :---: | :---: | :---: |
+| **#1** | **Axel** (Leg #3) | `1x (WK 1: $25)` | `$25.00` | `$75.74` | **+\$50.74** | `WK 7` |
+| **#2** | **Jackson** (Leg #1) | `1x (WK 2: $30)` | `$30.00` | `$75.74` | **+\$45.74** | `WK 8` |
+| **#3** | **Will** (Leg #6) | `1x (WK 3: $30)` | `$30.00` | `$75.74` | **+\$45.74** | `WK 9` |
+| **#4** | **Alex** (Leg #4) | `1x (WK 4: $30)` | `$30.00` | `$75.74` | **+\$45.74** | `WK 10` |
+| **#5** | **Ben** (Leg #5) | `0x (On Deck)` | `$0.00` | `$75.74` | **+\$75.74** | `WK 5` |
+| **#6** | **Edward** (Leg #2) | `0x (On Deck)` | `$0.00` | `$75.74` | **+\$75.74** | `WK 6` |
 
 ---
 
 ## 🏆 SQUAD STANDINGS & CAREER ANALYTICS
 
-| Rank | Squad Member | Win % | Record | Streak | Graded Avg Odds | All-Weeks Avg Odds | Best Odds Cashed | Solo \$10 Flat P/L (ROI) | Favorite Market |
+| Rank | Squad Member | Win % | Record | Streak | Actual Net Profit | Placed / Earned | Graded Avg Odds | Best Odds Cashed | Favorite Market |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
-| **#1** | **Axel** (Leg #3) | **100%** | `4-0` | `W4` | `-146` | `-146` | `-120` | **+$27.44** (`+69%`) | Points (`4/4`) |
-| **#2** | **Jackson** (Leg #1) | **75%** | `3-1` | `W1` | `-127` | `-127` | `-130` | **+$12.00** (`+30%`) | Shots on Goal (`3/4`) |
-| **#3** | **Will** (Leg #6) | **75%** | `3-1` | `W2` | `+117` | `+117` | `+155` | **+$31.20** (`+78%`) | Points (`1/2`) |
-| **#4** | **Edward** (Leg #2) | **67%** | `2-1` | `W1` | `-133` | `-133` | `-145` | **+$2.02** (`+7%`) | Points (`1/2`) |
-| **#5** | **Alex** (Leg #4) | **50%** | `2-2` | `W1` | `+126` | `+126` | `+110` | **+$2.00** (`+5%`) | Points (`1/1`) |
-| **#6** | **Ben** (Leg #5) | **25%** | `1-3` | `W1` | `-147` | `-147` | `-390` | **-$27.44** (`-69%`) | Points (`1/3`) |
+| **#1** | **Axel** (Leg #3) | **100%** | `4-0` | `W4` | **+\$50.74** | `$25.00` / `$75.74` | `-146` | `-120` | Points (`4/4`) |
+| **#2** | **Jackson** (Leg #1) | **75%** | `3-1` | `W1` | **+\$45.74** | `$30.00` / `$75.74` | `-127` | `-130` | Shots on Goal (`3/4`) |
+| **#3** | **Will** (Leg #6) | **75%** | `3-1` | `W2` | **+\$45.74** | `$30.00` / `$75.74` | `+117` | `+155` | Points (`1/2`) |
+| **#4** | **Edward** (Leg #2) | **67%** | `2-1` | `W1` | **+\$75.74** | `$0.00` / `$75.74` | `-133` | `-145` | Points (`1/2`) |
+| **#5** | **Alex** (Leg #4) | **50%** | `2-2` | `W1` | **+\$45.74** | `$30.00` / `$75.74` | `+126` | `+110` | Points (`1/1`) |
+| **#6** | **Ben** (Leg #5) | **25%** | `1-3` | `W1` | **+\$75.74** | `$0.00` / `$75.74` | `-147` | `-390` | Points (`1/3`) |
 
 ---
 
 ## 👤 INDIVIDUAL SQUAD BETTING PROFILES
 
 ### 🏒 Axel (Leg #3)
+- **Actual Pool Bankroll:** **+\$50.74** Net Profit (`$75.74` Equal Share Won − `$25.00` Placed • Tickets: `WK 1 ($25.00)`)
 - **Career Record:** `4-0` (**100%** Win Rate) • **Active/Pending:** 0
 - **Average Odds:** `-146` across all 4 picks (`-146` on graded legs)
 - **Best Odds Cashed:** `-120` — *Kent Johnson — 1+ Points (CBJ @ BUF)*
-- **Implied Solo \$10 Flat-Bet Profit:** **+$27.44** (`+69%` ROI)
+- **Implied Solo \$10 Flat-Bet Profit:** **+\$27.44** (`+69%` ROI)
 - **Favorite Market:** Points (`4/4` cashed)
 - **Complete Pick Log:**
   - **Week 1 (2026-10-16):** Brock Nelson 1+ Points (PIT @ COL) @ `-140` [Points] — **✅ HIT**
@@ -44,10 +59,11 @@
   - **Week 4 (2026-11-06):** Kent Johnson — 1+ Points (CBJ @ BUF) @ `-120` [Points] — **✅ HIT**
 
 ### 🏒 Jackson (Leg #1)
+- **Actual Pool Bankroll:** **+\$45.74** Net Profit (`$75.74` Equal Share Won − `$30.00` Placed • Tickets: `WK 2 ($30.00)`)
 - **Career Record:** `3-1` (**75%** Win Rate) • **Active/Pending:** 0
 - **Average Odds:** `-127` across all 4 picks (`-127` on graded legs)
 - **Best Odds Cashed:** `-130` — *Nathan MacKinnon 4+ Shots (PIT @ COL)*
-- **Implied Solo \$10 Flat-Bet Profit:** **+$12.00** (`+30%` ROI)
+- **Implied Solo \$10 Flat-Bet Profit:** **+\$12.00** (`+30%` ROI)
 - **Favorite Market:** Shots on Goal (`3/4` cashed)
 - **Complete Pick Log:**
   - **Week 1 (2026-10-16):** Nathan MacKinnon 4+ Shots (PIT @ COL) @ `-130` [Shots on Goal] — **✅ HIT**
@@ -56,10 +72,11 @@
   - **Week 4 (2026-11-06):** Matt Boldy — 3+ Shots on Goal (SJS @ MIN) @ `-135` [Shots on Goal] — **✅ HIT**
 
 ### 🏒 Will (Leg #6)
+- **Actual Pool Bankroll:** **+\$45.74** Net Profit (`$75.74` Equal Share Won − `$30.00` Placed • Tickets: `WK 3 ($30.00)`)
 - **Career Record:** `3-1` (**75%** Win Rate) • **Active/Pending:** 0
 - **Average Odds:** `+117` across all 4 picks (`+117` on graded legs)
 - **Best Odds Cashed:** `+155` — *Chandler Stephenson — Over 0.5 Assists (SEA @ CGY)*
-- **Implied Solo \$10 Flat-Bet Profit:** **+$31.20** (`+78%` ROI)
+- **Implied Solo \$10 Flat-Bet Profit:** **+\$31.20** (`+78%` ROI)
 - **Favorite Market:** Points (`1/2` cashed)
 - **Complete Pick Log:**
   - **Week 1 (2026-10-16):** Pavel Zacha 1+ Points (BOS @ ANA) @ `+120` [Points] — **✅ HIT**
@@ -68,10 +85,11 @@
   - **Week 4 (2026-11-06):** Cutter Gauthier — Anytime Goal Scorer (ANA @ CGY) @ `+137` [Goals] — **✅ HIT**
 
 ### 🏒 Edward (Leg #2)
+- **Actual Pool Bankroll:** **+\$75.74** Net Profit (`$75.74` Equal Share Won − `$0.00` Placed • Tickets: `None yet (Next turn: WK 6)`)
 - **Career Record:** `2-1` (**67%** Win Rate) • **Active/Pending:** 0
 - **Average Odds:** `-133` across all 3 picks (`-133` on graded legs)
 - **Best Odds Cashed:** `-145` — *Cole Caufield Over 3.5 SOG (MTL @ CHI)*
-- **Implied Solo \$10 Flat-Bet Profit:** **+$2.02** (`+7%` ROI)
+- **Implied Solo \$10 Flat-Bet Profit:** **+\$2.02** (`+7%` ROI)
 - **Favorite Market:** Points (`1/2` cashed)
 - **Complete Pick Log:**
   - **Week 2 (2026-10-23):** Cole Caufield Over 3.5 SOG (MTL @ CHI) @ `-145` [Shots on Goal] — **✅ HIT**
@@ -79,10 +97,11 @@
   - **Week 4 (2026-11-06):** Beckett Sennecke — 1+ Points (ANA @ CGY) @ `-195` [Points] — **✅ HIT**
 
 ### 🏒 Alex (Leg #4)
+- **Actual Pool Bankroll:** **+\$45.74** Net Profit (`$75.74` Equal Share Won − `$30.00` Placed • Tickets: `WK 4 ($30.00)`)
 - **Career Record:** `2-2` (**50%** Win Rate) • **Active/Pending:** 0
 - **Average Odds:** `+126` across all 4 picks (`+126` on graded legs)
 - **Best Odds Cashed:** `+110` — *Beckett Sennecke 1+ Points (BOS @ ANA)*
-- **Implied Solo \$10 Flat-Bet Profit:** **+$2.00** (`+5%` ROI)
+- **Implied Solo \$10 Flat-Bet Profit:** **+\$2.00** (`+5%` ROI)
 - **Favorite Market:** Points (`1/1` cashed)
 - **Complete Pick Log:**
   - **Week 1 (2026-10-16):** Beckett Sennecke 1+ Points (BOS @ ANA) @ `+110` [Points] — **✅ HIT**
@@ -91,10 +110,11 @@
   - **Week 4 (2026-11-06):** Minnesota Wild -1.5 Puck Line (SJS @ MIN) @ `+110` [Puck Line] — **✅ HIT**
 
 ### 🏒 Ben (Leg #5)
+- **Actual Pool Bankroll:** **+\$75.74** Net Profit (`$75.74` Equal Share Won − `$0.00` Placed • Tickets: `None yet (Next turn: WK 5)`)
 - **Career Record:** `1-3` (**25%** Win Rate) • **Active/Pending:** 0
 - **Average Odds:** `-147` across all 4 picks (`-147` on graded legs)
 - **Best Odds Cashed:** `-390` — *Quinn Hughes — 1+ Points (SJS @ MIN)*
-- **Implied Solo \$10 Flat-Bet Profit:** **-$27.44** (`-69%` ROI)
+- **Implied Solo \$10 Flat-Bet Profit:** **-\$27.44** (`-69%` ROI)
 - **Favorite Market:** Points (`1/3` cashed)
 - **Complete Pick Log:**
   - **Week 1 (2026-10-16):** Leo Carlsson 1+ Points (BOS @ ANA) @ `-115` [Points] — **❌ MISS**

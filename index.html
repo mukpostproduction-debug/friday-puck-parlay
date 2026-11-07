@@ -25,7 +25,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
 
-  <link rel="stylesheet" href="style.css?v=5.7" />
+  <link rel="stylesheet" href="style.css?v=5.8" />
 </head>
 <body>
   <!-- TOP GLOBAL NAVIGATION BAR (BET365 / BROADCAST DARK AESTHETIC) -->
@@ -446,12 +446,31 @@
           </div>
         </div>
 
+        <!-- SQUAD BANKROLL & INDIVIDUAL PROFIT LEDGER -->
+        <div class="bankroll-section b365-card">
+          <div class="section-title-bar bankroll-title-bar">
+            <div>
+              <h3 class="section-title">SQUAD BANKROLL &amp; INDIVIDUAL EARNINGS</h3>
+              <span class="section-subtitle">Tracks every boy's out-of-pocket tickets placed vs. equal 6-way parlay payout splits</span>
+            </div>
+            <div class="bankroll-pool-pill" id="bankrollPoolSummaryPill">
+              Pool Profit: +$339.41
+            </div>
+          </div>
+
+          <div class="bankroll-kpi-strip" id="bankrollKpiStrip"></div>
+
+          <div class="bankroll-cards-grid" id="bankrollCardsGrid"></div>
+
+          <div class="bankroll-settlement-note" id="bankrollSettlementNote"></div>
+        </div>
+
         <!-- THE 6-PLAYER LEADERBOARD TABLE -->
         <div class="leaderboard-section b365-card">
           <div class="section-title-bar">
             <div>
               <h3 class="section-title">THE SQUAD STANDINGS</h3>
-              <span class="section-subtitle">Tap any boy's name or profile chip to inspect his full pick history, odds &amp; analytics</span>
+              <span class="section-subtitle">Tap any boy's name or profile chip to inspect his full pick history, odds &amp; bankroll</span>
             </div>
             <div class="legend-pills">
               <span class="legend-pill hit"><svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Hit</span>
@@ -468,10 +487,11 @@
                 <tr>
                   <th>RANK</th>
                   <th>BETTOR</th>
+                  <th>NET PROFIT</th>
+                  <th>PLACED</th>
+                  <th>EARNED</th>
                   <th>HIT RATE</th>
                   <th>RECORD</th>
-                  <th>HITS</th>
-                  <th>MISSES</th>
                   <th>STREAK</th>
                   <th>AVG ODDS</th>
                   <th>TITLE</th>
@@ -809,6 +829,6 @@
 
   <!-- Main JavaScript Controller -->
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-  <script src="app.js?v=5.7"></script>
+  <script src="app.js?v=5.8"></script>
 </body>
 </html>

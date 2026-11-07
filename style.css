@@ -4425,3 +4425,267 @@ span svg,
     padding: 2px 6px;
   }
 }
+
+
+/* ==========================================================================
+   SQUAD BANKROLL & INDIVIDUAL EARNINGS LEDGER
+   ========================================================================== */
+.bankroll-section {
+  background: #ffffff;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-subtle);
+  padding: 18px 20px;
+}
+
+.bankroll-title-bar {
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.bankroll-pool-pill {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: var(--green-win-light);
+  color: var(--green-win);
+  border: 1px solid var(--green-win-border);
+  white-space: nowrap;
+}
+
+.bankroll-pool-pill.negative {
+  background: var(--red-alert-light);
+  color: var(--red-alert);
+  border-color: var(--red-alert-border);
+}
+
+.bankroll-kpi-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.bankroll-kpi-box {
+  background: var(--nhl-subcard);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.bkpi-label {
+  font-family: var(--font-sports);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.bkpi-val {
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  font-weight: 900;
+  color: var(--text-main);
+}
+
+.bkpi-val.green {
+  color: var(--green-win);
+}
+
+.bkpi-val.red {
+  color: var(--red-alert);
+}
+
+.bkpi-sub {
+  font-size: 0.68rem;
+  color: var(--text-secondary);
+}
+
+.bankroll-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.bankroll-player-card {
+  background: #ffffff;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 13px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  cursor: pointer;
+  transition: transform 0.14s ease, border-color 0.14s ease, box-shadow 0.14s ease;
+}
+
+.bankroll-player-card:hover {
+  border-color: var(--border-medium);
+  box-shadow: 0 4px 12px rgba(17, 20, 24, 0.06);
+  transform: translateY(-1px);
+}
+
+.bankroll-player-card.positive {
+  border-left: 3px solid var(--green-win);
+}
+
+.bankroll-player-card.negative {
+  border-left: 3px solid var(--red-alert);
+}
+
+.bpc-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.bpc-person {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+}
+
+.bpc-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-xs);
+  background: var(--nhl-subcard);
+  border: 1px solid var(--border-medium);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-sports);
+  font-weight: 900;
+  font-size: 0.88rem;
+  color: var(--text-main);
+  flex-shrink: 0;
+}
+
+.bpc-name-wrap {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.bpc-name {
+  font-family: var(--font-sports);
+  font-size: 1.02rem;
+  font-weight: 900;
+  color: var(--text-main);
+  line-height: 1.1;
+}
+
+.bpc-turn-tag {
+  font-family: var(--font-mono);
+  font-size: 0.67rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.bpc-turn-tag.pending-turn {
+  color: var(--gold-odds);
+}
+
+.bpc-net-pill {
+  font-family: var(--font-mono);
+  font-size: 0.92rem;
+  font-weight: 900;
+  padding: 4px 9px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.bpc-net-pill.green {
+  background: var(--green-win-light);
+  color: var(--green-win);
+  border: 1px solid var(--green-win-border);
+}
+
+.bpc-net-pill.red {
+  background: var(--red-alert-light);
+  color: var(--red-alert);
+  border: 1px solid var(--red-alert-border);
+}
+
+.bpc-ledger-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  background: var(--nhl-subcard);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  padding: 8px 10px;
+}
+
+.bpc-col {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.bpc-col.right {
+  text-align: right;
+}
+
+.bpc-col-label {
+  font-family: var(--font-sports);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.bpc-col-val {
+  font-family: var(--font-mono);
+  font-size: 0.80rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.bpc-col-val.green {
+  color: var(--green-win);
+}
+
+.bpc-col-val.red {
+  color: var(--red-alert);
+}
+
+.bankroll-settlement-note {
+  margin-top: 12px;
+  padding: 10px 13px;
+  border-radius: var(--radius-sm);
+  background: var(--green-win-light);
+  border: 1px solid var(--green-win-border);
+  font-size: 0.78rem;
+  color: var(--text-main);
+  line-height: 1.45;
+}
+
+@media (max-width: 900px) {
+  .bankroll-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .bankroll-kpi-strip {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .bankroll-section {
+    padding: 14px;
+  }
+  .bankroll-cards-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}

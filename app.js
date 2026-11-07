@@ -1550,6 +1550,12 @@ function toggleLegResult(weekIndex, legIndex, targetResult) {
     week.result = 'loss';
   } else {
     week.result = 'win';
+    if (!week.payout || week.payout <= 0) {
+      const canonicalSlip = DEFAULT_MASTER_SLIPS[week.dateStr];
+      week.payout = canonicalSlip?.potential_payout
+        ? parseFloat(canonicalSlip.potential_payout)
+        : Number(((week.stake || 30) * americanToDecimal(week.totalOdds)).toFixed(2));
+    }
   }
 
   saveStatsHistory();
@@ -1698,11 +1704,13 @@ function resolvePlayerAccolade(p, ctx) {
 // Compute All Squad Analytics
 function computeSquadAnalytics() {
   const playerStats = {};
-  SQUAD.forEach(boy => {
+  SQUAD.forEach((boy, rotIdx) => {
     playerStats[boy.name] = {
       name: boy.name,
       initials: boy.initials,
       color: boy.color,
+      role: `Leg #${rotIdx + 1}`,
+      rotIdx: rotIdx,
       total: 0,
       hits: 0,
       misses: 0,
@@ -1715,17 +1723,62 @@ function computeSquadAnalytics() {
       lastMissedPick: '',
       parlaysSold: 0,
       parlaysWon: 0,
-      plusMoneyHits: 0
+      plusMoneyHits: 0,
+      ticketsPlacedCount: 0,
+      ticketsPlacedWeeks: [],
+      placedAmount: 0,
+      earningsShare: 0,
+      winningSharesCount: 0,
+      netPoolPL: 0,
+      nextTurnWeekNum: rotIdx + 1
     };
   });
 
   // Iterate chronologically through all weeks
   const sortedWeeks = [...state.statsHistory].sort((a, b) => a.weekNum - b.weekNum);
+  const winningWeeksSummary = [];
 
   sortedWeeks.forEach(w => {
-    if (w.result === 'win' && w.bettor && playerStats[w.bettor]) {
-      playerStats[w.bettor].parlaysWon++;
+    const isSettledWeek = w.result === 'win' || w.result === 'loss';
+    const weekStake = Number(w.stake || 30);
+
+    if (isSettledWeek && w.bettor && playerStats[w.bettor]) {
+      playerStats[w.bettor].ticketsPlacedCount += 1;
+      playerStats[w.bettor].placedAmount += weekStake;
+      playerStats[w.bettor].ticketsPlacedWeeks.push(`W${w.weekNum} ($${weekStake})`);
     }
+
+    if (w.result === 'win') {
+      if (w.bettor && playerStats[w.bettor]) {
+        playerStats[w.bettor].parlaysWon++;
+      }
+      const weekPayout = (w.payout && w.payout > 0)
+        ? Number(w.payout)
+        : Number((weekStake * americanToDecimal(w.totalOdds)).toFixed(2));
+      const participants = (w.legs || [])
+        .map(l => l.boy)
+        .filter(boyName => !!playerStats[boyName]);
+      const uniqueParticipants = [...new Set(participants)];
+      const splitCount = uniqueParticipants.length > 0 ? uniqueParticipants.length : SQUAD.length;
+      const perBoyShare = Math.round(((weekPayout / splitCount) + 1e-9) * 100) / 100;
+
+      uniqueParticipants.forEach(boyName => {
+        playerStats[boyName].earningsShare = Math.round((playerStats[boyName].earningsShare + perBoyShare + 1e-9) * 100) / 100;
+        playerStats[boyName].winningSharesCount += 1;
+      });
+
+      winningWeeksSummary.push({
+        weekNum: w.weekNum,
+        dateStr: w.dateStr,
+        bettor: w.bettor,
+        stake: weekStake,
+        payout: weekPayout,
+        splitCount,
+        perBoyShare,
+        otherBoys: uniqueParticipants.filter(n => n !== w.bettor)
+      });
+    }
+
     w.legs.forEach(leg => {
       const p = playerStats[leg.boy];
       if (!p) return;
@@ -1772,19 +1825,29 @@ function computeSquadAnalytics() {
   const targetFri = state.currentFriday || getActiveFridayDate();
   const bettorThisWeek = getBettorForFriday(targetFri);
   const currentWeekNum = getFridayDiffWeeks(targetFri) + 1;
+  const settledWeeksCount = sortedWeeks.filter(w => w.result === 'win' || w.result === 'loss').length;
 
-  // Calculate percentages and averages
+  // Calculate percentages, averages, and individual net bankroll profit
   const list = Object.values(playerStats).map(p => {
     const rate = p.total > 0 ? Math.round((p.hits / p.total) * 100) : 0;
     const avgDec = p.oddsList.length > 0 ? (p.oddsList.reduce((a, b) => a + b, 0) / p.oddsList.length) : 1.8;
     const avgAmerican = decimalToAmerican(avgDec);
     const isBettorOnDeck = (p.name === bettorThisWeek.name);
+    const netPoolPL = Math.round(((p.earningsShare - p.placedAmount) + 1e-9) * 100) / 100;
+
+    let nextTurn = p.rotIdx + 1;
+    while (nextTurn <= settledWeeksCount) {
+      nextTurn += SQUAD.length;
+    }
+
     return {
       ...p,
       rate,
       avgDec,
       avgAmerican,
-      isBettorOnDeck
+      isBettorOnDeck,
+      netPoolPL,
+      nextTurnWeekNum: nextTurn
     };
   });
 
@@ -1918,6 +1981,7 @@ function computeSquadAnalytics() {
     totalWagered,
     totalWon,
     netPoolProfit,
+    winningWeeksSummary,
     totalLegsCount,
     totalHitsCount,
     pickWinRate,
@@ -1931,6 +1995,12 @@ function computeSquadAnalytics() {
   };
 }
 
+function formatSignedCurrency(val) {
+  const num = Number(val || 0);
+  if (Math.abs(num) < 0.005) return '$0.00';
+  return `${num >= 0 ? '+' : '-'}$${Math.abs(num).toFixed(2)}`;
+}
+
 function renderStatsView() {
   const data = computeSquadAnalytics();
 
@@ -1938,7 +2008,7 @@ function renderStatsView() {
   const wageredLabelEl = DOM.statsTotalWagered?.parentElement?.querySelector('.meta-label');
   if (data.totalWon > 0) {
     if (wageredLabelEl) wageredLabelEl.textContent = 'Pool Profit';
-    DOM.statsTotalWagered.textContent = `${data.netPoolProfit >= 0 ? '+' : '-'}$${Math.abs(data.netPoolProfit).toFixed(2)}`;
+    DOM.statsTotalWagered.textContent = formatSignedCurrency(data.netPoolProfit);
     DOM.statsTotalWagered.className = `meta-val ${data.netPoolProfit >= 0 ? 'b365-green' : 'red'}`;
   } else {
     if (wageredLabelEl) wageredLabelEl.textContent = 'Season Wagered';
@@ -1990,26 +2060,124 @@ function renderStatsView() {
   if (DOM.trophyChalkLabel) DOM.trophyChalkLabel.textContent = 'THE PUCK ANCHOR';
   if (DOM.trophyChalkNote) DOM.trophyChalkNote.textContent = data.anchorData.note;
 
-  // 0. Squad Member Profile Strip (Click any guy's name to view his full betting profile)
-  const profilesStrip = document.getElementById('squadProfilesStrip');
-  if (profilesStrip) {
-    profilesStrip.innerHTML = data.players.map(p => {
-      const isDebut = p.total === 0;
-      const winRateStr = isDebut ? 'Debut' : `${p.rate}% (${p.hits}-${p.misses})`;
-      const avgOddsStr = isDebut ? '--' : `${p.avgAmerican}`;
+  // Squad Bankroll & Individual Earnings Ledger
+  const bankrollSummaryPill = document.getElementById('bankrollPoolSummaryPill');
+  const bankrollKpiStrip = document.getElementById('bankrollKpiStrip');
+  const bankrollCardsGrid = document.getElementById('bankrollCardsGrid');
+  const bankrollSettlementNote = document.getElementById('bankrollSettlementNote');
+
+  if (bankrollSummaryPill) {
+    bankrollSummaryPill.textContent = `Net Pool Profit: ${formatSignedCurrency(data.netPoolProfit)}`;
+    bankrollSummaryPill.className = `bankroll-pool-pill ${data.netPoolProfit >= 0 ? '' : 'negative'}`;
+  }
+
+  if (bankrollKpiStrip) {
+    const perBoyEqualShare = data.totalWon > 0 ? (Math.round(((data.totalWon / SQUAD.length) + 1e-9) * 100) / 100) : 0;
+    const poolRoiPct = data.totalWagered > 0 ? Math.round((data.netPoolProfit / data.totalWagered) * 100) : 0;
+    bankrollKpiStrip.innerHTML = `
+      <div class="bankroll-kpi-box">
+        <span class="bkpi-label">Total Tickets Placed</span>
+        <span class="bkpi-val">$${data.totalWagered.toFixed(2)}</span>
+        <span class="bkpi-sub">${data.totalParlays} Friday Ticket${data.totalParlays === 1 ? '' : 's'} Staked</span>
+      </div>
+      <div class="bankroll-kpi-box">
+        <span class="bkpi-label">Total Parlay Winnings</span>
+        <span class="bkpi-val ${data.totalWon > 0 ? 'green' : ''}">$${data.totalWon.toFixed(2)}</span>
+        <span class="bkpi-sub">${data.wonParlays} of ${data.totalParlays} Ticket${data.totalParlays === 1 ? '' : 's'} Cashed</span>
+      </div>
+      <div class="bankroll-kpi-box">
+        <span class="bkpi-label">Equal Payout / Boy</span>
+        <span class="bkpi-val ${perBoyEqualShare > 0 ? 'green' : ''}">$${perBoyEqualShare.toFixed(2)}</span>
+        <span class="bkpi-sub">${data.totalWon > 0 ? `$${data.totalWon.toFixed(2)} ÷ 6 Boys` : 'Split equally on win'}</span>
+      </div>
+      <div class="bankroll-kpi-box">
+        <span class="bkpi-label">Net Squad Profit</span>
+        <span class="bkpi-val ${data.netPoolProfit >= 0 ? 'green' : 'red'}">${formatSignedCurrency(data.netPoolProfit)}</span>
+        <span class="bkpi-sub">${poolRoiPct >= 0 ? '+' : ''}${poolRoiPct}% Season Pool ROI</span>
+      </div>
+    `;
+  }
+
+  if (bankrollCardsGrid) {
+    const rotationOrderedPlayers = SQUAD.map(b => data.players.find(pl => pl.name === b.name)).filter(Boolean);
+    bankrollCardsGrid.innerHTML = rotationOrderedPlayers.map(p => {
+      const isPositive = p.netPoolPL >= 0;
+      const netStr = formatSignedCurrency(p.netPoolPL);
+      const placedStr = p.placedAmount > 0 ? `-$${p.placedAmount.toFixed(2)}` : '$0.00';
+      const earnedStr = p.earningsShare > 0 ? `+$${p.earningsShare.toFixed(2)}` : '$0.00';
+      const turnTagText = p.ticketsPlacedCount > 0
+        ? `Placed ${p.ticketsPlacedWeeks.join(', ')} • Next WK ${p.nextTurnWeekNum}`
+        : `$0 Placed Yet • On Deck WK ${p.nextTurnWeekNum}`;
+
       return `
-        <div class="squad-profile-chip" onclick="openPlayerProfile('${p.name}')" title="View ${p.name}'s Full Betting Profile">
-          <div class="spc-avatar">${p.initials}</div>
-          <div class="spc-info">
-            <div class="spc-name">${p.name} <span>↗</span></div>
-            <div class="spc-meta">${winRateStr} • ${avgOddsStr}</div>
+        <div class="bankroll-player-card ${isPositive ? 'positive' : 'negative'}" onclick="openPlayerProfile('${p.name}')" title="Tap to inspect ${p.name}'s full bankroll & pick history">
+          <div class="bpc-top">
+            <div class="bpc-person">
+              <div class="bpc-avatar">${p.initials}</div>
+              <div class="bpc-name-wrap">
+                <span class="bpc-name">${p.name}</span>
+                <span class="bpc-turn-tag ${p.ticketsPlacedCount === 0 ? 'pending-turn' : ''}">${turnTagText}</span>
+              </div>
+            </div>
+            <span class="bpc-net-pill ${isPositive ? 'green' : 'red'}">${netStr}</span>
+          </div>
+
+          <div class="bpc-ledger-row">
+            <div class="bpc-col">
+              <span class="bpc-col-label">Placed (${p.ticketsPlacedCount})</span>
+              <span class="bpc-col-val ${p.placedAmount > 0 ? 'red' : ''}">${placedStr}</span>
+            </div>
+            <div class="bpc-col">
+              <span class="bpc-col-label">Split Won</span>
+              <span class="bpc-col-val ${p.earningsShare > 0 ? 'green' : ''}">${earnedStr}</span>
+            </div>
+            <div class="bpc-col right">
+              <span class="bpc-col-label">Net Profit</span>
+              <span class="bpc-col-val ${isPositive ? 'green' : 'red'}">${netStr}</span>
+            </div>
           </div>
         </div>
       `;
     }).join('');
   }
 
-  // Leaderboard table (with tie-aware rank display)
+  if (bankrollSettlementNote) {
+    if (data.winningWeeksSummary && data.winningWeeksSummary.length > 0) {
+      bankrollSettlementNote.style.display = 'block';
+      bankrollSettlementNote.innerHTML = data.winningWeeksSummary.map(win => {
+        const shareStr = win.perBoyShare.toFixed(2);
+        const bettorNetOnWeek = (win.perBoyShare - win.stake).toFixed(2);
+        const othersStr = win.otherBoys.length > 1
+          ? `${win.otherBoys.slice(0, -1).join(', ')} & ${win.otherBoys[win.otherBoys.length - 1]}`
+          : (win.otherBoys[0] || 'the squad');
+        return `<strong>💸 Week ${win.weekNum} Cashout Split ($${win.payout.toFixed(2)} ÷ ${win.splitCount} boys = $${shareStr} each):</strong> <strong>${win.bettor}</strong> placed the $${win.stake.toFixed(2)} ticket, keeps his <strong>$${shareStr}</strong> share (<strong>+$${bettorNetOnWeek}</strong> net on W${win.weekNum}), and sends <strong>$${shareStr}</strong> each to ${othersStr}.`;
+      }).join('<br/>');
+    } else {
+      bankrollSettlementNote.style.display = 'none';
+      bankrollSettlementNote.innerHTML = '';
+    }
+  }
+
+  // 0. Squad Member Profile Strip (Click any guy's name to view his full betting profile)
+  const profilesStrip = document.getElementById('squadProfilesStrip');
+  if (profilesStrip) {
+    profilesStrip.innerHTML = data.players.map(p => {
+      const isDebut = p.total === 0;
+      const winRateStr = isDebut ? 'Debut' : `${p.rate}% (${p.hits}-${p.misses})`;
+      const netStr = formatSignedCurrency(p.netPoolPL);
+      return `
+        <div class="squad-profile-chip" onclick="openPlayerProfile('${p.name}')" title="View ${p.name}'s Full Betting Profile">
+          <div class="spc-avatar">${p.initials}</div>
+          <div class="spc-info">
+            <div class="spc-name">${p.name} <span>↗</span></div>
+            <div class="spc-meta">${winRateStr} • <strong style="color:${p.netPoolPL >= 0 ? 'var(--green-win)' : 'var(--red-alert)'};">${netStr}</strong></div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Leaderboard table (with tie-aware rank display + individual bankroll columns)
   let currentRank = 1;
   DOM.leaderboardTbody.innerHTML = data.players.map((p, idx) => {
     const isDebut = p.total === 0;
@@ -2026,6 +2194,9 @@ function renderStatsView() {
 
     const titlePill = `<span class="title-tag-pill ${p.accolade.pillClass}">${getIcon(p.accolade.icon)} ${p.accolade.title}</span>`;
     const streakDisplay = isDebut ? '--' : (p.streak > 0 ? `${p.streakType}${p.streak}` : '--');
+    const netStr = formatSignedCurrency(p.netPoolPL);
+    const placedDisplay = p.placedAmount > 0 ? `$${p.placedAmount.toFixed(0)} (${p.ticketsPlacedCount})` : `$0 (WK ${p.nextTurnWeekNum})`;
+    const earnedDisplay = `$${p.earningsShare.toFixed(2)}`;
 
     return `
       <tr>
@@ -2036,6 +2207,9 @@ function renderStatsView() {
             <span class="player-name-link">${p.name}</span>
           </div>
         </td>
+        <td class="font-mono font-bold ${p.netPoolPL >= 0 ? 'b365-green' : 'text-red-500'}">${netStr}</td>
+        <td class="font-mono text-zinc-500">${placedDisplay}</td>
+        <td class="font-mono font-bold ${p.earningsShare > 0 ? 'b365-green' : ''}">${earnedDisplay}</td>
         <td>
           <div class="hit-rate-cell">
             ${isDebut ? '<span class="rate-num" style="font-size:0.75rem; color:var(--text-secondary);">Debut W2</span>' : `
@@ -2047,10 +2221,8 @@ function renderStatsView() {
           </div>
         </td>
         <td class="font-mono font-bold">${isDebut ? '0-0' : `${p.hits}-${p.misses}`}</td>
-        <td class="b365-green font-mono font-bold">${p.hits}</td>
-        <td class="text-red-400 font-mono font-bold">${p.misses}</td>
         <td class="font-mono font-bold">${streakDisplay}</td>
-        <td class="font-mono text-zinc-300">${isDebut ? '--' : p.avgAmerican}</td>
+        <td class="font-mono text-zinc-500">${isDebut ? '--' : p.avgAmerican}</td>
         <td>${titlePill}</td>
       </tr>
     `;
@@ -2062,7 +2234,7 @@ function renderStatsView() {
     const totalLegs = week.legs.length;
     const isWin = week.result === 'win';
     const isLoss = week.result === 'loss';
-    const winPayoutLabel = week.payout ? ` ($${week.payout.toFixed(2)})` : '';
+    const winPayoutLabel = week.payout ? ` ($${week.payout.toFixed(2)} • $${(Math.round(((week.payout / (totalLegs || 6)) + 1e-9) * 100) / 100).toFixed(2)}/boy)` : '';
     const statusText = isWin
       ? `${getIcon('checkCircle')} TICKET CASHED!${winPayoutLabel}`
       : (isLoss ? `PARLAY SOLD (${hitsCount}/${totalLegs} HITS)` : `IN PROGRESS (WEEK ${week.weekNum})`);
@@ -2174,9 +2346,6 @@ window.openPlayerProfile = function(boyName) {
     : 0;
   const overallAvgAmerican = overallAvgDec > 0 ? decimalToAmerican(overallAvgDec) : '--';
 
-  // Implied $10 Flat-Bet Unit Profit & ROI on graded picks + Best Hit Odds
-  let flatStaked = 0;
-  let flatReturned = 0;
   let bestHitDec = 0;
   let bestHitOddsStr = p.maxWinningOddsStr || '--';
   let bestHitPick = '';
@@ -2187,21 +2356,13 @@ window.openPlayerProfile = function(boyName) {
     marketCounts[pk.market] = (marketCounts[pk.market] || 0) + 1;
     if (pk.result === 'hit') {
       marketHits[pk.market] = (marketHits[pk.market] || 0) + 1;
-      flatStaked += 10;
-      flatReturned += 10 * pk.decimal;
       if (pk.decimal > bestHitDec) {
         bestHitDec = pk.decimal;
         bestHitOddsStr = pk.odds;
         bestHitPick = pk.pick;
       }
-    } else if (pk.result === 'miss') {
-      flatStaked += 10;
     }
   });
-
-  const netProfit = flatReturned - flatStaked;
-  const netProfitStr = flatStaked === 0 ? '$0.00' : `${netProfit >= 0 ? '+' : '-'}$${Math.abs(netProfit).toFixed(2)}`;
-  const roiPct = flatStaked > 0 ? Math.round((netProfit / flatStaked) * 100) : 0;
 
   let favMarket = 'Points';
   let bestMarketCount = 0;
@@ -2213,10 +2374,11 @@ window.openPlayerProfile = function(boyName) {
   });
   const favMarketRecord = `${marketHits[favMarket] || 0}/${marketCounts[favMarket] || 0}`;
 
-  const weeksAsMaster = sortedWeeks.filter(w => w.bettor === boyName).length +
-    (!activeWeekInHistory && getBettorForFriday(state.currentFriday).name === boyName ? 1 : 0);
-
   const streakStr = p.total === 0 ? 'Debut' : (p.streak > 0 ? `${p.streakType}${p.streak}` : 'Even');
+  const poolNetStr = formatSignedCurrency(p.netPoolPL);
+  const placedSummary = p.ticketsPlacedCount > 0
+    ? `${p.ticketsPlacedWeeks.join(', ')} • Next WK ${p.nextTurnWeekNum}`
+    : `$0 Placed • On Deck WK ${p.nextTurnWeekNum}`;
 
   body.innerHTML = `
     <div class="profile-hero-banner">
@@ -2227,12 +2389,22 @@ window.openPlayerProfile = function(boyName) {
           <span class="title-tag-pill ${p.accolade.pillClass}">${getIcon(p.accolade.icon)} ${p.accolade.title}</span>
         </div>
         <div class="profile-hero-sub">
-          ${p.role || 'Squad Member'} • ${allPicks.length} Total Picks Logged • ${weeksAsMaster}x Master Bettor
+          ${p.role || 'Squad Member'} • ${allPicks.length} Total Picks • ${p.ticketsPlacedCount} Ticket${p.ticketsPlacedCount === 1 ? '' : 's'} Placed ($${p.placedAmount.toFixed(2)})
         </div>
       </div>
     </div>
 
     <div class="profile-stats-grid">
+      <div class="profile-stat-box">
+        <span class="psb-label">Actual Pool Net Profit</span>
+        <span class="psb-val ${p.netPoolPL >= 0 ? 'green' : 'red'}">${poolNetStr}</span>
+        <span class="psb-sub">$${p.earningsShare.toFixed(2)} Won − $${p.placedAmount.toFixed(2)} Placed</span>
+      </div>
+      <div class="profile-stat-box">
+        <span class="psb-label">Tickets Placed (${p.ticketsPlacedCount})</span>
+        <span class="psb-val">$${p.placedAmount.toFixed(2)}</span>
+        <span class="psb-sub">${placedSummary}</span>
+      </div>
       <div class="profile-stat-box">
         <span class="psb-label">Win Rate & Record</span>
         <span class="psb-val ${p.rate >= 60 ? 'green' : ''}">${p.rate}% (${p.hits}-${p.misses})</span>
@@ -2249,19 +2421,9 @@ window.openPlayerProfile = function(boyName) {
         <span class="psb-sub">${bestHitPick ? escapeHTML(bestHitPick) : 'No cashed leg yet'}</span>
       </div>
       <div class="profile-stat-box">
-        <span class="psb-label">Solo $10 Flat P/L</span>
-        <span class="psb-val ${netProfit >= 0 ? 'green' : 'red'}">${netProfitStr}</span>
-        <span class="psb-sub">ROI: ${roiPct >= 0 ? '+' : ''}${roiPct}% on graded legs</span>
-      </div>
-      <div class="profile-stat-box">
         <span class="psb-label">Favorite Market</span>
         <span class="psb-val">${favMarket}</span>
         <span class="psb-sub">${favMarketRecord} cashed in ${favMarket}</span>
-      </div>
-      <div class="profile-stat-box">
-        <span class="psb-label">Graded Avg Odds</span>
-        <span class="psb-val">${p.avgAmerican}</span>
-        <span class="psb-sub">${p.hits} Hits • ${p.misses} Misses</span>
       </div>
     </div>
 
@@ -2302,11 +2464,19 @@ window.exportSeasonStatsReport = function() {
   const lines = [];
   lines.push(`# 🏒 FRIDAY NIGHT PUCK — OFFICIAL SEASON STATS LEDGER`);
   lines.push(`Last Updated: ${new Date().toLocaleString()}`);
-  lines.push(`Parlays Cashed: ${data.wonParlays}/${data.totalParlays} | Total Leg Hits: ${data.totalHitsCount}/${data.totalLegsCount} (${data.pickWinRate}%) | Total Wagered: $${data.totalWagered.toFixed(2)}`);
+  lines.push(`Parlays Cashed: ${data.wonParlays}/${data.totalParlays} | Total Leg Hits: ${data.totalHitsCount}/${data.totalLegsCount} (${data.pickWinRate}%) | Pool Staked: $${data.totalWagered.toFixed(2)} | Pool Won: $${data.totalWon.toFixed(2)} | Net Profit: ${formatSignedCurrency(data.netPoolProfit)}`);
+  lines.push(``);
+  lines.push(`## 💰 INDIVIDUAL BANKROLL & PROFIT LEDGER`);
+  SQUAD.forEach(b => {
+    const p = data.players.find(pl => pl.name === b.name);
+    if (!p) return;
+    const placedInfo = p.ticketsPlacedCount > 0 ? p.ticketsPlacedWeeks.join(', ') : `On Deck WK ${p.nextTurnWeekNum}`;
+    lines.push(`- **${p.name}**: Net Profit **${formatSignedCurrency(p.netPoolPL)}** | Placed: $${p.placedAmount.toFixed(2)} (${placedInfo}) | Payout Split Earned: $${p.earningsShare.toFixed(2)}`);
+  });
   lines.push(``);
   lines.push(`## 🏆 SQUAD LEADERBOARD`);
   data.players.forEach((p, i) => {
-    lines.push(`${i + 1}. **${p.name}** (${p.accolade.title}) — ${p.rate}% (${p.hits}-${p.misses}) | Streak: ${p.streakType}${p.streak} | Avg Odds: ${p.avgAmerican} | Best Hit: ${p.maxWinningOddsStr || '--'}`);
+    lines.push(`${i + 1}. **${p.name}** (${p.accolade.title}) — ${p.rate}% (${p.hits}-${p.misses}) | Net Profit: ${formatSignedCurrency(p.netPoolPL)} | Streak: ${p.streakType}${p.streak} | Avg Odds: ${p.avgAmerican}`);
   });
   lines.push(``);
   lines.push(`## 📅 WEEKLY PARLAY ARCHIVE`);
@@ -2321,7 +2491,7 @@ window.exportSeasonStatsReport = function() {
   const reportText = lines.join('\n');
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(reportText).then(() => {
-      showToast('📊 Full Season Stats Ledger copied to clipboard!');
+      showToast('📊 Full Season Stats & Bankroll Ledger copied to clipboard!');
     }).catch(() => {
       showToast('📊 Season Stats Ledger ready!');
     });
