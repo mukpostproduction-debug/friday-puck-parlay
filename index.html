@@ -25,7 +25,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
 
-  <link rel="stylesheet" href="style.css?v=5.5" />
+  <link rel="stylesheet" href="style.css?v=5.7" />
 </head>
 <body>
   <!-- TOP GLOBAL NAVIGATION BAR (BET365 / BROADCAST DARK AESTHETIC) -->
@@ -559,13 +559,13 @@
         <div class="form-group">
           <label class="form-label">BET TYPE</label>
           <div class="bet-types-row" id="betTypeChips">
-            <button type="button" class="bet-type-btn active" data-type="Moneyline">Moneyline</button>
+            <button type="button" class="bet-type-btn" data-type="Moneyline">Moneyline</button>
             <button type="button" class="bet-type-btn" data-type="Puckline">Puckline (-1.5 / +1.5)</button>
             <button type="button" class="bet-type-btn" data-type="Total">Total (Over/Under)</button>
-            <button type="button" class="bet-type-btn" data-type="Player Prop">Player Prop</button>
+            <button type="button" class="bet-type-btn active" data-type="Player Prop">Player Prop</button>
             <button type="button" class="bet-type-btn" data-type="Other">Other</button>
           </div>
-          <input type="hidden" id="betTypeInput" value="Moneyline" />
+          <input type="hidden" id="betTypeInput" value="Player Prop" />
         </div>
 
         <!-- 4. Pick & Odds -->
@@ -809,6 +809,6 @@
 
   <!-- Main JavaScript Controller -->
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-  <script src="app.js?v=5.5"></script>
+  <script src="app.js?v=5.7"></script>
 </body>
 </html>

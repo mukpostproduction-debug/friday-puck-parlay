@@ -33,6 +33,7 @@ const CANONICAL_WEEKS = [
     stake: 25,
     totalOdds: '+950',
     potentialPayout: 262.50,
+    actualPayout: 0,
     book: 'DraftKings / Bet365',
     result: 'loss',
     legs: [
@@ -50,12 +51,13 @@ const CANONICAL_WEEKS = [
     stake: 30,
     totalOdds: '+1261',
     potentialPayout: 408.35,
+    actualPayout: 0,
     book: 'FanDuel',
     result: 'loss',
     legs: [
-      { boy: 'Edward',  pick: 'Connor Bedard Over 3.5 SOG (MTL @ CHI)',       odds: '-145', result: 'miss' },
-      { boy: 'Will',    pick: 'Nick Suzuki Over 0.5 Points (MTL @ CHI)',      odds: '-175', result: 'hit' },
-      { boy: 'Ben',     pick: 'Lane Hutson Over 1.5 SOG (MTL @ CHI)',         odds: '-130', result: 'hit' },
+      { boy: 'Edward',  pick: 'Cole Caufield Over 3.5 SOG (MTL @ CHI)',       odds: '-145', result: 'hit' },
+      { boy: 'Will',    pick: 'Juraj Slafkovsky Over 0.5 Points (MTL @ CHI)', odds: '-175', result: 'miss' },
+      { boy: 'Ben',     pick: 'Lane Hutson Over 1.5 SOG (MTL @ CHI)',         odds: '-130', result: 'miss' },
       { boy: 'Jackson', pick: 'Nathan MacKinnon Over 3.5 SOG (TBL @ COL)',    odds: '-145', result: 'hit' },
       { boy: 'Alex',    pick: 'Nikita Kucherov Over 0.5 Goals (TBL @ COL)',   odds: '+170', result: 'miss' },
       { boy: 'Axel',    pick: 'Brandon Hagel Over 0.5 Points (TBL @ COL)',    odds: '-175', result: 'hit' }
@@ -68,15 +70,35 @@ const CANONICAL_WEEKS = [
     stake: 30,
     totalOdds: '+2394',
     potentialPayout: 748.20,
+    actualPayout: 0,
     book: 'BET99 (SGP+)',
-    result: 'in-progress',
+    result: 'loss',
     legs: [
-      { boy: 'Axel',    pick: 'Carter Verhaeghe — Over 0.5 Points (WPG @ FLA)',    odds: '-160', result: 'pending', playerName: 'Carter Verhaeghe', statType: 'points', target: 1, game: 'WPG @ FLA' },
-      { boy: 'Jackson', pick: 'Sam Bennett — Over 2.5 Shots on Goal (WPG @ FLA)',  odds: '-105', result: 'pending', playerName: 'Sam Bennett',      statType: 'shots',  target: 3, game: 'WPG @ FLA' },
-      { boy: 'Alex',    pick: 'Seth Jones — Over 2.5 Shots on Goal (WPG @ FLA)',   odds: '+115', result: 'pending', playerName: 'Seth Jones',       statType: 'shots',  target: 3, game: 'WPG @ FLA' },
-      { boy: 'Ben',     pick: 'Bobby McMann — Over 0.5 Points (SEA @ CGY)',        odds: '-120', result: 'pending', playerName: 'Bobby McMann',     statType: 'points', target: 1, game: 'SEA @ CGY' },
-      { boy: 'Will',    pick: 'Chandler Stephenson — Over 0.5 Assists (SEA @ CGY)',odds: '+155', result: 'pending', playerName: 'Chandler Stephenson', statType: 'assists', target: 1, game: 'SEA @ CGY' },
-      { boy: 'Edward',  pick: 'Brandon Montour — Over 0.5 Points (SEA @ CGY)',     odds: '+105', result: 'pending', playerName: 'Brandon Montour',  statType: 'points', target: 1, game: 'SEA @ CGY' }
+      { boy: 'Axel',    pick: 'Carter Verhaeghe — Over 0.5 Points (WPG @ FLA)',    odds: '-160', result: 'hit',  playerName: 'Carter Verhaeghe',    statType: 'points',  target: 1, game: 'WPG @ FLA' },
+      { boy: 'Jackson', pick: 'Sam Bennett — Over 2.5 Shots on Goal (WPG @ FLA)',  odds: '-105', result: 'miss', playerName: 'Sam Bennett',         statType: 'shots',   target: 3, game: 'WPG @ FLA' },
+      { boy: 'Alex',    pick: 'Seth Jones — Over 2.5 Shots on Goal (WPG @ FLA)',   odds: '+115', result: 'miss', playerName: 'Seth Jones',          statType: 'shots',   target: 3, game: 'WPG @ FLA' },
+      { boy: 'Ben',     pick: 'Bobby McMann — Over 0.5 Points (SEA @ CGY)',        odds: '-120', result: 'miss', playerName: 'Bobby McMann',        statType: 'points',  target: 1, game: 'SEA @ CGY' },
+      { boy: 'Will',    pick: 'Chandler Stephenson — Over 0.5 Assists (SEA @ CGY)',odds: '+155', result: 'hit',  playerName: 'Chandler Stephenson', statType: 'assists', target: 1, game: 'SEA @ CGY' },
+      { boy: 'Edward',  pick: 'Brandon Montour — Over 0.5 Points (SEA @ CGY)',     odds: '+105', result: 'miss', playerName: 'Brandon Montour',     statType: 'points',  target: 1, game: 'SEA @ CGY' }
+    ]
+  },
+  {
+    weekNum: 4,
+    dateStr: '2026-11-06',
+    bettor: 'Alex',
+    stake: 30,
+    totalOdds: '+1414',
+    potentialPayout: 454.41,
+    actualPayout: 454.41,
+    book: 'FanDuel (SGP+)',
+    result: 'win',
+    legs: [
+      { boy: 'Axel',    pick: 'Kent Johnson — 1+ Points (CBJ @ BUF)',              odds: '-120', result: 'hit', playerName: 'Kent Johnson',     statType: 'points',   target: 1, game: 'CBJ @ BUF' },
+      { boy: 'Jackson', pick: 'Matt Boldy — 3+ Shots on Goal (SJS @ MIN)',         odds: '-135', result: 'hit', playerName: 'Matt Boldy',       statType: 'shots',    target: 3, game: 'SJS @ MIN' },
+      { boy: 'Will',    pick: 'Cutter Gauthier — Anytime Goal Scorer (ANA @ CGY)', odds: '+137', result: 'hit', playerName: 'Cutter Gauthier',  statType: 'goals',    target: 1, game: 'ANA @ CGY' },
+      { boy: 'Alex',    pick: 'Minnesota Wild -1.5 Puck Line (SJS @ MIN)',         odds: '+110', result: 'hit', playerName: 'Minnesota Wild',   statType: 'puckline', target: 2, game: 'SJS @ MIN' },
+      { boy: 'Ben',     pick: 'Quinn Hughes — 1+ Points (SJS @ MIN)',              odds: '-390', result: 'hit', playerName: 'Quinn Hughes',     statType: 'points',   target: 1, game: 'SJS @ MIN' },
+      { boy: 'Edward',  pick: 'Beckett Sennecke — 1+ Points (ANA @ CGY)',          odds: '-195', result: 'hit', playerName: 'Beckett Sennecke', statType: 'points',   target: 1, game: 'ANA @ CGY' }
     ]
   }
 ];
@@ -98,6 +120,8 @@ function decimalToAmerican(dec) {
 
 function detectMarket(pickText) {
   const lower = String(pickText || '').toLowerCase();
+  if (lower.includes('puck line') || lower.includes('puckline') || /[+-]\d+\.5/.test(lower)) return 'Puck Line';
+  if (lower.includes('moneyline') || lower.includes('money line') || /\bml\b/.test(lower)) return 'Moneyline';
   if (lower.includes('save') || lower.includes(' sv')) return 'Goalie Saves';
   if (lower.includes('shot') || lower.includes('sog')) return 'Shots on Goal';
   if (lower.includes('assist')) return 'Assists';
@@ -292,6 +316,30 @@ async function main() {
     return a.misses - b.misses;
   });
 
+  // Compute Pool Bankroll Summary
+  const settledWeeks = weeks.filter(w => w.result === 'win' || w.result === 'loss');
+  const wonWeeks = settledWeeks.filter(w => w.result === 'win');
+  const totalStaked = settledWeeks.reduce((acc, w) => acc + (w.stake || 0), 0);
+  const totalCashed = wonWeeks.reduce((acc, w) => acc + (w.actualPayout ?? w.potentialPayout ?? 0), 0);
+  const netPoolProfit = totalCashed - totalStaked;
+  const totalGradedLegs = profiles.reduce((acc, p) => acc + p.totalGraded, 0);
+  const totalHitLegs = profiles.reduce((acc, p) => acc + p.hits, 0);
+  const overallLegWinPct = totalGradedLegs > 0 ? ((totalHitLegs / totalGradedLegs) * 100).toFixed(1) : '0.0';
+  const parlayWinPct = settledWeeks.length > 0 ? ((wonWeeks.length / settledWeeks.length) * 100).toFixed(1) : '0.0';
+
+  const poolSummary = {
+    settledParlays: settledWeeks.length,
+    parlaysWon: wonWeeks.length,
+    parlaysLost: settledWeeks.length - wonWeeks.length,
+    parlayWinPct: `${parlayWinPct}%`,
+    totalGradedLegs,
+    totalHitLegs,
+    overallLegWinPct: `${overallLegWinPct}%`,
+    totalStaked: Number(totalStaked.toFixed(2)),
+    totalCashed: Number(totalCashed.toFixed(2)),
+    netPoolProfit: Number(netPoolProfit.toFixed(2))
+  };
+
   // Save JSON Archive
   const dataDir = path.join(__dirname, '..', 'data');
   if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
@@ -299,6 +347,7 @@ async function main() {
   const archivePayload = {
     generatedAt: new Date().toISOString(),
     season: '2026-2027',
+    poolSummary,
     profiles,
     weeks
   };
@@ -309,6 +358,18 @@ async function main() {
   md.push(`# 🏒 FRIDAY NIGHT PUCK — OFFICIAL SEASON STATS LEDGER`);
   md.push(`> **Maintained by the Friday Puck Stats Archivist Agent (\`scripts/stats_agent.js\`)**`);
   md.push(`> **Last Synced:** ${new Date().toUTCString()}`);
+  md.push(``);
+  md.push(`---`);
+  md.push(``);
+  md.push(`## 💰 SQUAD POOL BANKROLL SUMMARY`);
+  md.push(``);
+  md.push(`| Metric | Season Total |`);
+  md.push(`| :--- | :--- |`);
+  md.push(`| **Parlay Tickets Cashed** | **${poolSummary.parlaysWon} / ${poolSummary.settledParlays}** (\`${poolSummary.parlayWinPct}\`) |`);
+  md.push(`| **Individual Legs Hit** | **${poolSummary.totalHitLegs} / ${poolSummary.totalGradedLegs}** (\`${poolSummary.overallLegWinPct}\`) |`);
+  md.push(`| **Total Pool Staked** | \`\\$${poolSummary.totalStaked.toFixed(2)}\` |`);
+  md.push(`| **Total Payouts Cashed** | \`\\$${poolSummary.totalCashed.toFixed(2)}\` |`);
+  md.push(`| **Net Pool Profit** | **${poolSummary.netPoolProfit >= 0 ? '+' : '-'}\\$${Math.abs(poolSummary.netPoolProfit).toFixed(2)}** |`);
   md.push(``);
   md.push(`---`);
   md.push(``);
@@ -368,3 +429,4 @@ main().catch(err => {
   console.error(err);
   process.exit(1);
 });
+

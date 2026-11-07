@@ -1,25 +1,37 @@
 {
-  "generatedAt": "2026-10-30T23:46:56.399Z",
+  "generatedAt": "2026-11-07T04:10:33.247Z",
   "season": "2026-2027",
+  "poolSummary": {
+    "settledParlays": 4,
+    "parlaysWon": 1,
+    "parlaysLost": 3,
+    "parlayWinPct": "25.0%",
+    "totalGradedLegs": 23,
+    "totalHitLegs": 15,
+    "overallLegWinPct": "65.2%",
+    "totalStaked": 115,
+    "totalCashed": 454.41,
+    "netPoolProfit": 339.41
+  },
   "profiles": [
     {
       "name": "Axel",
       "role": "Leg #3",
-      "hits": 3,
+      "hits": 4,
       "misses": 0,
       "pending": 0,
-      "totalGraded": 3,
-      "totalPicks": 3,
+      "totalGraded": 4,
+      "totalPicks": 4,
       "winRate": 100,
-      "streak": "W3",
-      "avgGradedOdds": "-157",
-      "avgAllOdds": "-157",
-      "bestHitOdds": "-140",
-      "bestHitPick": "Brock Nelson 1+ Points (PIT @ COL)",
+      "streak": "W4",
+      "avgGradedOdds": "-146",
+      "avgAllOdds": "-146",
+      "bestHitOdds": "-120",
+      "bestHitPick": "Kent Johnson — 1+ Points (CBJ @ BUF)",
       "favMarket": "Points",
-      "favMarketRecord": "3/3",
-      "flatBetPL": "+$19.11",
-      "flatBetRoi": "+64%",
+      "favMarketRecord": "4/4",
+      "flatBetPL": "+$27.44",
+      "flatBetRoi": "+69%",
       "pickHistory": [
         {
           "weekNum": 1,
@@ -44,27 +56,35 @@
           "odds": "-160",
           "market": "Points",
           "result": "hit"
+        },
+        {
+          "weekNum": 4,
+          "dateStr": "2026-11-06",
+          "pick": "Kent Johnson — 1+ Points (CBJ @ BUF)",
+          "odds": "-120",
+          "market": "Points",
+          "result": "hit"
         }
       ]
     },
     {
       "name": "Jackson",
       "role": "Leg #1",
-      "hits": 2,
-      "misses": 0,
-      "pending": 1,
-      "totalGraded": 2,
-      "totalPicks": 3,
-      "winRate": 100,
-      "streak": "W2",
-      "avgGradedOdds": "-137",
-      "avgAllOdds": "-124",
+      "hits": 3,
+      "misses": 1,
+      "pending": 0,
+      "totalGraded": 4,
+      "totalPicks": 4,
+      "winRate": 75,
+      "streak": "W1",
+      "avgGradedOdds": "-127",
+      "avgAllOdds": "-127",
       "bestHitOdds": "-130",
       "bestHitPick": "Nathan MacKinnon 4+ Shots (PIT @ COL)",
       "favMarket": "Shots on Goal",
-      "favMarketRecord": "2/3",
-      "flatBetPL": "+$14.59",
-      "flatBetRoi": "+73%",
+      "favMarketRecord": "3/4",
+      "flatBetPL": "+$12.00",
+      "flatBetRoi": "+30%",
       "pickHistory": [
         {
           "weekNum": 1,
@@ -88,28 +108,36 @@
           "pick": "Sam Bennett — Over 2.5 Shots on Goal (WPG @ FLA)",
           "odds": "-105",
           "market": "Shots on Goal",
-          "result": "pending"
+          "result": "miss"
+        },
+        {
+          "weekNum": 4,
+          "dateStr": "2026-11-06",
+          "pick": "Matt Boldy — 3+ Shots on Goal (SJS @ MIN)",
+          "odds": "-135",
+          "market": "Shots on Goal",
+          "result": "hit"
         }
       ]
     },
     {
       "name": "Will",
       "role": "Leg #6",
-      "hits": 2,
-      "misses": 0,
-      "pending": 1,
-      "totalGraded": 2,
-      "totalPicks": 3,
-      "winRate": 100,
+      "hits": 3,
+      "misses": 1,
+      "pending": 0,
+      "totalGraded": 4,
+      "totalPicks": 4,
+      "winRate": 75,
       "streak": "W2",
-      "avgGradedOdds": "-113",
-      "avgAllOdds": "+111",
-      "bestHitOdds": "+120",
-      "bestHitPick": "Pavel Zacha 1+ Points (BOS @ ANA)",
+      "avgGradedOdds": "+117",
+      "avgAllOdds": "+117",
+      "bestHitOdds": "+155",
+      "bestHitPick": "Chandler Stephenson — Over 0.5 Assists (SEA @ CGY)",
       "favMarket": "Points",
-      "favMarketRecord": "2/2",
-      "flatBetPL": "+$17.71",
-      "flatBetRoi": "+89%",
+      "favMarketRecord": "1/2",
+      "flatBetPL": "+$31.20",
+      "flatBetRoi": "+78%",
       "pickHistory": [
         {
           "weekNum": 1,
@@ -122,10 +150,10 @@
         {
           "weekNum": 2,
           "dateStr": "2026-10-23",
-          "pick": "Nick Suzuki Over 0.5 Points (MTL @ CHI)",
+          "pick": "Juraj Slafkovsky Over 0.5 Points (MTL @ CHI)",
           "odds": "-175",
           "market": "Points",
-          "result": "hit"
+          "result": "miss"
         },
         {
           "weekNum": 3,
@@ -133,27 +161,80 @@
           "pick": "Chandler Stephenson — Over 0.5 Assists (SEA @ CGY)",
           "odds": "+155",
           "market": "Assists",
-          "result": "pending"
+          "result": "hit"
+        },
+        {
+          "weekNum": 4,
+          "dateStr": "2026-11-06",
+          "pick": "Cutter Gauthier — Anytime Goal Scorer (ANA @ CGY)",
+          "odds": "+137",
+          "market": "Goals",
+          "result": "hit"
+        }
+      ]
+    },
+    {
+      "name": "Edward",
+      "role": "Leg #2",
+      "hits": 2,
+      "misses": 1,
+      "pending": 0,
+      "totalGraded": 3,
+      "totalPicks": 3,
+      "winRate": 67,
+      "streak": "W1",
+      "avgGradedOdds": "-133",
+      "avgAllOdds": "-133",
+      "bestHitOdds": "-145",
+      "bestHitPick": "Cole Caufield Over 3.5 SOG (MTL @ CHI)",
+      "favMarket": "Points",
+      "favMarketRecord": "1/2",
+      "flatBetPL": "+$2.02",
+      "flatBetRoi": "+7%",
+      "pickHistory": [
+        {
+          "weekNum": 2,
+          "dateStr": "2026-10-23",
+          "pick": "Cole Caufield Over 3.5 SOG (MTL @ CHI)",
+          "odds": "-145",
+          "market": "Shots on Goal",
+          "result": "hit"
+        },
+        {
+          "weekNum": 3,
+          "dateStr": "2026-10-30",
+          "pick": "Brandon Montour — Over 0.5 Points (SEA @ CGY)",
+          "odds": "+105",
+          "market": "Points",
+          "result": "miss"
+        },
+        {
+          "weekNum": 4,
+          "dateStr": "2026-11-06",
+          "pick": "Beckett Sennecke — 1+ Points (ANA @ CGY)",
+          "odds": "-195",
+          "market": "Points",
+          "result": "hit"
         }
       ]
     },
     {
       "name": "Alex",
       "role": "Leg #4",
-      "hits": 1,
-      "misses": 1,
-      "pending": 1,
-      "totalGraded": 2,
-      "totalPicks": 3,
+      "hits": 2,
+      "misses": 2,
+      "pending": 0,
+      "totalGraded": 4,
+      "totalPicks": 4,
       "winRate": 50,
-      "streak": "L1",
-      "avgGradedOdds": "+140",
-      "avgAllOdds": "+132",
+      "streak": "W1",
+      "avgGradedOdds": "+126",
+      "avgAllOdds": "+126",
       "bestHitOdds": "+110",
       "bestHitPick": "Beckett Sennecke 1+ Points (BOS @ ANA)",
       "favMarket": "Points",
       "favMarketRecord": "1/1",
-      "flatBetPL": "+$1.00",
+      "flatBetPL": "+$2.00",
       "flatBetRoi": "+5%",
       "pickHistory": [
         {
@@ -178,7 +259,15 @@
           "pick": "Seth Jones — Over 2.5 Shots on Goal (WPG @ FLA)",
           "odds": "+115",
           "market": "Shots on Goal",
-          "result": "pending"
+          "result": "miss"
+        },
+        {
+          "weekNum": 4,
+          "dateStr": "2026-11-06",
+          "pick": "Minnesota Wild -1.5 Puck Line (SJS @ MIN)",
+          "odds": "+110",
+          "market": "Puck Line",
+          "result": "hit"
         }
       ]
     },
@@ -186,20 +275,20 @@
       "name": "Ben",
       "role": "Leg #5",
       "hits": 1,
-      "misses": 1,
-      "pending": 1,
-      "totalGraded": 2,
-      "totalPicks": 3,
-      "winRate": 50,
+      "misses": 3,
+      "pending": 0,
+      "totalGraded": 4,
+      "totalPicks": 4,
+      "winRate": 25,
       "streak": "W1",
-      "avgGradedOdds": "-122",
-      "avgAllOdds": "-121",
-      "bestHitOdds": "-130",
-      "bestHitPick": "Lane Hutson Over 1.5 SOG (MTL @ CHI)",
+      "avgGradedOdds": "-147",
+      "avgAllOdds": "-147",
+      "bestHitOdds": "-390",
+      "bestHitPick": "Quinn Hughes — 1+ Points (SJS @ MIN)",
       "favMarket": "Points",
-      "favMarketRecord": "0/2",
-      "flatBetPL": "-$2.31",
-      "flatBetRoi": "-12%",
+      "favMarketRecord": "1/3",
+      "flatBetPL": "-$27.44",
+      "flatBetRoi": "-69%",
       "pickHistory": [
         {
           "weekNum": 1,
@@ -215,7 +304,7 @@
           "pick": "Lane Hutson Over 1.5 SOG (MTL @ CHI)",
           "odds": "-130",
           "market": "Shots on Goal",
-          "result": "hit"
+          "result": "miss"
         },
         {
           "weekNum": 3,
@@ -223,44 +312,15 @@
           "pick": "Bobby McMann — Over 0.5 Points (SEA @ CGY)",
           "odds": "-120",
           "market": "Points",
-          "result": "pending"
-        }
-      ]
-    },
-    {
-      "name": "Edward",
-      "role": "Leg #2",
-      "hits": 0,
-      "misses": 1,
-      "pending": 1,
-      "totalGraded": 1,
-      "totalPicks": 2,
-      "winRate": 0,
-      "streak": "L1",
-      "avgGradedOdds": "-145",
-      "avgAllOdds": "-115",
-      "bestHitOdds": "--",
-      "bestHitPick": "",
-      "favMarket": "Shots on Goal",
-      "favMarketRecord": "0/1",
-      "flatBetPL": "-$10.00",
-      "flatBetRoi": "-100%",
-      "pickHistory": [
-        {
-          "weekNum": 2,
-          "dateStr": "2026-10-23",
-          "pick": "Connor Bedard Over 3.5 SOG (MTL @ CHI)",
-          "odds": "-145",
-          "market": "Shots on Goal",
           "result": "miss"
         },
         {
-          "weekNum": 3,
-          "dateStr": "2026-10-30",
-          "pick": "Brandon Montour — Over 0.5 Points (SEA @ CGY)",
-          "odds": "+105",
+          "weekNum": 4,
+          "dateStr": "2026-11-06",
+          "pick": "Quinn Hughes — 1+ Points (SJS @ MIN)",
+          "odds": "-390",
           "market": "Points",
-          "result": "pending"
+          "result": "hit"
         }
       ]
     }
@@ -273,6 +333,7 @@
       "stake": 25,
       "totalOdds": "+950",
       "potentialPayout": 262.5,
+      "actualPayout": 0,
       "book": "DraftKings / Bet365",
       "result": "loss",
       "legs": [
@@ -315,26 +376,27 @@
       "stake": 30,
       "totalOdds": "+1261",
       "potentialPayout": 408.35,
+      "actualPayout": 0,
       "book": "FanDuel",
       "result": "loss",
       "legs": [
         {
           "boy": "Edward",
-          "pick": "Connor Bedard Over 3.5 SOG (MTL @ CHI)",
+          "pick": "Cole Caufield Over 3.5 SOG (MTL @ CHI)",
           "odds": "-145",
-          "result": "miss"
+          "result": "hit"
         },
         {
           "boy": "Will",
-          "pick": "Nick Suzuki Over 0.5 Points (MTL @ CHI)",
+          "pick": "Juraj Slafkovsky Over 0.5 Points (MTL @ CHI)",
           "odds": "-175",
-          "result": "hit"
+          "result": "miss"
         },
         {
           "boy": "Ben",
           "pick": "Lane Hutson Over 1.5 SOG (MTL @ CHI)",
           "odds": "-130",
-          "result": "hit"
+          "result": "miss"
         },
         {
           "boy": "Jackson",
@@ -363,8 +425,9 @@
       "stake": 30,
       "totalOdds": "+2394",
       "potentialPayout": 748.2,
+      "actualPayout": 0,
       "book": "BET99 (SGP+)",
-      "result": "in-progress",
+      "result": "loss",
       "legs": [
         {
           "boy": "Axel",
@@ -374,36 +437,33 @@
           "playerName": "Carter Verhaeghe",
           "statType": "points",
           "target": 1,
-          "game": "WPG @ FLA",
-          "liveStat": "1/1"
+          "game": "WPG @ FLA"
         },
         {
           "boy": "Jackson",
           "pick": "Sam Bennett — Over 2.5 Shots on Goal (WPG @ FLA)",
           "odds": "-105",
-          "result": "pending",
+          "result": "miss",
           "playerName": "Sam Bennett",
           "statType": "shots",
           "target": 3,
-          "game": "WPG @ FLA",
-          "liveStat": "1/3"
+          "game": "WPG @ FLA"
         },
         {
           "boy": "Alex",
           "pick": "Seth Jones — Over 2.5 Shots on Goal (WPG @ FLA)",
           "odds": "+115",
-          "result": "pending",
+          "result": "miss",
           "playerName": "Seth Jones",
           "statType": "shots",
           "target": 3,
-          "game": "WPG @ FLA",
-          "liveStat": "0/3"
+          "game": "WPG @ FLA"
         },
         {
           "boy": "Ben",
           "pick": "Bobby McMann — Over 0.5 Points (SEA @ CGY)",
           "odds": "-120",
-          "result": "pending",
+          "result": "miss",
           "playerName": "Bobby McMann",
           "statType": "points",
           "target": 1,
@@ -413,7 +473,7 @@
           "boy": "Will",
           "pick": "Chandler Stephenson — Over 0.5 Assists (SEA @ CGY)",
           "odds": "+155",
-          "result": "pending",
+          "result": "hit",
           "playerName": "Chandler Stephenson",
           "statType": "assists",
           "target": 1,
@@ -423,11 +483,84 @@
           "boy": "Edward",
           "pick": "Brandon Montour — Over 0.5 Points (SEA @ CGY)",
           "odds": "+105",
-          "result": "pending",
+          "result": "miss",
           "playerName": "Brandon Montour",
           "statType": "points",
           "target": 1,
           "game": "SEA @ CGY"
+        }
+      ]
+    },
+    {
+      "weekNum": 4,
+      "dateStr": "2026-11-06",
+      "bettor": "Alex",
+      "stake": 30,
+      "totalOdds": "+1414",
+      "potentialPayout": 454.41,
+      "actualPayout": 454.41,
+      "book": "FanDuel (SGP+)",
+      "result": "win",
+      "legs": [
+        {
+          "boy": "Axel",
+          "pick": "Kent Johnson — 1+ Points (CBJ @ BUF)",
+          "odds": "-120",
+          "result": "hit",
+          "playerName": "Kent Johnson",
+          "statType": "points",
+          "target": 1,
+          "game": "CBJ @ BUF"
+        },
+        {
+          "boy": "Jackson",
+          "pick": "Matt Boldy — 3+ Shots on Goal (SJS @ MIN)",
+          "odds": "-135",
+          "result": "hit",
+          "playerName": "Matt Boldy",
+          "statType": "shots",
+          "target": 3,
+          "game": "SJS @ MIN"
+        },
+        {
+          "boy": "Will",
+          "pick": "Cutter Gauthier — Anytime Goal Scorer (ANA @ CGY)",
+          "odds": "+137",
+          "result": "hit",
+          "playerName": "Cutter Gauthier",
+          "statType": "goals",
+          "target": 1,
+          "game": "ANA @ CGY"
+        },
+        {
+          "boy": "Alex",
+          "pick": "Minnesota Wild -1.5 Puck Line (SJS @ MIN)",
+          "odds": "+110",
+          "result": "hit",
+          "playerName": "Minnesota Wild",
+          "statType": "puckline",
+          "target": 2,
+          "game": "SJS @ MIN"
+        },
+        {
+          "boy": "Ben",
+          "pick": "Quinn Hughes — 1+ Points (SJS @ MIN)",
+          "odds": "-390",
+          "result": "hit",
+          "playerName": "Quinn Hughes",
+          "statType": "points",
+          "target": 1,
+          "game": "SJS @ MIN"
+        },
+        {
+          "boy": "Edward",
+          "pick": "Beckett Sennecke — 1+ Points (ANA @ CGY)",
+          "odds": "-195",
+          "result": "hit",
+          "playerName": "Beckett Sennecke",
+          "statType": "points",
+          "target": 1,
+          "game": "ANA @ CGY"
         }
       ]
     }
