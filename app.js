@@ -7,21 +7,25 @@
 // =============================================================================
 // 1. SQUAD CONFIGURATION & 6-WEEK BETTOR ROTATION
 // =============================================================================
-// Week 1 was Friday, October 9, 2026 (Axel placed the bet from the States)
-// Week 2 is Friday, October 16, 2026 (Jackson is ON DECK this week)
-// 6-week cycle: Axel -> Jackson -> Will -> Alex -> Ben -> Edward (repeats)
+// Week 1: Friday, Oct 2, 2026 (Ben placed the inaugural $5 5-leg ticket on Bet365)
+// (Oct 9 skipped — no parlay)
+// Week 2: Friday, Oct 16, 2026 (Axel placed $25 5-leg ticket)
+// Week 3: Friday, Oct 23, 2026 (Jackson placed $30 6-leg ticket — Edward joined!)
+// Week 4: Friday, Oct 30, 2026 (Will placed $30 6-leg ticket)
+// Week 5: Friday, Nov 6, 2026 (Alex placed $30 6-leg ticket — CASHED $454.41!)
+// Week 6: Friday, Nov 13, 2026 (Edward ON DECK)
+// 6-week cycle: Ben -> Axel -> Jackson -> Will -> Alex -> Edward (repeats)
 const SQUAD = [
-  { id: 'axel', name: 'Axel', initials: 'AX', color: '#f59e0b', defaultRole: 'Week 1 Bettor' },
-  { id: 'jackson', name: 'Jackson', initials: 'JA', color: '#00ff87', defaultRole: 'Week 2 Bettor (On Deck)' },
-  { id: 'will', name: 'Will', initials: 'WI', color: '#38bdf8', defaultRole: 'Week 3 Bettor' },
-  { id: 'alex', name: 'Alex', initials: 'AL', color: '#a855f7', defaultRole: 'Week 4 Bettor' },
-  { id: 'ben', name: 'Ben', initials: 'BE', color: '#ec4899', defaultRole: 'Week 5 Bettor' },
-  { id: 'edward', name: 'Edward', initials: 'ED', color: '#fb923c', defaultRole: 'Week 6 Bettor' }
+  { id: 'ben', name: 'Ben', initials: 'BE', color: '#ec4899', defaultRole: 'Week 1 Bettor' },
+  { id: 'axel', name: 'Axel', initials: 'AX', color: '#f59e0b', defaultRole: 'Week 2 Bettor' },
+  { id: 'jackson', name: 'Jackson', initials: 'JA', color: '#00ff87', defaultRole: 'Week 3 Bettor' },
+  { id: 'will', name: 'Will', initials: 'WI', color: '#38bdf8', defaultRole: 'Week 4 Bettor' },
+  { id: 'alex', name: 'Alex', initials: 'AL', color: '#a855f7', defaultRole: 'Week 5 Bettor' },
+  { id: 'edward', name: 'Edward', initials: 'ED', color: '#fb923c', defaultRole: 'Week 6 Bettor (On Deck)' }
 ];
 
-// REFERENCE START DATE FOR ROTATION
-// Week 1 was Friday, October 16, 2026 (Axel placed the bet from the States)
-// Week 2 is Friday, October 23, 2026 (Jackson is ON DECK this week)
+// REFERENCE DATES FOR POOL WEEK & ROTATION
+const INAUGURAL_OCT02_FRIDAY = new Date('2026-10-02T12:00:00Z');
 const ROTATION_START_FRIDAY = new Date('2026-10-16T12:00:00Z');
 
 // DYNAMIC SUNDAY SWITCH ENGINE
@@ -119,15 +123,27 @@ function playSound(type = 'click') {
 // =============================================================================
 // 3. DATE & 6-WEEK ROTATION ENGINE
 // =============================================================================
+// Returns 0-based pool week index:
+//   2026-10-02 -> 0 (Week 1: Ben)
+//   (2026-10-09 skipped — no parlay)
+//   2026-10-16 -> 1 (Week 2: Axel)
+//   2026-10-23 -> 2 (Week 3: Jackson)
+//   2026-10-30 -> 3 (Week 4: Will)
+//   2026-11-06 -> 4 (Week 5: Alex)
+//   2026-11-13 -> 5 (Week 6: Edward)
 function getFridayDiffWeeks(fridayDate) {
   const msPerWeek = 7 * 24 * 60 * 60 * 1000;
-  const diffMs = fridayDate.getTime() - ROTATION_START_FRIDAY.getTime();
-  return Math.round(diffMs / msPerWeek);
+  const diffFromOct16 = Math.round((fridayDate.getTime() - ROTATION_START_FRIDAY.getTime()) / msPerWeek);
+  if (diffFromOct16 < 0) {
+    const diffFromOct02 = Math.round((fridayDate.getTime() - INAUGURAL_OCT02_FRIDAY.getTime()) / msPerWeek);
+    return Math.min(0, diffFromOct02);
+  }
+  return diffFromOct16 + 1;
 }
 
 function getBettorForFriday(fridayDate) {
-  const weeksDiff = getFridayDiffWeeks(fridayDate);
-  const index = ((weeksDiff % SQUAD.length) + SQUAD.length) % SQUAD.length;
+  const poolWeekIdx = getFridayDiffWeeks(fridayDate);
+  const index = ((poolWeekIdx % SQUAD.length) + SQUAD.length) % SQUAD.length;
   return SQUAD[index];
 }
 
@@ -900,7 +916,160 @@ const DEFAULT_NOV06_SLATE = [
   }
 ];
 
+const DEFAULT_OCT02_SLATE = [
+  {
+    gameId: "ANA_VGK_OCT02",
+    title: "SAME GAME PARLAY",
+    odds: "SGP",
+    awayTeam: "ANA",
+    awayName: "ANA Ducks",
+    homeTeam: "VGK",
+    homeName: "VGK Golden Knights",
+    awayScore: 4,
+    homeScore: 3,
+    awaySog: 27,
+    homeSog: 32,
+    gameStatus: "final",
+    statusDetail: "Final",
+    startTime: "Fri Oct 2 • 10:00 PM ET",
+    gameStateText: "ANA 4 - VGK 3 (Final)",
+    legs: [
+      {
+        id: "marner_pts_oct02",
+        boyName: "Ben",
+        playerName: "Mitch Marner",
+        team: "VGK",
+        odds: "-200",
+        marketLabel: "Over 0.5 Total Points (-200)",
+        statType: "points",
+        target: 1,
+        apiStat: 1,
+        manualDelta: 0,
+        subDetail: "0G, 1A • 1 SOG • 22:22 TOI"
+      },
+      {
+        id: "eichel_sog_oct02",
+        boyName: "Alex",
+        playerName: "Jack Eichel",
+        team: "VGK",
+        odds: "-300",
+        marketLabel: "2+ Shots on Goal (-300)",
+        statType: "shots",
+        target: 2,
+        apiStat: 2,
+        manualDelta: 0,
+        subDetail: "0G, 2A • 2 SOG • 22:07 TOI"
+      }
+    ]
+  },
+  {
+    gameId: "STL_DAL_OCT02",
+    title: "PLAYER PROP",
+    odds: "-140",
+    awayTeam: "STL",
+    awayName: "STL Blues",
+    homeTeam: "DAL",
+    homeName: "DAL Stars",
+    awayScore: 4,
+    homeScore: 0,
+    awaySog: 24,
+    homeSog: 28,
+    gameStatus: "final",
+    statusDetail: "Final",
+    startTime: "Fri Oct 2 • 9:00 PM ET",
+    gameStateText: "STL 4 - DAL 0 (Final)",
+    legs: [
+      {
+        id: "johnston_pts_oct02",
+        boyName: "Jackson",
+        playerName: "Wyatt Johnston",
+        team: "DAL",
+        odds: "-140",
+        marketLabel: "Over 0.5 Total Points (-140)",
+        statType: "points",
+        target: 1,
+        apiStat: 0,
+        manualDelta: 0,
+        subDetail: "0G, 0A • 4 SOG • 21:49 TOI"
+      }
+    ]
+  },
+  {
+    gameId: "WSH_CAR_OCT02",
+    title: "MONEYLINE",
+    odds: "-180",
+    awayTeam: "WSH",
+    awayName: "WSH Capitals",
+    homeTeam: "CAR",
+    homeName: "CAR Hurricanes",
+    awayScore: 5,
+    homeScore: 2,
+    awaySog: 30,
+    homeSog: 29,
+    gameStatus: "final",
+    statusDetail: "Final",
+    startTime: "Fri Oct 2 • 7:00 PM ET",
+    gameStateText: "WSH 5 - CAR 2 (Final)",
+    legs: [
+      {
+        id: "car_ml_oct02",
+        boyName: "Axel",
+        playerName: "Carolina Hurricanes ML",
+        team: "CAR",
+        odds: "-180",
+        marketLabel: "Moneyline (-180)",
+        statType: "moneyline",
+        isTeamBet: true,
+        teamAbbr: "CAR",
+        spread: -0.5,
+        teamBetCovering: false,
+        teamBetHit: false,
+        margin: -3,
+        target: 1,
+        apiStat: 0,
+        manualDelta: 0,
+        subDetail: "CAR 2 - WSH 5 (-3 Margin • Final)"
+      }
+    ]
+  },
+  {
+    gameId: "CHI_BUF_OCT03",
+    title: "PLAYER PROP",
+    odds: "+200",
+    awayTeam: "CHI",
+    awayName: "CHI Blackhawks",
+    homeTeam: "BUF",
+    homeName: "BUF Sabres",
+    awayScore: 3,
+    homeScore: 4,
+    awaySog: 23,
+    homeSog: 31,
+    gameStatus: "final",
+    statusDetail: "Final",
+    startTime: "Sat Oct 3 • 7:00 PM ET",
+    gameStateText: "CHI 3 - BUF 4 (Final)",
+    legs: [
+      {
+        id: "kane_goal_oct02",
+        boyName: "Will",
+        playerName: "Patrick Kane",
+        team: "CHI",
+        odds: "+200",
+        marketLabel: "Anytime Goal Scorer (+200)",
+        statType: "goals",
+        target: 1,
+        apiStat: 0,
+        manualDelta: 0,
+        subDetail: "0G, 0A • 0 SOG • 19:01 TOI"
+      }
+    ]
+  }
+];
+
 function getSlateForDate(dateStr) {
+  if (dateStr === '2026-10-02') {
+    return JSON.parse(JSON.stringify(DEFAULT_OCT02_SLATE));
+  }
   if (dateStr === '2026-10-16') {
     return JSON.parse(JSON.stringify(DEFAULT_OCT16_SLATE));
   }
@@ -1260,8 +1429,8 @@ function parsePickIntoLeg(boyName, pickObj) {
 
 // Synchronize live tracker game blocks with the boys' real picks on the Bet Slip
 function syncTrackerFromRealPicks() {
-  if (state.currentFridayStr === '2026-10-16') {
-    state.trackerData = getSlateForDate('2026-10-16');
+  if (state.currentFridayStr === '2026-10-02' || state.currentFridayStr === '2026-10-16') {
+    state.trackerData = getSlateForDate(state.currentFridayStr);
     saveTrackerData();
     return;
   }
@@ -1390,7 +1559,7 @@ function syncTrackerFromRealPicks() {
 }
 
 // Initialize Tracker Data from LocalStorage or Default (Purely NHL API Data-Driven)
-const TRACKER_STORAGE_KEY = "b365_sgp_tracker_data_v6";
+const TRACKER_STORAGE_KEY = "b365_sgp_tracker_data_v7";
 
 function initTrackerData() {
   const currentKey = `${TRACKER_STORAGE_KEY}_${state.currentFridayStr}`;
@@ -1431,18 +1600,35 @@ function loadAragonDemoSlate() {
 // =============================================================================
 // 7. SQUAD STATS & LEADERBOARD HISTORICAL ENGINE
 // =============================================================================
-const STATS_STORAGE_KEY = "bts_squad_stats_history_v9";
+const STATS_STORAGE_KEY = "bts_squad_stats_history_v10";
 
 const DEFAULT_STATS_HISTORY = [
   {
     weekNum: 1,
+    dateStr: '2026-10-02',
+    bettor: 'Ben',
+    stake: 5,
+    totalOdds: '+1500',
+    payout: 0,
+    result: 'loss', // 2 of 5 hit!
+    notes: 'Inaugural Friday Puck Parlay! Ben lowered the wager to $5 on Bet365 (+1500 -> $80.00 potential payout) with the original 5 boys before Edward joined. 2 of 5 legs hit: Ben (Marner 1A) and Alex (Eichel 2 SOG) cashed Friday night, while Jackson (Wyatt Johnston 0 PTS), Axel (Canes ML 2-5), and Will (Patrick Kane 0G) missed.',
+    legs: [
+      { boy: 'Ben', pick: 'Mitch Marner — 1+ Points', odds: '-200', result: 'hit' },
+      { boy: 'Alex', pick: 'Jack Eichel — 2+ Shots on Goal', odds: '-300', result: 'hit' },
+      { boy: 'Jackson', pick: 'Wyatt Johnston — 1+ Points', odds: '-140', result: 'miss' },
+      { boy: 'Will', pick: 'Patrick Kane — Anytime Goal Scorer', odds: '+200', result: 'miss' },
+      { boy: 'Axel', pick: 'Carolina Hurricanes Moneyline', odds: '-180', result: 'miss' }
+    ]
+  },
+  {
+    weekNum: 2,
     dateStr: '2026-10-16',
     bettor: 'Axel',
     stake: 25,
     totalOdds: '+950',
     payout: 0,
     result: 'loss', // 4 of 5 hit!
-    notes: 'Axel placed from the States while Jackson was away. 4 of 5 legs hit — Ben missed on Leo Carlsson and sold the parlay! (Edward joined the squad in Week 2)',
+    notes: 'Axel placed from the States while Jackson was away ($25 stake). 4 of 5 legs hit — Ben missed on Leo Carlsson and sold the parlay! (Edward joined the squad in Week 3)',
     legs: [
       { boy: 'Axel', pick: 'Brock Nelson 1+ Points', odds: '-140', result: 'hit' },
       { boy: 'Jackson', pick: 'Nathan MacKinnon 4+ SOG', odds: '-130', result: 'hit' },
@@ -1452,14 +1638,14 @@ const DEFAULT_STATS_HISTORY = [
     ]
   },
   {
-    weekNum: 2,
+    weekNum: 3,
     dateStr: '2026-10-23',
     bettor: 'Jackson',
     stake: 30,
     totalOdds: '+1261',
     payout: 0,
     result: 'loss',
-    notes: 'Jackson placed on FanDuel ($30 SGP+ at +1261). 3 of 6 legs hit — Edward (Caufield 4 SOG), Jackson (MacKinnon 4 SOG, 4 PTS), and Axel (Hagel 1 PT) cashed, while Will (Slafkovsky 0 PTS), Ben (Hutson 0 SOG), and Alex (Kucherov 0 G) missed.',
+    notes: 'Jackson placed on FanDuel ($30 SGP+ at +1261) — Edward joined as the 6th member! 3 of 6 legs hit: Edward (Caufield 4 SOG), Jackson (MacKinnon 4 SOG, 4 PTS), and Axel (Hagel 1 PT) cashed, while Will (Slafkovsky 0 PTS), Ben (Hutson 0 SOG), and Alex (Kucherov 0 G) missed.',
     legs: [
       { boy: 'Axel', pick: 'Brandon Hagel Over 0.5 Total Points', odds: '-175', result: 'hit' },
       { boy: 'Jackson', pick: 'Nathan MacKinnon Over 3.5 Total Shots On Goal', odds: '-145', result: 'hit' },
@@ -1470,7 +1656,7 @@ const DEFAULT_STATS_HISTORY = [
     ]
   },
   {
-    weekNum: 3,
+    weekNum: 4,
     dateStr: '2026-10-30',
     bettor: 'Will',
     stake: 30,
@@ -1488,7 +1674,7 @@ const DEFAULT_STATS_HISTORY = [
     ]
   },
   {
-    weekNum: 4,
+    weekNum: 5,
     dateStr: '2026-11-06',
     bettor: 'Alex',
     stake: 30,
@@ -2906,6 +3092,9 @@ function renderTracker() {
   } else if (state.currentFridayStr === '2026-10-16') {
     payout = "262.50";
     totalOddsMulti = 10.50;
+  } else if (state.currentFridayStr === '2026-10-02') {
+    payout = "80.00";
+    totalOddsMulti = 16.00;
   }
   DOM.trackerWagerDisplay.textContent = `$${state.stake.toFixed(2)}`;
   DOM.trackerReturnDisplay.textContent = `$${payout}`;
@@ -3556,6 +3745,31 @@ function parseNhlScheduleData(data, targetDateStr) {
 }
 
 function getFallbackGames(dateStr) {
+  if (dateStr === '2026-10-02') {
+    return [
+      {
+        id: 401892432,
+        startTimeUTC: `${dateStr}T23:00:00Z`,
+        venue: 'Lenovo Center',
+        away: { abbrev: 'WSH', name: 'Capitals', place: 'Washington', logo: 'https://assets.nhle.com/logos/nhl/svg/WSH_light.svg' },
+        home: { abbrev: 'CAR', name: 'Hurricanes', place: 'Carolina', logo: 'https://assets.nhle.com/logos/nhl/svg/CAR_light.svg' }
+      },
+      {
+        id: 401891782,
+        startTimeUTC: `2026-10-03T01:00:00Z`,
+        venue: 'American Airlines Center',
+        away: { abbrev: 'STL', name: 'Blues', place: 'St. Louis', logo: 'https://assets.nhle.com/logos/nhl/svg/STL_light.svg' },
+        home: { abbrev: 'DAL', name: 'Stars', place: 'Dallas', logo: 'https://assets.nhle.com/logos/nhl/svg/DAL_light.svg' }
+      },
+      {
+        id: 401892433,
+        startTimeUTC: `2026-10-03T02:00:00Z`,
+        venue: 'T-Mobile Arena',
+        away: { abbrev: 'ANA', name: 'Ducks', place: 'Anaheim', logo: 'https://assets.nhle.com/logos/nhl/svg/ANA_light.svg' },
+        home: { abbrev: 'VGK', name: 'Golden Knights', place: 'Vegas', logo: 'https://assets.nhle.com/logos/nhl/svg/VGK_light.svg' }
+      }
+    ];
+  }
   if (dateStr === '2026-10-16') {
     return [
       {
@@ -3809,7 +4023,25 @@ const DEFAULT_OCT16_PICKS = {
   Ben: { boy: 'Ben', game: 'BOS @ ANA', betType: 'prop', pick_text: 'Leo Carlsson 1+ Points', odds: '-115', chirp: 'Sold the parlay' }
 };
 
+const DEFAULT_OCT02_PICKS = {
+  Ben: { user_name: 'Ben', boy: 'Ben', game: 'ANA @ VGK', game_title: 'ANA Ducks @ VGK Golden Knights', bet_type: 'Player Prop', pick_text: 'Mitch Marner — 1+ Points', odds: '-200', chirp: 'I actually only did $5 — we can start with 5 and increase if we want', locked: true },
+  Alex: { user_name: 'Alex', boy: 'Alex', game: 'ANA @ VGK', game_title: 'ANA Ducks @ VGK Golden Knights', bet_type: 'Player Prop', pick_text: 'Jack Eichel — 2+ Shots on Goal', odds: '-300', chirp: 'Me and Alex’s legs both hit tonight', locked: true },
+  Jackson: { user_name: 'Jackson', boy: 'Jackson', game: 'STL @ DAL', game_title: 'STL Blues @ DAL Stars', bet_type: 'Player Prop', pick_text: 'Wyatt Johnston — 1+ Points', odds: '-140', chirp: 'wyatt johnston for a point', locked: true },
+  Will: { user_name: 'Will', boy: 'Will', game: 'CHI @ BUF', game_title: 'CHI Blackhawks @ BUF Sabres', bet_type: 'Player Prop', pick_text: 'Patrick Kane — Anytime Goal Scorer', odds: '+200', chirp: 'Patty Kane goal after the Canes game started at 5', locked: true },
+  Axel: { user_name: 'Axel', boy: 'Axel', game: 'WSH @ CAR', game_title: 'WSH Capitals @ CAR Hurricanes', bet_type: 'Moneyline', pick_text: 'Carolina Hurricanes Moneyline', odds: '-180', chirp: 'Canes ML', locked: true }
+};
+
 const DEFAULT_MASTER_SLIPS = {
+  '2026-10-02': {
+    id: '2026-10-02',
+    week_date: '2026-10-02',
+    bettor_name: 'Ben',
+    status: 'lost',
+    stake: 5,
+    total_odds: '+1500',
+    potential_payout: 80.00,
+    notes: 'Inaugural Friday Puck Parlay placed on Bet365 by Ben ($5 @ +1500 -> $80.00 • 2 of 5 hit)'
+  },
   '2026-10-16': {
     id: '2026-10-16',
     week_date: '2026-10-16',
@@ -3855,13 +4087,14 @@ const DEFAULT_MASTER_SLIPS = {
 function loadLocalData(dateStr) {
   state.masterSlip = DEFAULT_MASTER_SLIPS[dateStr] ? JSON.parse(JSON.stringify(DEFAULT_MASTER_SLIPS[dateStr])) : null;
 
-  const key = `bet_the_show_${dateStr}_v6`;
+  const defaultStakeForDate = dateStr === '2026-10-02' ? 5 : (dateStr === '2026-10-16' ? 25 : 30);
+  const key = `bet_the_show_${dateStr}_v7`;
   const saved = localStorage.getItem(key);
   if (saved) {
     try {
       const parsed = JSON.parse(saved);
       state.legs = parsed.legs || {};
-      state.stake = parsed.stake || (dateStr === '2026-10-16' ? 25 : 30);
+      state.stake = parsed.stake || defaultStakeForDate;
       state.isPlaced = !!parsed.isPlaced;
       return;
     } catch (e) {}
@@ -3884,6 +4117,10 @@ function loadLocalData(dateStr) {
     state.legs = JSON.parse(JSON.stringify(DEFAULT_OCT16_PICKS));
     state.stake = 25;
     state.isPlaced = true;
+  } else if (dateStr === '2026-10-02') {
+    state.legs = JSON.parse(JSON.stringify(DEFAULT_OCT02_PICKS));
+    state.stake = 5;
+    state.isPlaced = true;
   } else {
     state.legs = {};
     state.stake = 30;
@@ -3893,7 +4130,7 @@ function loadLocalData(dateStr) {
 }
 
 function saveLocalData(dateStr) {
-  const key = `bet_the_show_${dateStr}_v6`;
+  const key = `bet_the_show_${dateStr}_v7`;
   const payload = {
     date: dateStr,
     legs: state.legs,
@@ -4093,7 +4330,9 @@ function renderSquadLegs() {
       statClass: 'debut'
     };
 
-    if (state.currentFridayStr === '2026-10-16' && boy.name === 'Edward') {
+    if ((state.currentFridayStr === '2026-10-02' || state.currentFridayStr === '2026-10-16') && boy.name === 'Edward') {
+      const preJoinWeek = state.currentFridayStr === '2026-10-02' ? 1 : 2;
+      const preJoinStake = state.currentFridayStr === '2026-10-02' ? 5 : 25;
       return `
         <div class="leg-card-nhl empty" style="opacity: 0.6; border-style: dashed;">
           <div class="leg-card-top">
@@ -4102,16 +4341,16 @@ function renderSquadLegs() {
               <div>
                 <div class="boy-title-line">
                   <span class="boy-name-text">Edward</span>
-                  <span class="title-tag-pill debut">${getIcon('spark')} Joined Week 2</span>
+                  <span class="title-tag-pill debut">${getIcon('spark')} Joined Week 3</span>
                 </div>
                 <div class="boy-sub-role">
                   <span class="boy-stat-tag debut">N/A</span>
                   <span class="boy-stat-divider">•</span>
-                  <span class="boy-blurb-text">Not in group for Week 1 (5-boy $25 ticket)</span>
+                  <span class="boy-blurb-text">Not in group for Week ${preJoinWeek} (5-boy $${preJoinStake} ticket)</span>
                 </div>
               </div>
             </div>
-            <span class="leg-status-tag" style="background:var(--nhl-subcard); color:var(--text-secondary); border:1px solid var(--border-subtle);">N/A (Joined W2)</span>
+            <span class="leg-status-tag" style="background:var(--nhl-subcard); color:var(--text-secondary); border:1px solid var(--border-subtle);">N/A (Joined W3)</span>
           </div>
         </div>
       `;
@@ -4228,29 +4467,32 @@ function renderBettorBanner() {
   const diffWeeks = getFridayDiffWeeks(state.currentFriday);
   const weekNum = diffWeeks + 1;
   state.weekNumber = weekNum;
+  const expectedLegs = (state.currentFridayStr === '2026-10-02' || state.currentFridayStr === '2026-10-16') ? 5 : 6;
 
   DOM.weekPill.textContent = `WEEK ${weekNum} OF THE REGULAR SEASON`;
   DOM.bettorName.textContent = bettor.name;
   DOM.bettorAvatar.textContent = bettor.initials;
   
-  if (weekNum === 2) {
-    DOM.bettorDesc.innerHTML = `Week 1 was placed by Axel. This week it's <strong>${bettor.name}</strong>'s turn to place the 6-leg parlay ticket ($30 total wager) on his sportsbook account.`;
+  if (weekNum === 1) {
+    DOM.bettorDesc.innerHTML = `Inaugural Friday Puck Parlay! <strong>${bettor.name}</strong> placed the original 5-boy Bet365 ticket ($${state.stake} total wager).`;
+  } else if (weekNum === 2) {
+    DOM.bettorDesc.innerHTML = `Week 1 was placed by Ben. For Week 2, <strong>${bettor.name}</strong> placed the 5-leg parlay ticket ($${state.stake} total wager).`;
   } else {
-    DOM.bettorDesc.innerHTML = `It's <strong>${bettor.name}</strong>'s turn in the 6-week rotation to place this week's 6-leg ticket ($30 total wager) on his sportsbook account.`;
+    DOM.bettorDesc.innerHTML = `It's <strong>${bettor.name}</strong>'s turn in the 6-week rotation to place this week's 6-leg ticket ($${state.stake} total wager) on his sportsbook account.`;
   }
 
   const legsCount = Object.keys(state.legs).length;
-  DOM.slipProgressText.textContent = `${legsCount} / 6 LEGS`;
-  DOM.slipProgressBar.style.width = `${(legsCount / 6) * 100}%`;
+  DOM.slipProgressText.textContent = `${legsCount} / ${expectedLegs} LEGS`;
+  DOM.slipProgressBar.style.width = `${Math.min(100, (legsCount / expectedLegs) * 100)}%`;
 
-  if (legsCount === 6) {
-    DOM.slipStatusMsg.innerHTML = `<span class="msg-icon">${getIcon('fire')}</span> All 6 legs locked in! ${bettor.name} is clear to submit the $30 ticket to the book!`;
+  if (legsCount >= expectedLegs) {
+    DOM.slipStatusMsg.innerHTML = `<span class="msg-icon">${getIcon('fire')}</span> All ${expectedLegs} legs locked in! ${bettor.name} is clear to submit the $${state.stake} ticket to the book!`;
     DOM.slipStatusMsg.style.color = 'var(--b365-green)';
   } else if (legsCount === 0) {
-    DOM.slipStatusMsg.textContent = `No picks locked in yet for Week ${weekNum}. Let's build the ${state.stake} ticket!`;
+    DOM.slipStatusMsg.textContent = `No picks locked in yet for Week ${weekNum}. Let's build the $${state.stake} ticket!`;
     DOM.slipStatusMsg.style.color = 'var(--text-muted)';
   } else {
-    DOM.slipStatusMsg.textContent = `Need ${6 - legsCount} more leg${6 - legsCount === 1 ? '' : 's'} to complete the 6-legger ($30 stake).`;
+    DOM.slipStatusMsg.textContent = `Need ${expectedLegs - legsCount} more leg${expectedLegs - legsCount === 1 ? '' : 's'} to complete the ${expectedLegs}-legger ($${state.stake} stake).`;
     DOM.slipStatusMsg.style.color = 'var(--gold-odds)';
   }
 
@@ -4293,14 +4535,15 @@ function renderSportsbookTicket() {
   DOM.ticketDateText.textContent = formatDateDisplay(state.currentFriday);
   DOM.ticketReferenceCode.textContent = `SLIP #BTS-${state.currentFridayStr.replace(/-/g, '')}-W${state.weekNumber}`;
 
+  const expectedTicketLegs = (state.currentFridayStr === '2026-10-02' || state.currentFridayStr === '2026-10-16') ? 5 : 6;
   if (state.masterSlip && state.masterSlip.status === 'won') {
-    DOM.ticketStatusBadge.textContent = 'TICKET CASHED (6/6)';
+    DOM.ticketStatusBadge.textContent = `TICKET CASHED (${expectedTicketLegs}/${expectedTicketLegs})`;
     DOM.ticketStatusBadge.className = 'ticket-badge ready';
-  } else if (totals.count === 6) {
-    DOM.ticketStatusBadge.textContent = 'SLIP READY (6/6)';
+  } else if (totals.count >= expectedTicketLegs) {
+    DOM.ticketStatusBadge.textContent = `SLIP READY (${expectedTicketLegs}/${expectedTicketLegs})`;
     DOM.ticketStatusBadge.className = 'ticket-badge ready';
   } else {
-    DOM.ticketStatusBadge.textContent = `${totals.count}/6 LEGS`;
+    DOM.ticketStatusBadge.textContent = `${totals.count}/${expectedTicketLegs} LEGS`;
     DOM.ticketStatusBadge.className = 'ticket-badge';
   }
 
@@ -4338,12 +4581,18 @@ function renderSportsbookTicket() {
 
 function renderRotationSchedule() {
   const weeks = [];
-  const base = new Date(state.currentFriday);
+  let cursor = new Date(state.currentFriday);
+  cursor.setDate(cursor.getDate() - 7);
+  if (formatDateISO(cursor) === '2026-10-09') {
+    cursor.setDate(cursor.getDate() - 7);
+  }
 
-  for (let i = -1; i <= 4; i++) {
-    const d = new Date(base);
-    d.setDate(d.getDate() + (i * 7));
-    weeks.push(d);
+  while (weeks.length < 6) {
+    const d = new Date(cursor);
+    if (formatDateISO(d) !== '2026-10-09') {
+      weeks.push(d);
+    }
+    cursor.setDate(cursor.getDate() + 7);
   }
 
   DOM.rotationList.innerHTML = weeks.map(fri => {
@@ -5027,9 +5276,12 @@ function setupEvents() {
     if (e.target === DOM.installModalBackdrop) DOM.installModalBackdrop.classList.remove('open');
   });
 
-  // Week navigation
+  // Week navigation (skipping non-parlay Friday 2026-10-09)
   DOM.prevWeekBtn.addEventListener('click', () => {
     state.currentFriday.setDate(state.currentFriday.getDate() - 7);
+    if (formatDateISO(state.currentFriday) === '2026-10-09') {
+      state.currentFriday.setDate(state.currentFriday.getDate() - 7);
+    }
     state.currentFridayStr = formatDateISO(state.currentFriday);
     loadLocalData(state.currentFridayStr);
     initTrackerData();
@@ -5042,6 +5294,9 @@ function setupEvents() {
 
   DOM.nextWeekBtn.addEventListener('click', () => {
     state.currentFriday.setDate(state.currentFriday.getDate() + 7);
+    if (formatDateISO(state.currentFriday) === '2026-10-09') {
+      state.currentFriday.setDate(state.currentFriday.getDate() + 7);
+    }
     state.currentFridayStr = formatDateISO(state.currentFriday);
     loadLocalData(state.currentFridayStr);
     initTrackerData();

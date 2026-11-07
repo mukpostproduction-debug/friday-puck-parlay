@@ -28,6 +28,24 @@ const SQUAD_MEMBERS = [
 const CANONICAL_WEEKS = [
   {
     weekNum: 1,
+    dateStr: '2026-10-02',
+    bettor: 'Ben',
+    stake: 5,
+    totalOdds: '+1500',
+    potentialPayout: 80.00,
+    actualPayout: 0,
+    book: 'Bet365',
+    result: 'loss',
+    legs: [
+      { boy: 'Ben',     pick: 'Mitch Marner — 1+ Points (ANA @ VGK)',              odds: '-200', result: 'hit' },
+      { boy: 'Alex',    pick: 'Jack Eichel — 2+ Shots on Goal (ANA @ VGK)',        odds: '-300', result: 'hit' },
+      { boy: 'Jackson', pick: 'Wyatt Johnston — 1+ Points (STL @ DAL)',            odds: '-140', result: 'miss' },
+      { boy: 'Will',    pick: 'Patrick Kane — Anytime Goal Scorer (CHI @ BUF)',    odds: '+200', result: 'miss' },
+      { boy: 'Axel',    pick: 'Carolina Hurricanes Moneyline (WSH @ CAR)',         odds: '-180', result: 'miss' }
+    ]
+  },
+  {
+    weekNum: 2,
     dateStr: '2026-10-16',
     bettor: 'Axel',
     stake: 25,
@@ -45,7 +63,7 @@ const CANONICAL_WEEKS = [
     ]
   },
   {
-    weekNum: 2,
+    weekNum: 3,
     dateStr: '2026-10-23',
     bettor: 'Jackson',
     stake: 30,
@@ -64,7 +82,7 @@ const CANONICAL_WEEKS = [
     ]
   },
   {
-    weekNum: 3,
+    weekNum: 4,
     dateStr: '2026-10-30',
     bettor: 'Will',
     stake: 30,
@@ -83,7 +101,7 @@ const CANONICAL_WEEKS = [
     ]
   },
   {
-    weekNum: 4,
+    weekNum: 5,
     dateStr: '2026-11-06',
     bettor: 'Alex',
     stake: 30,
@@ -217,7 +235,7 @@ async function main() {
   }
 
   // Master Bettor 6-Week Rotation Order
-  const ROTATION_ORDER = ['Axel', 'Jackson', 'Will', 'Alex', 'Ben', 'Edward'];
+  const ROTATION_ORDER = ['Ben', 'Axel', 'Jackson', 'Will', 'Alex', 'Edward'];
   const settledRotationCount = weeks.filter(w => w.result === 'win' || w.result === 'loss').length;
 
   // Compute Squad Member Career Profiles & Individual Bankroll Ledger
@@ -416,7 +434,7 @@ async function main() {
   md.push(`---`);
   md.push(``);
   md.push(`## 💵 INDIVIDUAL BANKROLL & EQUAL-SPLIT PROFIT LEDGER`);
-  md.push(`> **How Pool Accounting Works:** One Master Bettor fronts the full ticket stake on their sportsbook each Friday (6-week rotation: \`Axel -> Jackson -> Will -> Alex -> Ben -> Edward\`). Every winning ticket payout is split equally 6 ways across the squad, and **Net Profit = Equal Payout Share − Tickets Placed Out-of-Pocket**.`);
+  md.push(`> **How Pool Accounting Works:** One Master Bettor fronts the full ticket stake on their sportsbook each Friday (6-week rotation: \`Ben -> Axel -> Jackson -> Will -> Alex -> Edward\`). Every winning ticket payout is split equally 6 ways across the squad, and **Net Profit = Equal Payout Share − Tickets Placed Out-of-Pocket**.`);
   md.push(``);
   md.push(`| Rotation | Squad Member | Tickets Placed | Out-of-Pocket Placed | Equal Payout Share | Actual Net Profit | Next Master Bettor Turn |`);
   md.push(`| :---: | :--- | :--- | :---: | :---: | :---: | :---: |`);

@@ -1,41 +1,41 @@
 {
-  "generatedAt": "2026-11-07T04:23:07.381Z",
+  "generatedAt": "2026-11-07T04:53:25.256Z",
   "season": "2026-2027",
   "poolSummary": {
-    "settledParlays": 4,
+    "settledParlays": 5,
     "parlaysWon": 1,
-    "parlaysLost": 3,
-    "parlayWinPct": "25.0%",
-    "totalGradedLegs": 23,
-    "totalHitLegs": 15,
-    "overallLegWinPct": "65.2%",
-    "totalStaked": 115,
+    "parlaysLost": 4,
+    "parlayWinPct": "20.0%",
+    "totalGradedLegs": 28,
+    "totalHitLegs": 17,
+    "overallLegWinPct": "60.7%",
+    "totalStaked": 120,
     "totalCashed": 454.41,
-    "netPoolProfit": 339.41
+    "netPoolProfit": 334.41
   },
   "profiles": [
     {
       "name": "Axel",
       "role": "Leg #3",
       "hits": 4,
-      "misses": 0,
+      "misses": 1,
       "pending": 0,
-      "totalGraded": 4,
-      "totalPicks": 4,
-      "winRate": 100,
+      "totalGraded": 5,
+      "totalPicks": 5,
+      "winRate": 80,
       "streak": "W4",
-      "avgGradedOdds": "-146",
-      "avgAllOdds": "-146",
+      "avgGradedOdds": "-152",
+      "avgAllOdds": "-152",
       "bestHitOdds": "-120",
       "bestHitPick": "Kent Johnson — 1+ Points (CBJ @ BUF)",
       "favMarket": "Points",
       "favMarketRecord": "4/4",
-      "flatBetPL": "+$27.44",
-      "flatBetRoi": "+69%",
+      "flatBetPL": "+$17.44",
+      "flatBetRoi": "+35%",
       "ticketsPlacedCount": 1,
       "ticketsPlacedWeeks": [
         {
-          "weekNum": 1,
+          "weekNum": 2,
           "dateStr": "2026-10-16",
           "stake": 25,
           "book": "DraftKings / Bet365"
@@ -45,10 +45,18 @@
       "earningsShare": 75.74,
       "netPoolProfit": 50.74,
       "netPoolProfitFormatted": "+$50.74",
-      "nextTurnWeekNum": 7,
+      "nextTurnWeekNum": 8,
       "pickHistory": [
         {
           "weekNum": 1,
+          "dateStr": "2026-10-02",
+          "pick": "Carolina Hurricanes Moneyline (WSH @ CAR)",
+          "odds": "-180",
+          "market": "Moneyline",
+          "result": "miss"
+        },
+        {
+          "weekNum": 2,
           "dateStr": "2026-10-16",
           "pick": "Brock Nelson 1+ Points (PIT @ COL)",
           "odds": "-140",
@@ -56,7 +64,7 @@
           "result": "hit"
         },
         {
-          "weekNum": 2,
+          "weekNum": 3,
           "dateStr": "2026-10-23",
           "pick": "Brandon Hagel Over 0.5 Points (TBL @ COL)",
           "odds": "-175",
@@ -64,7 +72,7 @@
           "result": "hit"
         },
         {
-          "weekNum": 3,
+          "weekNum": 4,
           "dateStr": "2026-10-30",
           "pick": "Carter Verhaeghe — Over 0.5 Points (WPG @ FLA)",
           "odds": "-160",
@@ -72,145 +80,11 @@
           "result": "hit"
         },
         {
-          "weekNum": 4,
+          "weekNum": 5,
           "dateStr": "2026-11-06",
           "pick": "Kent Johnson — 1+ Points (CBJ @ BUF)",
           "odds": "-120",
           "market": "Points",
-          "result": "hit"
-        }
-      ]
-    },
-    {
-      "name": "Jackson",
-      "role": "Leg #1",
-      "hits": 3,
-      "misses": 1,
-      "pending": 0,
-      "totalGraded": 4,
-      "totalPicks": 4,
-      "winRate": 75,
-      "streak": "W1",
-      "avgGradedOdds": "-127",
-      "avgAllOdds": "-127",
-      "bestHitOdds": "-130",
-      "bestHitPick": "Nathan MacKinnon 4+ Shots (PIT @ COL)",
-      "favMarket": "Shots on Goal",
-      "favMarketRecord": "3/4",
-      "flatBetPL": "+$12.00",
-      "flatBetRoi": "+30%",
-      "ticketsPlacedCount": 1,
-      "ticketsPlacedWeeks": [
-        {
-          "weekNum": 2,
-          "dateStr": "2026-10-23",
-          "stake": 30,
-          "book": "FanDuel"
-        }
-      ],
-      "placedAmount": 30,
-      "earningsShare": 75.74,
-      "netPoolProfit": 45.74,
-      "netPoolProfitFormatted": "+$45.74",
-      "nextTurnWeekNum": 8,
-      "pickHistory": [
-        {
-          "weekNum": 1,
-          "dateStr": "2026-10-16",
-          "pick": "Nathan MacKinnon 4+ Shots (PIT @ COL)",
-          "odds": "-130",
-          "market": "Shots on Goal",
-          "result": "hit"
-        },
-        {
-          "weekNum": 2,
-          "dateStr": "2026-10-23",
-          "pick": "Nathan MacKinnon Over 3.5 SOG (TBL @ COL)",
-          "odds": "-145",
-          "market": "Shots on Goal",
-          "result": "hit"
-        },
-        {
-          "weekNum": 3,
-          "dateStr": "2026-10-30",
-          "pick": "Sam Bennett — Over 2.5 Shots on Goal (WPG @ FLA)",
-          "odds": "-105",
-          "market": "Shots on Goal",
-          "result": "miss"
-        },
-        {
-          "weekNum": 4,
-          "dateStr": "2026-11-06",
-          "pick": "Matt Boldy — 3+ Shots on Goal (SJS @ MIN)",
-          "odds": "-135",
-          "market": "Shots on Goal",
-          "result": "hit"
-        }
-      ]
-    },
-    {
-      "name": "Will",
-      "role": "Leg #6",
-      "hits": 3,
-      "misses": 1,
-      "pending": 0,
-      "totalGraded": 4,
-      "totalPicks": 4,
-      "winRate": 75,
-      "streak": "W2",
-      "avgGradedOdds": "+117",
-      "avgAllOdds": "+117",
-      "bestHitOdds": "+155",
-      "bestHitPick": "Chandler Stephenson — Over 0.5 Assists (SEA @ CGY)",
-      "favMarket": "Points",
-      "favMarketRecord": "1/2",
-      "flatBetPL": "+$31.20",
-      "flatBetRoi": "+78%",
-      "ticketsPlacedCount": 1,
-      "ticketsPlacedWeeks": [
-        {
-          "weekNum": 3,
-          "dateStr": "2026-10-30",
-          "stake": 30,
-          "book": "BET99 (SGP+)"
-        }
-      ],
-      "placedAmount": 30,
-      "earningsShare": 75.74,
-      "netPoolProfit": 45.74,
-      "netPoolProfitFormatted": "+$45.74",
-      "nextTurnWeekNum": 9,
-      "pickHistory": [
-        {
-          "weekNum": 1,
-          "dateStr": "2026-10-16",
-          "pick": "Pavel Zacha 1+ Points (BOS @ ANA)",
-          "odds": "+120",
-          "market": "Points",
-          "result": "hit"
-        },
-        {
-          "weekNum": 2,
-          "dateStr": "2026-10-23",
-          "pick": "Juraj Slafkovsky Over 0.5 Points (MTL @ CHI)",
-          "odds": "-175",
-          "market": "Points",
-          "result": "miss"
-        },
-        {
-          "weekNum": 3,
-          "dateStr": "2026-10-30",
-          "pick": "Chandler Stephenson — Over 0.5 Assists (SEA @ CGY)",
-          "odds": "+155",
-          "market": "Assists",
-          "result": "hit"
-        },
-        {
-          "weekNum": 4,
-          "dateStr": "2026-11-06",
-          "pick": "Cutter Gauthier — Anytime Goal Scorer (ANA @ CGY)",
-          "odds": "+137",
-          "market": "Goals",
           "result": "hit"
         }
       ]
@@ -242,7 +116,7 @@
       "nextTurnWeekNum": 6,
       "pickHistory": [
         {
-          "weekNum": 2,
+          "weekNum": 3,
           "dateStr": "2026-10-23",
           "pick": "Cole Caufield Over 3.5 SOG (MTL @ CHI)",
           "odds": "-145",
@@ -250,7 +124,7 @@
           "result": "hit"
         },
         {
-          "weekNum": 3,
+          "weekNum": 4,
           "dateStr": "2026-10-30",
           "pick": "Brandon Montour — Over 0.5 Points (SEA @ CGY)",
           "odds": "+105",
@@ -258,7 +132,7 @@
           "result": "miss"
         },
         {
-          "weekNum": 4,
+          "weekNum": 5,
           "dateStr": "2026-11-06",
           "pick": "Beckett Sennecke — 1+ Points (ANA @ CGY)",
           "odds": "-195",
@@ -268,30 +142,180 @@
       ]
     },
     {
-      "name": "Alex",
-      "role": "Leg #4",
-      "hits": 2,
+      "name": "Jackson",
+      "role": "Leg #1",
+      "hits": 3,
       "misses": 2,
       "pending": 0,
-      "totalGraded": 4,
-      "totalPicks": 4,
-      "winRate": 50,
+      "totalGraded": 5,
+      "totalPicks": 5,
+      "winRate": 60,
       "streak": "W1",
-      "avgGradedOdds": "+126",
-      "avgAllOdds": "+126",
+      "avgGradedOdds": "-129",
+      "avgAllOdds": "-129",
+      "bestHitOdds": "-130",
+      "bestHitPick": "Nathan MacKinnon 4+ Shots (PIT @ COL)",
+      "favMarket": "Shots on Goal",
+      "favMarketRecord": "3/4",
+      "flatBetPL": "+$2.00",
+      "flatBetRoi": "+4%",
+      "ticketsPlacedCount": 1,
+      "ticketsPlacedWeeks": [
+        {
+          "weekNum": 3,
+          "dateStr": "2026-10-23",
+          "stake": 30,
+          "book": "FanDuel"
+        }
+      ],
+      "placedAmount": 30,
+      "earningsShare": 75.74,
+      "netPoolProfit": 45.74,
+      "netPoolProfitFormatted": "+$45.74",
+      "nextTurnWeekNum": 9,
+      "pickHistory": [
+        {
+          "weekNum": 1,
+          "dateStr": "2026-10-02",
+          "pick": "Wyatt Johnston — 1+ Points (STL @ DAL)",
+          "odds": "-140",
+          "market": "Points",
+          "result": "miss"
+        },
+        {
+          "weekNum": 2,
+          "dateStr": "2026-10-16",
+          "pick": "Nathan MacKinnon 4+ Shots (PIT @ COL)",
+          "odds": "-130",
+          "market": "Shots on Goal",
+          "result": "hit"
+        },
+        {
+          "weekNum": 3,
+          "dateStr": "2026-10-23",
+          "pick": "Nathan MacKinnon Over 3.5 SOG (TBL @ COL)",
+          "odds": "-145",
+          "market": "Shots on Goal",
+          "result": "hit"
+        },
+        {
+          "weekNum": 4,
+          "dateStr": "2026-10-30",
+          "pick": "Sam Bennett — Over 2.5 Shots on Goal (WPG @ FLA)",
+          "odds": "-105",
+          "market": "Shots on Goal",
+          "result": "miss"
+        },
+        {
+          "weekNum": 5,
+          "dateStr": "2026-11-06",
+          "pick": "Matt Boldy — 3+ Shots on Goal (SJS @ MIN)",
+          "odds": "-135",
+          "market": "Shots on Goal",
+          "result": "hit"
+        }
+      ]
+    },
+    {
+      "name": "Alex",
+      "role": "Leg #4",
+      "hits": 3,
+      "misses": 2,
+      "pending": 0,
+      "totalGraded": 5,
+      "totalPicks": 5,
+      "winRate": 60,
+      "streak": "W1",
+      "avgGradedOdds": "+108",
+      "avgAllOdds": "+108",
       "bestHitOdds": "+110",
       "bestHitPick": "Beckett Sennecke 1+ Points (BOS @ ANA)",
-      "favMarket": "Points",
-      "favMarketRecord": "1/1",
-      "flatBetPL": "+$2.00",
-      "flatBetRoi": "+5%",
+      "favMarket": "Shots on Goal",
+      "favMarketRecord": "1/2",
+      "flatBetPL": "+$5.33",
+      "flatBetRoi": "+11%",
+      "ticketsPlacedCount": 1,
+      "ticketsPlacedWeeks": [
+        {
+          "weekNum": 5,
+          "dateStr": "2026-11-06",
+          "stake": 30,
+          "book": "FanDuel (SGP+)"
+        }
+      ],
+      "placedAmount": 30,
+      "earningsShare": 75.74,
+      "netPoolProfit": 45.74,
+      "netPoolProfitFormatted": "+$45.74",
+      "nextTurnWeekNum": 11,
+      "pickHistory": [
+        {
+          "weekNum": 1,
+          "dateStr": "2026-10-02",
+          "pick": "Jack Eichel — 2+ Shots on Goal (ANA @ VGK)",
+          "odds": "-300",
+          "market": "Shots on Goal",
+          "result": "hit"
+        },
+        {
+          "weekNum": 2,
+          "dateStr": "2026-10-16",
+          "pick": "Beckett Sennecke 1+ Points (BOS @ ANA)",
+          "odds": "+110",
+          "market": "Points",
+          "result": "hit"
+        },
+        {
+          "weekNum": 3,
+          "dateStr": "2026-10-23",
+          "pick": "Nikita Kucherov Over 0.5 Goals (TBL @ COL)",
+          "odds": "+170",
+          "market": "Goals",
+          "result": "miss"
+        },
+        {
+          "weekNum": 4,
+          "dateStr": "2026-10-30",
+          "pick": "Seth Jones — Over 2.5 Shots on Goal (WPG @ FLA)",
+          "odds": "+115",
+          "market": "Shots on Goal",
+          "result": "miss"
+        },
+        {
+          "weekNum": 5,
+          "dateStr": "2026-11-06",
+          "pick": "Minnesota Wild -1.5 Puck Line (SJS @ MIN)",
+          "odds": "+110",
+          "market": "Puck Line",
+          "result": "hit"
+        }
+      ]
+    },
+    {
+      "name": "Will",
+      "role": "Leg #6",
+      "hits": 3,
+      "misses": 2,
+      "pending": 0,
+      "totalGraded": 5,
+      "totalPicks": 5,
+      "winRate": 60,
+      "streak": "W2",
+      "avgGradedOdds": "+134",
+      "avgAllOdds": "+134",
+      "bestHitOdds": "+155",
+      "bestHitPick": "Chandler Stephenson — Over 0.5 Assists (SEA @ CGY)",
+      "favMarket": "Goals",
+      "favMarketRecord": "1/2",
+      "flatBetPL": "+$21.20",
+      "flatBetRoi": "+42%",
       "ticketsPlacedCount": 1,
       "ticketsPlacedWeeks": [
         {
           "weekNum": 4,
-          "dateStr": "2026-11-06",
+          "dateStr": "2026-10-30",
           "stake": 30,
-          "book": "FanDuel (SGP+)"
+          "book": "BET99 (SGP+)"
         }
       ],
       "placedAmount": 30,
@@ -302,34 +326,42 @@
       "pickHistory": [
         {
           "weekNum": 1,
-          "dateStr": "2026-10-16",
-          "pick": "Beckett Sennecke 1+ Points (BOS @ ANA)",
-          "odds": "+110",
-          "market": "Points",
-          "result": "hit"
-        },
-        {
-          "weekNum": 2,
-          "dateStr": "2026-10-23",
-          "pick": "Nikita Kucherov Over 0.5 Goals (TBL @ COL)",
-          "odds": "+170",
+          "dateStr": "2026-10-02",
+          "pick": "Patrick Kane — Anytime Goal Scorer (CHI @ BUF)",
+          "odds": "+200",
           "market": "Goals",
           "result": "miss"
         },
         {
+          "weekNum": 2,
+          "dateStr": "2026-10-16",
+          "pick": "Pavel Zacha 1+ Points (BOS @ ANA)",
+          "odds": "+120",
+          "market": "Points",
+          "result": "hit"
+        },
+        {
           "weekNum": 3,
-          "dateStr": "2026-10-30",
-          "pick": "Seth Jones — Over 2.5 Shots on Goal (WPG @ FLA)",
-          "odds": "+115",
-          "market": "Shots on Goal",
+          "dateStr": "2026-10-23",
+          "pick": "Juraj Slafkovsky Over 0.5 Points (MTL @ CHI)",
+          "odds": "-175",
+          "market": "Points",
           "result": "miss"
         },
         {
           "weekNum": 4,
+          "dateStr": "2026-10-30",
+          "pick": "Chandler Stephenson — Over 0.5 Assists (SEA @ CGY)",
+          "odds": "+155",
+          "market": "Assists",
+          "result": "hit"
+        },
+        {
+          "weekNum": 5,
           "dateStr": "2026-11-06",
-          "pick": "Minnesota Wild -1.5 Puck Line (SJS @ MIN)",
-          "odds": "+110",
-          "market": "Puck Line",
+          "pick": "Cutter Gauthier — Anytime Goal Scorer (ANA @ CGY)",
+          "odds": "+137",
+          "market": "Goals",
           "result": "hit"
         }
       ]
@@ -337,31 +369,46 @@
     {
       "name": "Ben",
       "role": "Leg #5",
-      "hits": 1,
+      "hits": 2,
       "misses": 3,
       "pending": 0,
-      "totalGraded": 4,
-      "totalPicks": 4,
-      "winRate": 25,
+      "totalGraded": 5,
+      "totalPicks": 5,
+      "winRate": 40,
       "streak": "W1",
-      "avgGradedOdds": "-147",
-      "avgAllOdds": "-147",
-      "bestHitOdds": "-390",
-      "bestHitPick": "Quinn Hughes — 1+ Points (SJS @ MIN)",
+      "avgGradedOdds": "-155",
+      "avgAllOdds": "-155",
+      "bestHitOdds": "-200",
+      "bestHitPick": "Mitch Marner — 1+ Points (ANA @ VGK)",
       "favMarket": "Points",
-      "favMarketRecord": "1/3",
-      "flatBetPL": "-$27.44",
-      "flatBetRoi": "-69%",
-      "ticketsPlacedCount": 0,
-      "ticketsPlacedWeeks": [],
-      "placedAmount": 0,
+      "favMarketRecord": "2/4",
+      "flatBetPL": "-$22.44",
+      "flatBetRoi": "-45%",
+      "ticketsPlacedCount": 1,
+      "ticketsPlacedWeeks": [
+        {
+          "weekNum": 1,
+          "dateStr": "2026-10-02",
+          "stake": 5,
+          "book": "Bet365"
+        }
+      ],
+      "placedAmount": 5,
       "earningsShare": 75.74,
-      "netPoolProfit": 75.74,
-      "netPoolProfitFormatted": "+$75.74",
-      "nextTurnWeekNum": 5,
+      "netPoolProfit": 70.74,
+      "netPoolProfitFormatted": "+$70.74",
+      "nextTurnWeekNum": 7,
       "pickHistory": [
         {
           "weekNum": 1,
+          "dateStr": "2026-10-02",
+          "pick": "Mitch Marner — 1+ Points (ANA @ VGK)",
+          "odds": "-200",
+          "market": "Points",
+          "result": "hit"
+        },
+        {
+          "weekNum": 2,
           "dateStr": "2026-10-16",
           "pick": "Leo Carlsson 1+ Points (BOS @ ANA)",
           "odds": "-115",
@@ -369,7 +416,7 @@
           "result": "miss"
         },
         {
-          "weekNum": 2,
+          "weekNum": 3,
           "dateStr": "2026-10-23",
           "pick": "Lane Hutson Over 1.5 SOG (MTL @ CHI)",
           "odds": "-130",
@@ -377,7 +424,7 @@
           "result": "miss"
         },
         {
-          "weekNum": 3,
+          "weekNum": 4,
           "dateStr": "2026-10-30",
           "pick": "Bobby McMann — Over 0.5 Points (SEA @ CGY)",
           "odds": "-120",
@@ -385,7 +432,7 @@
           "result": "miss"
         },
         {
-          "weekNum": 4,
+          "weekNum": 5,
           "dateStr": "2026-11-06",
           "pick": "Quinn Hughes — 1+ Points (SJS @ MIN)",
           "odds": "-390",
@@ -398,6 +445,49 @@
   "weeks": [
     {
       "weekNum": 1,
+      "dateStr": "2026-10-02",
+      "bettor": "Ben",
+      "stake": 5,
+      "totalOdds": "+1500",
+      "potentialPayout": 80,
+      "actualPayout": 0,
+      "book": "Bet365",
+      "result": "loss",
+      "legs": [
+        {
+          "boy": "Ben",
+          "pick": "Mitch Marner — 1+ Points (ANA @ VGK)",
+          "odds": "-200",
+          "result": "hit"
+        },
+        {
+          "boy": "Alex",
+          "pick": "Jack Eichel — 2+ Shots on Goal (ANA @ VGK)",
+          "odds": "-300",
+          "result": "hit"
+        },
+        {
+          "boy": "Jackson",
+          "pick": "Wyatt Johnston — 1+ Points (STL @ DAL)",
+          "odds": "-140",
+          "result": "miss"
+        },
+        {
+          "boy": "Will",
+          "pick": "Patrick Kane — Anytime Goal Scorer (CHI @ BUF)",
+          "odds": "+200",
+          "result": "miss"
+        },
+        {
+          "boy": "Axel",
+          "pick": "Carolina Hurricanes Moneyline (WSH @ CAR)",
+          "odds": "-180",
+          "result": "miss"
+        }
+      ]
+    },
+    {
+      "weekNum": 2,
       "dateStr": "2026-10-16",
       "bettor": "Axel",
       "stake": 25,
@@ -440,7 +530,7 @@
       ]
     },
     {
-      "weekNum": 2,
+      "weekNum": 3,
       "dateStr": "2026-10-23",
       "bettor": "Jackson",
       "stake": 30,
@@ -489,7 +579,7 @@
       ]
     },
     {
-      "weekNum": 3,
+      "weekNum": 4,
       "dateStr": "2026-10-30",
       "bettor": "Will",
       "stake": 30,
@@ -562,7 +652,7 @@
       ]
     },
     {
-      "weekNum": 4,
+      "weekNum": 5,
       "dateStr": "2026-11-06",
       "bettor": "Alex",
       "stake": 30,
