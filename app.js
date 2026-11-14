@@ -13,39 +13,59 @@
 // Week 3: Friday, Oct 23, 2026 (Jackson placed $30 6-leg ticket — Edward joined!)
 // Week 4: Friday, Oct 30, 2026 (Will placed $30 6-leg ticket)
 // Week 5: Friday, Nov 6, 2026 (Alex placed $30 6-leg ticket — CASHED $454.41!)
-// Week 6: Friday, Nov 13, 2026 (Edward placed $25 5-leg Betway ticket @ +5525 -> $1,406.25 — Alex sat out!)
+// Week 6: Friday, Nov 13, 2026 (Edward placed $25 5-leg Betway ticket @ +5525 -> 4/5 hit, Edward sold on Ohgren!)
+// Week 7: Special Non-Friday NHL Week (0 games Fri Nov 20 -> Squad votes Thu Nov 19 vs Sat Nov 21 until Wed Nov 18 @ 8 PM ET; Ben on deck!)
 // 6-week cycle: Ben -> Axel -> Jackson -> Will -> Alex -> Edward (repeats)
 const SQUAD = [
-  { id: 'ben', name: 'Ben', initials: 'BE', color: '#ec4899', defaultRole: 'Week 1 Bettor' },
+  { id: 'ben', name: 'Ben', initials: 'BE', color: '#ec4899', defaultRole: 'Week 1 & 7 Bettor' },
   { id: 'axel', name: 'Axel', initials: 'AX', color: '#f59e0b', defaultRole: 'Week 2 Bettor' },
   { id: 'jackson', name: 'Jackson', initials: 'JA', color: '#00ff87', defaultRole: 'Week 3 Bettor' },
   { id: 'will', name: 'Will', initials: 'WI', color: '#38bdf8', defaultRole: 'Week 4 Bettor' },
   { id: 'alex', name: 'Alex', initials: 'AL', color: '#a855f7', defaultRole: 'Week 5 Bettor' },
-  { id: 'edward', name: 'Edward', initials: 'ED', color: '#fb923c', defaultRole: 'Week 6 Bettor (On Deck)' }
+  { id: 'edward', name: 'Edward', initials: 'ED', color: '#fb923c', defaultRole: 'Week 6 Bettor' }
 ];
 
 // REFERENCE DATES FOR POOL WEEK & ROTATION
 const INAUGURAL_OCT02_FRIDAY = new Date('2026-10-02T12:00:00Z');
 const ROTATION_START_FRIDAY = new Date('2026-10-16T12:00:00Z');
 
-// DYNAMIC SUNDAY SWITCH ENGINE
-// "Each Sunday it should switch from our previous week to the new one."
-function getActiveFridayDate(refDate = new Date()) {
-  const d = new Date(refDate);
-  const day = d.getDay(); // 0 = Sun, 1 = Mon, 2 = Tue, 3 = Wed, 4 = Thu, 5 = Fri, 6 = Sat
+// WEEK 7 SPECIAL NON-FRIDAY GAME DAY VOTE CONFIGURATION
+// (No NHL games scheduled on Friday, Nov 20, 2026)
+const WEEK7_FRIDAY_ANCHOR = '2026-11-20';
+const WEEK7_VOTE_DATE_KEY = '2026-11-18'; // Supabase parlay_legs week_date key for per-boy votes
+const WEEK7_THU_DATE = '2026-11-19';
+const WEEK7_SAT_DATE = '2026-11-21';
+const WEEK7_VOTE_LOCK_AT = new Date('2026-11-18T20:00:00-05:00'); // Wed, Nov 18, 2026 @ 8:00 PM ET
+const WEEK7_VOTE_STORAGE_KEY = 'bts_week7_day_vote_v1';
 
-  if (day === 0) {
-    // Sunday: upcoming Friday (in 5 days)
-    d.setDate(d.getDate() + 5);
-  } else if (day === 6) {
-    // Saturday: keep yesterday's settled Friday visible for victory lap until Sunday rollover
-    d.setDate(d.getDate() - 1);
-  } else if (day >= 1 && day <= 5) {
-    // Mon-Fri: upcoming or current Friday
-    d.setDate(d.getDate() + (5 - day));
+function parseLocalISODate(dateStr) {
+  const parts = String(dateStr || '').split('-');
+  if (parts.length === 3) {
+    return new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10), 12, 0, 0, 0);
   }
+  const d = new Date(dateStr);
   d.setHours(12, 0, 0, 0);
   return d;
+}
+
+function isWeek7DateStr(dateStr) {
+  return dateStr === WEEK7_THU_DATE || dateStr === WEEK7_FRIDAY_ANCHOR || dateStr === WEEK7_SAT_DATE;
+}
+
+function toCanonicalFridayDate(dateOrStr) {
+  const iso = typeof dateOrStr === 'string' ? dateOrStr : formatDateISO(dateOrStr);
+  if (isWeek7DateStr(iso)) {
+    return parseLocalISODate(WEEK7_FRIDAY_ANCHOR);
+  }
+  const d = typeof dateOrStr === 'string' ? parseLocalISODate(dateOrStr) : new Date(dateOrStr);
+  d.setHours(12, 0, 0, 0);
+  return d;
+}
+
+function getDayLabelForDateStr(dateStr) {
+  if (dateStr === WEEK7_THU_DATE) return 'Thursday';
+  if (dateStr === WEEK7_SAT_DATE) return 'Saturday';
+  return 'Friday';
 }
 
 // PRE-CONFIGURED SUPABASE CREDENTIALS (Jackson's live Supabase instance)
@@ -58,22 +78,127 @@ const DEFAULT_SUPABASE_CONFIG = {
 // 2. APPLICATION STATE
 // =============================================================================
 const state = {
-  currentFriday: null,        // Date object (defaults to Oct 16, 2026)
+  currentFriday: null,        // Date object for active pool date
   currentFridayStr: '',       // 'YYYY-MM-DD'
-  weekNumber: 2,              // Week 2
+  weekNumber: 7,              // Active week number
   legs: {},                   // Map of boyName -> leg object
-  games: [],                  // Friday's NHL matchups
+  games: [],                  // Active day's NHL matchups
   stake: 30,                  // Default $30 pool stake ($5 per boy)
   isPlaced: false,
   supabase: null,
   isLiveSync: false,
   currentView: 'slipBuilderView',
-  // Live tracker parlay data (Aragon's template + 6th leg for Edward)
+  // Live tracker parlay data
   trackerData: [],
   // Stats & Leaderboard historical data
   statsHistory: [],
-  selectedHistoryWeek: 6 // Default to latest week (Week 6) for single-week view
+  selectedHistoryWeek: 6,     // Default to latest settled week (Week 6) for single-week view
+  // Week 7 Special Thursday vs. Saturday Vote State
+  week7Vote: {
+    votes: {},                // Map of boyName -> { choice: '2026-11-19' | '2026-11-21', updatedAt: '' }
+    selectedVoter: '',        // Remembered voter name on this device
+    slateFilter: 'both',      // 'both' | '2026-11-19' | '2026-11-21'
+    thuGames: [],             // Thursday Nov 19 games (12)
+    satGames: [],             // Saturday Nov 21 games (14)
+    lockedDate: null,         // Explicit locked winner ('2026-11-19' | '2026-11-21') from Supabase/local
+    supabaseLoaded: false
+  }
 };
+
+function isWeek7VoteLocked(now = new Date()) {
+  if (state.week7Vote.lockedDate === WEEK7_THU_DATE || state.week7Vote.lockedDate === WEEK7_SAT_DATE) {
+    return true;
+  }
+  return now.getTime() >= WEEK7_VOTE_LOCK_AT.getTime();
+}
+
+function tallyWeek7Votes() {
+  const thuVoters = [];
+  const satVoters = [];
+  SQUAD.forEach(boy => {
+    const v = state.week7Vote.votes[boy.name];
+    if (v && v.choice === WEEK7_THU_DATE) thuVoters.push(boy.name);
+    else if (v && v.choice === WEEK7_SAT_DATE) satVoters.push(boy.name);
+  });
+
+  const thuCount = thuVoters.length;
+  const satCount = satVoters.length;
+  const isTie = thuCount === satCount;
+  let winnerDate = WEEK7_SAT_DATE;
+  let tieBreakerReason = '';
+
+  if (state.week7Vote.lockedDate === WEEK7_THU_DATE || state.week7Vote.lockedDate === WEEK7_SAT_DATE) {
+    winnerDate = state.week7Vote.lockedDate;
+  } else if (thuCount > satCount) {
+    winnerDate = WEEK7_THU_DATE;
+  } else if (satCount > thuCount) {
+    winnerDate = WEEK7_SAT_DATE;
+  } else {
+    // Tie-breaker: Week 7 Master Bettor (Ben)'s vote if cast, else Saturday 14-game HNIC slate
+    const benVote = state.week7Vote.votes['Ben']?.choice;
+    if (benVote === WEEK7_THU_DATE || benVote === WEEK7_SAT_DATE) {
+      winnerDate = benVote;
+      tieBreakerReason = "Ben's Master Bettor tiebreaker";
+    } else {
+      winnerDate = WEEK7_SAT_DATE;
+      tieBreakerReason = '14-game Saturday HNIC slate default';
+    }
+  }
+
+  return {
+    thuVoters,
+    satVoters,
+    thuCount,
+    satCount,
+    totalVotes: thuCount + satCount,
+    isTie,
+    winnerDate,
+    tieBreakerReason
+  };
+}
+
+function getResolvedWeek7DateStr(now = new Date()) {
+  if (!isWeek7VoteLocked(now)) return WEEK7_FRIDAY_ANCHOR;
+  return tallyWeek7Votes().winnerDate;
+}
+
+function resolvePoolWeekDate(canonicalFriDate, now = new Date()) {
+  const iso = formatDateISO(canonicalFriDate);
+  if (iso === WEEK7_FRIDAY_ANCHOR) {
+    return parseLocalISODate(getResolvedWeek7DateStr(now));
+  }
+  return canonicalFriDate;
+}
+
+function isViewingWeek7Vote(now = new Date()) {
+  return state.currentFridayStr === WEEK7_FRIDAY_ANCHOR && !isWeek7VoteLocked(now);
+}
+
+// DYNAMIC WEEKLY ROLLOVER ENGINE
+function getActiveFridayDate(refDate = new Date()) {
+  const d = new Date(refDate);
+  const refISO = formatDateISO(d);
+
+  // Week 6 (2026-11-13) is officially settled -> Nov 14 through Nov 21 defaults straight to Week 7!
+  if (refISO >= '2026-11-14' && refISO <= '2026-11-21') {
+    return resolvePoolWeekDate(parseLocalISODate(WEEK7_FRIDAY_ANCHOR), refDate);
+  }
+  // On Sunday Nov 22: if Week 7 was Saturday Nov 21, keep Sat Nov 21 visible for late games & victory lap!
+  if (refISO === '2026-11-22' && getResolvedWeek7DateStr(refDate) === WEEK7_SAT_DATE) {
+    return parseLocalISODate(WEEK7_SAT_DATE);
+  }
+
+  const day = d.getDay(); // 0 = Sun, 1 = Mon, 2 = Tue, 3 = Wed, 4 = Thu, 5 = Fri, 6 = Sat
+  if (day === 0) {
+    d.setDate(d.getDate() + 5);
+  } else if (day === 6) {
+    d.setDate(d.getDate() - 1);
+  } else if (day >= 1 && day <= 5) {
+    d.setDate(d.getDate() + (5 - day));
+  }
+  d.setHours(12, 0, 0, 0);
+  return resolvePoolWeekDate(d, refDate);
+}
 
 // AUDIO SYNTHESIZER (Web Audio API)
 const audioCtx = (window.AudioContext || window.webkitAudioContext) ? new (window.AudioContext || window.webkitAudioContext)() : null;
@@ -133,10 +258,11 @@ function playSound(type = 'click') {
 //   2026-11-06 -> 4 (Week 5: Alex)
 //   2026-11-13 -> 5 (Week 6: Edward)
 function getFridayDiffWeeks(fridayDate) {
+  const canonicalFri = toCanonicalFridayDate(fridayDate);
   const msPerWeek = 7 * 24 * 60 * 60 * 1000;
-  const diffFromOct16 = Math.round((fridayDate.getTime() - ROTATION_START_FRIDAY.getTime()) / msPerWeek);
+  const diffFromOct16 = Math.round((canonicalFri.getTime() - ROTATION_START_FRIDAY.getTime()) / msPerWeek);
   if (diffFromOct16 < 0) {
-    const diffFromOct02 = Math.round((fridayDate.getTime() - INAUGURAL_OCT02_FRIDAY.getTime()) / msPerWeek);
+    const diffFromOct02 = Math.round((canonicalFri.getTime() - INAUGURAL_OCT02_FRIDAY.getTime()) / msPerWeek);
     return Math.min(0, diffFromOct02);
   }
   return diffFromOct16 + 1;
@@ -239,12 +365,22 @@ const DOM = {
   installAppBtn: document.getElementById('installAppBtn'),
   syncStatusBtn: document.getElementById('syncStatusBtn'),
   syncStatusText: document.getElementById('syncStatusText'),
+  ribbonDayLabel: document.getElementById('ribbonDayLabel'),
   tickerGamesCount: document.getElementById('tickerGamesCount'),
   gamesTicker: document.getElementById('gamesTicker'),
   // Views
   slipBuilderView: document.getElementById('slipBuilderView'),
   liveTrackerView: document.getElementById('liveTrackerView'),
   statsView: document.getElementById('statsView'),
+  // Week 7 Vote Arena & Slip Sections
+  week7VoteArena: document.getElementById('week7VoteArena'),
+  week7VoteSettledBanner: document.getElementById('week7VoteSettledBanner'),
+  slipBettorBanner: document.getElementById('slipBettorBanner'),
+  slipWorkspace: document.getElementById('slipWorkspace'),
+  slipMatchupsPanel: document.getElementById('slipMatchupsPanel'),
+  lineupColCaption: document.getElementById('lineupColCaption'),
+  schedulePanelHeading: document.getElementById('schedulePanelHeading'),
+  legModalDayTag: document.getElementById('legModalDayTag'),
   // Week navigation
   prevWeekBtn: document.getElementById('prevWeekBtn'),
   nextWeekBtn: document.getElementById('nextWeekBtn'),
@@ -1077,10 +1213,16 @@ const DEFAULT_NOV13_SLATE = [
     awayName: "NYR Rangers",
     homeTeam: "VAN",
     homeName: "VAN Canucks",
-    gameStatus: "pre",
-    statusDetail: "9:00 PM ET",
+    awayScore: 5,
+    homeScore: 1,
+    awaySog: 31,
+    homeSog: 28,
+    awayHits: 21,
+    homeHits: 28,
+    gameStatus: "final",
+    statusDetail: "Final",
     startTime: "Fri Nov 13 • 9:00 PM ET",
-    gameStateText: "9:00 PM ET",
+    gameStateText: "NYR 5 - VAN 1 (Final)",
     legs: [
       {
         id: "ohgren_goals_nov13",
@@ -1093,7 +1235,7 @@ const DEFAULT_NOV13_SLATE = [
         target: 1,
         apiStat: 0,
         manualDelta: 0,
-        subDetail: "0G, 0A • 0 SOG"
+        subDetail: "0G, 0A • 2 SOG • 12:58 TOI"
       },
       {
         id: "boeser_pts_nov13",
@@ -1104,9 +1246,9 @@ const DEFAULT_NOV13_SLATE = [
         marketLabel: "Over 0.5 Total Points (-135)",
         statType: "points",
         target: 1,
-        apiStat: 0,
+        apiStat: 1,
         manualDelta: 0,
-        subDetail: "0G, 0A • 0 SOG"
+        subDetail: "0G, 1A • 1 SOG • 21:34 TOI"
       },
       {
         id: "jtmiller_sog_nov13",
@@ -1117,9 +1259,9 @@ const DEFAULT_NOV13_SLATE = [
         marketLabel: "Over 1.5 Shots on Goal (-140)",
         statType: "shots",
         target: 2,
-        apiStat: 0,
+        apiStat: 2,
         manualDelta: 0,
-        subDetail: "0G, 0A • 0 SOG"
+        subDetail: "0G, 2A • 2 SOG • 18:49 TOI"
       }
     ]
   },
@@ -1131,10 +1273,16 @@ const DEFAULT_NOV13_SLATE = [
     awayName: "NSH Predators",
     homeTeam: "VGK",
     homeName: "VGK Golden Knights",
-    gameStatus: "pre",
-    statusDetail: "10:00 PM ET",
+    awayScore: 3,
+    homeScore: 2,
+    awaySog: 32,
+    homeSog: 42,
+    awayHits: 18,
+    homeHits: 20,
+    gameStatus: "final",
+    statusDetail: "Final/SO",
     startTime: "Fri Nov 13 • 10:00 PM ET",
-    gameStateText: "10:00 PM ET",
+    gameStateText: "NSH 3 - VGK 2 (Final/SO)",
     legs: [
       {
         id: "hill_saves_nov13",
@@ -1145,9 +1293,9 @@ const DEFAULT_NOV13_SLATE = [
         marketLabel: "Over 22.5 Total Saves (-120)",
         statType: "saves",
         target: 23,
-        apiStat: 0,
+        apiStat: 30,
         manualDelta: 0,
-        subDetail: "0 SV • 0 SA, 0 GA"
+        subDetail: "30 SV • 32 SA, 2 GA • 65:00 TOI"
       },
       {
         id: "olofsson_sog_nov13",
@@ -1158,9 +1306,9 @@ const DEFAULT_NOV13_SLATE = [
         marketLabel: "Over 2.5 Shots on Goal (+125)",
         statType: "shots",
         target: 3,
-        apiStat: 0,
+        apiStat: 4,
         manualDelta: 0,
-        subDetail: "0G, 0A • 0 SOG"
+        subDetail: "1G, 0A • 4 SOG • 15:23 TOI"
       }
     ]
   }
@@ -1637,7 +1785,7 @@ function syncTrackerFromRealPicks() {
           awayHits: prevGamesMap[gameKey]?.awayHits,
           homeHits: prevGamesMap[gameKey]?.homeHits,
           statusDetail: prevGamesMap[gameKey]?.statusDetail,
-          startTime: `Friday, ${state.currentFridayStr}`,
+          startTime: `${getDayLabelForDateStr(state.currentFridayStr)}, ${state.currentFridayStr}`,
           gameStateText: prevGamesMap[gameKey]?.gameStateText || 'Scheduled',
           gameStatus: prevGamesMap[gameKey]?.gameStatus || 'pre',
           odds: 'SGP',
@@ -1694,7 +1842,7 @@ function syncTrackerFromRealPicks() {
 }
 
 // Initialize Tracker Data from LocalStorage or Default (Purely NHL API Data-Driven)
-const TRACKER_STORAGE_KEY = "b365_sgp_tracker_data_v8";
+const TRACKER_STORAGE_KEY = "b365_sgp_tracker_data_v9";
 
 function initTrackerData() {
   const currentKey = `${TRACKER_STORAGE_KEY}_${state.currentFridayStr}`;
@@ -1735,7 +1883,7 @@ function loadAragonDemoSlate() {
 // =============================================================================
 // 7. SQUAD STATS & LEADERBOARD HISTORICAL ENGINE
 // =============================================================================
-const STATS_STORAGE_KEY = "bts_squad_stats_history_v11";
+const STATS_STORAGE_KEY = "bts_squad_stats_history_v12";
 
 const DEFAULT_STATS_HISTORY = [
   {
@@ -1833,14 +1981,14 @@ const DEFAULT_STATS_HISTORY = [
     stake: 25,
     totalOdds: '+5525',
     payout: 0,
-    result: 'pending',
-    notes: 'Edward locked in a $25 5-Fold BetBuilder+ on Betway (@ +5525 -> $1,406.25 potential return, $281.25/guy)! Alex was buckled in the sauna with Taylor Hall and sat out Week 6.',
+    result: 'loss',
+    notes: 'Edward locked in a $25 5-Fold BetBuilder+ on Betway (@ +5525 -> $1,406.25 potential return)! 4 of 5 legs cashed (Will Boeser 1A, Ben J.T. Miller 2 SOG, Jackson Adin Hill 30 SV, Axel Olofsson 4 SOG / 1G) — Edward sold his own bettor week on Liam Ohgren 0G! Alex sat out Week 6.',
     legs: [
-      { boy: 'Edward', pick: 'Liam Ohgren — Over 0.5 Total Goals', odds: '+360', result: 'pending' },
-      { boy: 'Will', pick: 'Brock Boeser — Over 0.5 Total Points', odds: '-135', result: 'pending' },
-      { boy: 'Ben', pick: 'J.T. Miller — Over 1.5 Shots on Goal', odds: '-140', result: 'pending' },
-      { boy: 'Jackson', pick: 'Adin Hill — Over 22.5 Total Saves', odds: '-120', result: 'pending' },
-      { boy: 'Axel', pick: 'Victor Olofsson — Over 2.5 Shots on Goal', odds: '+125', result: 'pending' }
+      { boy: 'Edward', pick: 'Liam Ohgren — Over 0.5 Total Goals', odds: '+360', result: 'miss' },
+      { boy: 'Will', pick: 'Brock Boeser — Over 0.5 Total Points', odds: '-135', result: 'hit' },
+      { boy: 'Ben', pick: 'J.T. Miller — Over 1.5 Shots on Goal', odds: '-140', result: 'hit' },
+      { boy: 'Jackson', pick: 'Adin Hill — Over 22.5 Total Saves', odds: '-120', result: 'hit' },
+      { boy: 'Axel', pick: 'Victor Olofsson — Over 2.5 Shots on Goal', odds: '+125', result: 'hit' }
     ]
   }
 ];
@@ -2228,7 +2376,7 @@ function computeSquadAnalytics() {
       sharpshooters = {
         names: leader.name,
         stat: `${leader.rate}% Hit Rate (${leader.hits}/${leader.total} Hits)`,
-        note: `Undefeated sole leader in squad accuracy on a ${leader.streakType}${leader.streak} heater!`,
+        note: `${leader.misses === 0 ? 'Undefeated sole' : 'Sole'} leader in squad accuracy on a ${leader.streakType}${leader.streak} heater!`,
         isTie: false,
         list: [leader]
       };
@@ -2255,7 +2403,7 @@ function computeSquadAnalytics() {
     name: hotSeatWinner.name,
     stat: `${hotSeatWinner.misses} Miss${hotSeatWinner.misses === 1 ? '' : 'es'} (${hotSeatWinner.hits}-${hotSeatWinner.misses} • ${hotSeatWinner.streakType}${hotSeatWinner.streak})`,
     note: hotSeatWinner.streakType === 'W'
-      ? `Snapped the cold streak in Week ${sortedWeeks[sortedWeeks.length - 1]?.weekNum || currentWeekNum} to help cash the parlay! Climbing back up.`
+      ? `Most season misses (${hotSeatWinner.misses}), now climbing back on a W${hotSeatWinner.streak} rebound streak!`
       : `Last missed ${hotSeatWinner.lastMissedPick || 'a leg'} — locked in for a bounce-back in Week ${currentWeekNum}!`
   } : {
     name: 'Nobody (Clean Sheet)',
@@ -2908,14 +3056,57 @@ function renderEmptyTrackerState() {
   DOM.trackerGamesContainer.innerHTML = "";
 
   const bettor = getBettorForFriday(state.currentFriday);
+
+  if (isViewingWeek7Vote()) {
+    const tally = tallyWeek7Votes();
+    DOM.legsHitCount.textContent = `0 / 6`;
+    if (DOM.overallProgressBar) DOM.overallProgressBar.style.width = "0%";
+    if (DOM.trackerTotalOddsBadge) DOM.trackerTotalOddsBadge.textContent = "WEEK 7 DAY VOTE";
+    if (DOM.navLiveMultiplier) DOM.navLiveMultiplier.textContent = "VOTE";
+    if (DOM.syncStatus) DOM.syncStatus.textContent = "No NHL games Fri Nov 20 • Voting Thu Nov 19 vs Sat Nov 21 until Wed 8:00 PM ET";
+    DOM.trackerWagerDisplay.textContent = `$30.00`;
+    DOM.trackerReturnDisplay.textContent = "--";
+
+    if (DOM.ticketStatusBanner) {
+      DOM.ticketStatusBanner.className = "tracker-cashout-btn pending";
+      DOM.ticketStatusBanner.innerHTML = `<span class="bts-icon" style="margin-right:6px;">${getIcon('clock')}</span> Voting Open (${tally.totalVotes}/6 In) • Locks Wed Nov 18 @ 8:00 PM ET`;
+    }
+
+    const voteCard = document.createElement("div");
+    voteCard.className = "tracker-empty-card";
+    voteCard.innerHTML = `
+      <div class="tracker-empty-icon-wrap">
+        ${getIcon('puck')}
+      </div>
+      <div class="tracker-empty-badge">WEEK 7 SPECIAL SCHEDULE VOTE</div>
+      <h3 class="tracker-empty-title">THU NOV 19 (12 GM) VS. SAT NOV 21 (14 GM)</h3>
+      <p class="tracker-empty-desc">
+        There are <strong>zero NHL games scheduled on Friday, Nov 20</strong>. Cast your vote on the <strong>Slip ($30)</strong> tab before <strong>Wednesday, Nov 18 at 8:00 PM ET</strong> — once locked, Week 7 will automatically configure for the winning night with <strong>${bettor.name}</strong> on deck!
+      </p>
+      <div class="tracker-empty-actions">
+        <button class="nhl-action-btn primary" onclick="switchView('slipBuilderView')">
+          <span class="bts-icon">${getIcon('bolt')}</span>
+          <span>Go Vote: Thu (${tally.thuCount}) vs Sat (${tally.satCount})</span>
+        </button>
+        <button class="nhl-action-btn secondary" onclick="jumpToWeekDate('2026-11-13')">
+          <span class="bts-icon">${getIcon('trophy')}</span>
+          <span>View Settled Week 6 Slip (4/5)</span>
+        </button>
+      </div>
+    `;
+    DOM.trackerGamesContainer.appendChild(voteCard);
+    return;
+  }
+
   const boysWithPicks = Object.keys(state.legs || {});
   const readyCount = boysWithPicks.length;
+  const dayLabel = getDayLabelForDateStr(state.currentFridayStr);
 
   DOM.legsHitCount.textContent = `0 / 6`;
   if (DOM.overallProgressBar) DOM.overallProgressBar.style.width = "0%";
   if (DOM.trackerTotalOddsBadge) DOM.trackerTotalOddsBadge.textContent = "AWAITING LOCK-IN";
   if (DOM.navLiveMultiplier) DOM.navLiveMultiplier.textContent = "--";
-  if (DOM.syncStatus) DOM.syncStatus.textContent = "Awaiting Bet Placement • Live NHL API ready to sync upon lock-in";
+  if (DOM.syncStatus) DOM.syncStatus.textContent = `Awaiting ${dayLabel} Bet Placement • Live NHL API ready to sync upon lock-in`;
 
   DOM.trackerWagerDisplay.textContent = `$${state.stake.toFixed(2)}`;
   DOM.trackerReturnDisplay.textContent = "--";
@@ -2931,10 +3122,10 @@ function renderEmptyTrackerState() {
     <div class="tracker-empty-icon-wrap">
       ${getIcon('lock')}
     </div>
-    <div class="tracker-empty-badge">PARLAY PENDING</div>
+    <div class="tracker-empty-badge">${dayLabel.toUpperCase()} PARLAY PENDING</div>
     <h3 class="tracker-empty-title">LIVE TRACKER AWAITING LOCK-IN</h3>
     <p class="tracker-empty-desc">
-      This week’s parlay has not been placed yet. Once <strong>${bettor.name}</strong> places the bet on the sportsbook and confirms it, the live tracker will activate, refresh with our real picks, and begin streaming real-time NHL boxscore progress!
+      This week’s ${dayLabel} parlay has not been placed yet. Once <strong>${bettor.name}</strong> places the bet on the sportsbook and confirms it, the live tracker will activate, refresh with our real picks, and begin streaming real-time NHL boxscore progress!
     </p>
 
     <div class="tracker-empty-slip-preview">
@@ -2974,6 +3165,22 @@ function renderEmptyTrackerState() {
 
   DOM.trackerGamesContainer.appendChild(emptyCard);
 }
+
+window.jumpToWeekDate = function(targetDateStr) {
+  state.currentFriday = parseLocalISODate(targetDateStr);
+  state.currentFridayStr = formatDateISO(state.currentFriday);
+  loadLocalData(state.currentFridayStr);
+  initTrackerData();
+  if (isViewingWeek7Vote()) {
+    fetchWeek7DualSlates();
+  } else {
+    fetchFridayNhlGames(state.currentFridayStr);
+    if (state.supabase) fetchSupabaseParlay(state.currentFridayStr);
+  }
+  renderAll();
+  renderTracker();
+  playSound('click');
+};
 
 window.lockInBetAndRefreshTracker = function() {
   state.isPlaced = true;
@@ -3458,20 +3665,11 @@ async function fetchAllLiveStats(isManualClick = false) {
     try {
       espnResp = await fetch(datedEspnUrl);
     } catch (e) {
-      espnResp = await fetch(baseEspnUrl);
+      if (!compactDate) espnResp = await fetch(baseEspnUrl);
     }
     if (espnResp && espnResp.ok) {
       let scoreboard = await espnResp.json();
       let events = scoreboard.events || [];
-      if (events.length === 0) {
-        try {
-          const fallbackResp = await fetch(baseEspnUrl);
-          if (fallbackResp.ok) {
-            scoreboard = await fallbackResp.json();
-            events = scoreboard.events || [];
-          }
-        } catch (e) {}
-      }
       espnSucceeded = true;
 
       for (const event of events) {
@@ -3827,6 +4025,11 @@ function toggleAutoPoll() {
 // 9. FRIDAY NHL GAMES FETCH (SCOREBOARD TICKER & MATCHUPS EXPLORER)
 // =============================================================================
 async function fetchFridayNhlGames(dateStr, isSilentRefresh = false) {
+  if (isViewingWeek7Vote()) {
+    await fetchWeek7DualSlates();
+    return;
+  }
+
   if (!isSilentRefresh) {
     let gamesList = getFallbackGames(dateStr);
     state.games = gamesList;
@@ -3841,24 +4044,10 @@ async function fetchFridayNhlGames(dateStr, isSilentRefresh = false) {
   const espnScheduleUrl = `${baseScheduleUrl}?dates=${compactDate}`;
 
   try {
-    let res = null;
-    try {
-      res = await fetch(espnScheduleUrl);
-    } catch (e) {
-      res = await fetch(baseScheduleUrl);
-    }
+    const res = await fetch(espnScheduleUrl);
     if (res && res.ok) {
-      let data = await res.json();
-      let events = data.events || [];
-      if (events.length === 0) {
-        try {
-          const fallbackRes = await fetch(baseScheduleUrl);
-          if (fallbackRes.ok) {
-            data = await fallbackRes.json();
-            events = data.events || [];
-          }
-        } catch (e) {}
-      }
+      const data = await res.json();
+      const events = data.events || [];
       if (events.length > 0) {
         const gamesList = events.map(ev => {
           const comp = ev.competitions?.[0] || {};
@@ -3951,6 +4140,40 @@ function parseNhlScheduleData(data, targetDateStr) {
   }
   return games;
 }
+
+const NHL_LOGO = (abbr) => `https://assets.nhle.com/logos/nhl/svg/${abbr}_light.svg`;
+
+const DEFAULT_NOV19_GAMES = [
+  { id: 2026020347, startTimeUTC: '2026-11-20T00:00:00Z', venue: 'Scotiabank Arena', away: { abbrev: 'LAK', name: 'Kings', place: 'Los Angeles', logo: NHL_LOGO('LAK') }, home: { abbrev: 'TOR', name: 'Maple Leafs', place: 'Toronto', logo: NHL_LOGO('TOR') } },
+  { id: 2026020348, startTimeUTC: '2026-11-20T00:00:00Z', venue: 'Canadian Tire Centre', away: { abbrev: 'PHI', name: 'Flyers', place: 'Philadelphia', logo: NHL_LOGO('PHI') }, home: { abbrev: 'OTT', name: 'Senators', place: 'Ottawa', logo: NHL_LOGO('OTT') } },
+  { id: 2026020350, startTimeUTC: '2026-11-20T00:00:00Z', venue: 'PPG Paints Arena', away: { abbrev: 'STL', name: 'Blues', place: 'St. Louis', logo: NHL_LOGO('STL') }, home: { abbrev: 'PIT', name: 'Penguins', place: 'Pittsburgh', logo: NHL_LOGO('PIT') } },
+  { id: 2026020351, startTimeUTC: '2026-11-20T00:00:00Z', venue: 'Capital One Arena', away: { abbrev: 'BUF', name: 'Sabres', place: 'Buffalo', logo: NHL_LOGO('BUF') }, home: { abbrev: 'WSH', name: 'Capitals', place: 'Washington', logo: NHL_LOGO('WSH') } },
+  { id: 2026020352, startTimeUTC: '2026-11-20T00:00:00Z', venue: 'Lenovo Center', away: { abbrev: 'MTL', name: 'Canadiens', place: 'Montréal', logo: NHL_LOGO('MTL') }, home: { abbrev: 'CAR', name: 'Hurricanes', place: 'Carolina', logo: NHL_LOGO('CAR') } },
+  { id: 2026020354, startTimeUTC: '2026-11-20T00:00:00Z', venue: 'Canada Life Centre', away: { abbrev: 'NYI', name: 'Islanders', place: 'New York', logo: NHL_LOGO('NYI') }, home: { abbrev: 'WPG', name: 'Jets', place: 'Winnipeg', logo: NHL_LOGO('WPG') } },
+  { id: 2026020349, startTimeUTC: '2026-11-20T00:30:00Z', venue: 'Benchmark International Arena', away: { abbrev: 'EDM', name: 'Oilers', place: 'Edmonton', logo: NHL_LOGO('EDM') }, home: { abbrev: 'TBL', name: 'Lightning', place: 'Tampa Bay', logo: NHL_LOGO('TBL') } },
+  { id: 2026020353, startTimeUTC: '2026-11-20T01:00:00Z', venue: 'United Center', away: { abbrev: 'CBJ', name: 'Blue Jackets', place: 'Columbus', logo: NHL_LOGO('CBJ') }, home: { abbrev: 'CHI', name: 'Blackhawks', place: 'Chicago', logo: NHL_LOGO('CHI') } },
+  { id: 2026020355, startTimeUTC: '2026-11-20T01:00:00Z', venue: 'Scotiabank Saddledome', away: { abbrev: 'MIN', name: 'Wild', place: 'Minnesota', logo: NHL_LOGO('MIN') }, home: { abbrev: 'CGY', name: 'Flames', place: 'Calgary', logo: NHL_LOGO('CGY') } },
+  { id: 2026020356, startTimeUTC: '2026-11-20T02:00:00Z', venue: 'Ball Arena', away: { abbrev: 'ANA', name: 'Ducks', place: 'Anaheim', logo: NHL_LOGO('ANA') }, home: { abbrev: 'COL', name: 'Avalanche', place: 'Colorado', logo: NHL_LOGO('COL') } },
+  { id: 2026020357, startTimeUTC: '2026-11-20T02:40:00Z', venue: 'Climate Pledge Arena', away: { abbrev: 'VAN', name: 'Canucks', place: 'Vancouver', logo: NHL_LOGO('VAN') }, home: { abbrev: 'SEA', name: 'Kraken', place: 'Seattle', logo: NHL_LOGO('SEA') } },
+  { id: 2026020358, startTimeUTC: '2026-11-20T03:00:00Z', venue: 'T-Mobile Arena', away: { abbrev: 'DAL', name: 'Stars', place: 'Dallas', logo: NHL_LOGO('DAL') }, home: { abbrev: 'VGK', name: 'Golden Knights', place: 'Vegas', logo: NHL_LOGO('VGK') } }
+];
+
+const DEFAULT_NOV21_GAMES = [
+  { id: 2026020359, startTimeUTC: '2026-11-21T18:00:00Z', venue: 'Lenovo Center', away: { abbrev: 'EDM', name: 'Oilers', place: 'Edmonton', logo: NHL_LOGO('EDM') }, home: { abbrev: 'CAR', name: 'Hurricanes', place: 'Carolina', logo: NHL_LOGO('CAR') } },
+  { id: 2026020360, startTimeUTC: '2026-11-21T20:30:00Z', venue: 'Scotiabank Saddledome', away: { abbrev: 'CHI', name: 'Blackhawks', place: 'Chicago', logo: NHL_LOGO('CHI') }, home: { abbrev: 'CGY', name: 'Flames', place: 'Calgary', logo: NHL_LOGO('CGY') } },
+  { id: 2026020361, startTimeUTC: '2026-11-21T23:00:00Z', venue: 'Amerant Bank Arena', away: { abbrev: 'BUF', name: 'Sabres', place: 'Buffalo', logo: NHL_LOGO('BUF') }, home: { abbrev: 'FLA', name: 'Panthers', place: 'Florida', logo: NHL_LOGO('FLA') } },
+  { id: 2026020362, startTimeUTC: '2026-11-21T23:00:00Z', venue: 'Bridgestone Arena', away: { abbrev: 'PIT', name: 'Penguins', place: 'Pittsburgh', logo: NHL_LOGO('PIT') }, home: { abbrev: 'NSH', name: 'Predators', place: 'Nashville', logo: NHL_LOGO('NSH') } },
+  { id: 2026020363, startTimeUTC: '2026-11-22T00:00:00Z', venue: 'TD Garden', away: { abbrev: 'WSH', name: 'Capitals', place: 'Washington', logo: NHL_LOGO('WSH') }, home: { abbrev: 'BOS', name: 'Bruins', place: 'Boston', logo: NHL_LOGO('BOS') } },
+  { id: 2026020364, startTimeUTC: '2026-11-22T00:00:00Z', venue: 'Scotiabank Arena', away: { abbrev: 'CBJ', name: 'Blue Jackets', place: 'Columbus', logo: NHL_LOGO('CBJ') }, home: { abbrev: 'TOR', name: 'Maple Leafs', place: 'Toronto', logo: NHL_LOGO('TOR') } },
+  { id: 2026020365, startTimeUTC: '2026-11-22T00:00:00Z', venue: 'Centre Bell', away: { abbrev: 'PHI', name: 'Flyers', place: 'Philadelphia', logo: NHL_LOGO('PHI') }, home: { abbrev: 'MTL', name: 'Canadiens', place: 'Montréal', logo: NHL_LOGO('MTL') } },
+  { id: 2026020366, startTimeUTC: '2026-11-22T00:00:00Z', venue: 'Canadian Tire Centre', away: { abbrev: 'LAK', name: 'Kings', place: 'Los Angeles', logo: NHL_LOGO('LAK') }, home: { abbrev: 'OTT', name: 'Senators', place: 'Ottawa', logo: NHL_LOGO('OTT') } },
+  { id: 2026020367, startTimeUTC: '2026-11-22T00:00:00Z', venue: 'Little Caesars Arena', away: { abbrev: 'NYI', name: 'Islanders', place: 'New York', logo: NHL_LOGO('NYI') }, home: { abbrev: 'DET', name: 'Red Wings', place: 'Detroit', logo: NHL_LOGO('DET') } },
+  { id: 2026020368, startTimeUTC: '2026-11-22T00:00:00Z', venue: 'Enterprise Center', away: { abbrev: 'NJD', name: 'Devils', place: 'New Jersey', logo: NHL_LOGO('NJD') }, home: { abbrev: 'STL', name: 'Blues', place: 'St. Louis', logo: NHL_LOGO('STL') } },
+  { id: 2026020369, startTimeUTC: '2026-11-22T00:00:00Z', venue: 'Canada Life Centre', away: { abbrev: 'VGK', name: 'Golden Knights', place: 'Vegas', logo: NHL_LOGO('VGK') }, home: { abbrev: 'WPG', name: 'Jets', place: 'Winnipeg', logo: NHL_LOGO('WPG') } },
+  { id: 2026020370, startTimeUTC: '2026-11-22T02:00:00Z', venue: 'Delta Center', away: { abbrev: 'ANA', name: 'Ducks', place: 'Anaheim', logo: NHL_LOGO('ANA') }, home: { abbrev: 'UTA', name: 'Mammoth', place: 'Utah', logo: NHL_LOGO('UTA') } },
+  { id: 2026020371, startTimeUTC: '2026-11-22T03:00:00Z', venue: 'Rogers Arena', away: { abbrev: 'MIN', name: 'Wild', place: 'Minnesota', logo: NHL_LOGO('MIN') }, home: { abbrev: 'VAN', name: 'Canucks', place: 'Vancouver', logo: NHL_LOGO('VAN') } },
+  { id: 2026020372, startTimeUTC: '2026-11-22T03:00:00Z', venue: 'SAP Center at San Jose', away: { abbrev: 'SEA', name: 'Kraken', place: 'Seattle', logo: NHL_LOGO('SEA') }, home: { abbrev: 'SJS', name: 'Sharks', place: 'San Jose', logo: NHL_LOGO('SJS') } }
+];
 
 function getFallbackGames(dateStr) {
   if (dateStr === '2026-10-02') {
@@ -4064,27 +4287,41 @@ function getFallbackGames(dateStr) {
       }
     ];
   }
-  return [
-    {
-      id: 401892706,
-      startTimeUTC: '2026-11-14T02:00:00Z',
-      venue: 'Rogers Arena',
-      away: { abbrev: 'NYR', name: 'Rangers', place: 'New York', logo: 'https://assets.nhle.com/logos/nhl/svg/NYR_light.svg' },
-      home: { abbrev: 'VAN', name: 'Canucks', place: 'Vancouver', logo: 'https://assets.nhle.com/logos/nhl/svg/VAN_light.svg' }
-    },
-    {
-      id: 401892707,
-      startTimeUTC: '2026-11-14T03:00:00Z',
-      venue: 'T-Mobile Arena',
-      away: { abbrev: 'NSH', name: 'Predators', place: 'Nashville', logo: 'https://assets.nhle.com/logos/nhl/svg/NSH_light.svg' },
-      home: { abbrev: 'VGK', name: 'Golden Knights', place: 'Vegas', logo: 'https://assets.nhle.com/logos/nhl/svg/VGK_light.svg' }
-    }
-  ];
+  if (dateStr === '2026-11-13') {
+    return [
+      {
+        id: 401802624,
+        startTimeUTC: '2026-11-14T02:00:00Z',
+        venue: 'Rogers Arena',
+        state: 'post',
+        statusDetail: 'Final',
+        away: { abbrev: 'NYR', name: 'Rangers', place: 'New York', logo: NHL_LOGO('NYR'), score: 5, sog: 31 },
+        home: { abbrev: 'VAN', name: 'Canucks', place: 'Vancouver', logo: NHL_LOGO('VAN'), score: 1, sog: 28 }
+      },
+      {
+        id: 401802625,
+        startTimeUTC: '2026-11-14T03:00:00Z',
+        venue: 'T-Mobile Arena',
+        state: 'post',
+        statusDetail: 'Final/SO',
+        away: { abbrev: 'NSH', name: 'Predators', place: 'Nashville', logo: NHL_LOGO('NSH'), score: 3, sog: 32 },
+        home: { abbrev: 'VGK', name: 'Golden Knights', place: 'Vegas', logo: NHL_LOGO('VGK'), score: 2, sog: 42 }
+      }
+    ];
+  }
+  if (dateStr === '2026-11-19') {
+    return JSON.parse(JSON.stringify(DEFAULT_NOV19_GAMES));
+  }
+  if (dateStr === '2026-11-21') {
+    return JSON.parse(JSON.stringify(DEFAULT_NOV21_GAMES));
+  }
+  return [];
 }
 
 function renderGamesTicker(games) {
+  const dayLabel = getDayLabelForDateStr(state.currentFridayStr);
   if (!games || games.length === 0) {
-    DOM.gamesTicker.innerHTML = `<div class="ticker-loading">No scheduled Friday games found.</div>`;
+    DOM.gamesTicker.innerHTML = `<div class="ticker-loading">No scheduled ${dayLabel} NHL games on ${formatWeekDateStr(state.currentFridayStr)}.</div>`;
     return;
   }
 
@@ -4142,10 +4379,14 @@ function renderGamesTicker(games) {
 }
 
 function renderMatchupsPanel(games) {
+  const dayLabel = getDayLabelForDateStr(state.currentFridayStr);
   DOM.scheduleDateSubtitle.textContent = formatDateDisplay(state.currentFriday);
+  if (DOM.schedulePanelHeading) {
+    DOM.schedulePanelHeading.textContent = `${dayLabel}'s NHL Matchups`;
+  }
 
   if (!games || games.length === 0) {
-    DOM.matchupsList.innerHTML = `<div class="empty-state-text" style="padding: 10px;">No games listed for this Friday. Enter custom matchups when submitting.</div>`;
+    DOM.matchupsList.innerHTML = `<div class="empty-state-text" style="padding: 10px;">No NHL games listed for this ${dayLabel}. Enter custom matchups when submitting.</div>`;
     return;
   }
 
@@ -4190,7 +4431,8 @@ function renderMatchupsPanel(games) {
 }
 
 function populateGameSelect(games) {
-  DOM.gameSelect.innerHTML = '<option value="">Select a Friday game...</option>';
+  const dayLabel = getDayLabelForDateStr(state.currentFridayStr);
+  DOM.gameSelect.innerHTML = `<option value="">Select a ${dayLabel} game...</option>`;
   games.forEach(g => {
     const title = `${g.away.abbrev} ${g.away.name} @ ${g.home.abbrev} ${g.home.name}`;
     const opt = document.createElement('option');
@@ -4320,11 +4562,11 @@ const DEFAULT_MASTER_SLIPS = {
     id: '2026-11-13',
     week_date: '2026-11-13',
     bettor_name: 'Edward',
-    status: 'placed',
+    status: 'lost',
     stake: 25,
     total_odds: '+5525',
     potential_payout: 1406.25,
-    notes: 'Placed on Betway by Edward ($25 5-Fold BetBuilder+ @ +5525 -> $1,406.25 Return • Alex sat out Week 6)'
+    notes: 'Settled - Lost on Betway ($25 5-Fold @ +5525 -> $1,406.25 • 4 of 5 hit: Will, Ben, Jackson & Axel cashed; Edward sold on Liam Ohgren 0G!)'
   }
 };
 
@@ -4389,6 +4631,705 @@ function saveLocalData(dateStr) {
   localStorage.setItem(key, JSON.stringify(payload));
 }
 
+// =============================================================================
+// 10B. WEEK 7 SPECIAL THURSDAY VS. SATURDAY VOTE & AUTO-LOCK ENGINE
+// =============================================================================
+function initWeek7VoteState() {
+  state.week7Vote.thuGames = getFallbackGames(WEEK7_THU_DATE);
+  state.week7Vote.satGames = getFallbackGames(WEEK7_SAT_DATE);
+
+  const savedVoter = localStorage.getItem('bts_voter_identity') || '';
+  if (SQUAD.some(b => b.name === savedVoter)) {
+    state.week7Vote.selectedVoter = savedVoter;
+  }
+
+  try {
+    const raw = localStorage.getItem(WEEK7_VOTE_STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object') {
+        state.week7Vote.votes = parsed.votes || {};
+        if (parsed.lockedDate === WEEK7_THU_DATE || parsed.lockedDate === WEEK7_SAT_DATE) {
+          state.week7Vote.lockedDate = parsed.lockedDate;
+        }
+      }
+    }
+  } catch (e) {}
+}
+
+function saveLocalWeek7Votes() {
+  try {
+    localStorage.setItem(WEEK7_VOTE_STORAGE_KEY, JSON.stringify({
+      votes: state.week7Vote.votes,
+      lockedDate: state.week7Vote.lockedDate,
+      updatedAt: new Date().toISOString()
+    }));
+  } catch (e) {}
+}
+
+function mapEspnEventsToGames(events, fallbackList = []) {
+  if (!Array.isArray(events) || events.length === 0) return fallbackList;
+  return events.map(ev => {
+    const comp = ev.competitions?.[0] || {};
+    const competitors = comp.competitors || [];
+    const awayComp = competitors.find(c => c.homeAway === 'away') || competitors[0] || {};
+    const homeComp = competitors.find(c => c.homeAway === 'home') || competitors[1] || {};
+    const awayAbbrev = normalizeTeamAbbr(awayComp.team?.abbreviation || 'NHL');
+    const homeAbbrev = normalizeTeamAbbr(homeComp.team?.abbreviation || 'NHL');
+    return {
+      id: ev.id,
+      startTimeUTC: ev.date,
+      venue: comp.venue?.fullName || 'NHL Arena',
+      state: ev.status?.type?.state || 'pre',
+      statusDetail: ev.status?.type?.shortDetail || '',
+      away: {
+        abbrev: awayAbbrev,
+        name: awayComp.team?.shortDisplayName || awayAbbrev,
+        place: awayComp.team?.location || '',
+        logo: awayComp.team?.logo || NHL_LOGO(awayAbbrev),
+        score: parseInt(awayComp.score || '0', 10) || 0
+      },
+      home: {
+        abbrev: homeAbbrev,
+        name: homeComp.team?.shortDisplayName || homeAbbrev,
+        place: homeComp.team?.location || '',
+        logo: homeComp.team?.logo || NHL_LOGO(homeAbbrev),
+        score: parseInt(homeComp.score || '0', 10) || 0
+      }
+    };
+  });
+}
+
+async function fetchWeek7DualSlates() {
+  if (!state.week7Vote.thuGames || state.week7Vote.thuGames.length === 0) {
+    state.week7Vote.thuGames = getFallbackGames(WEEK7_THU_DATE);
+  }
+  if (!state.week7Vote.satGames || state.week7Vote.satGames.length === 0) {
+    state.week7Vote.satGames = getFallbackGames(WEEK7_SAT_DATE);
+  }
+
+  if (isViewingWeek7Vote()) {
+    renderDualVoteTicker();
+    renderWeek7VoteArena();
+  }
+
+  const baseUrl = 'https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/scoreboard';
+  try {
+    const [thuRes, satRes] = await Promise.allSettled([
+      fetch(`${baseUrl}?dates=20261119`),
+      fetch(`${baseUrl}?dates=20261121`)
+    ]);
+
+    if (thuRes.status === 'fulfilled' && thuRes.value.ok) {
+      const thuJson = await thuRes.value.json();
+      if (Array.isArray(thuJson.events) && thuJson.events.length > 0) {
+        state.week7Vote.thuGames = mapEspnEventsToGames(thuJson.events, state.week7Vote.thuGames);
+      }
+    }
+    if (satRes.status === 'fulfilled' && satRes.value.ok) {
+      const satJson = await satRes.value.json();
+      if (Array.isArray(satJson.events) && satJson.events.length > 0) {
+        state.week7Vote.satGames = mapEspnEventsToGames(satJson.events, state.week7Vote.satGames);
+      }
+    }
+  } catch (e) {}
+
+  if (isViewingWeek7Vote()) {
+    renderDualVoteTicker();
+    renderWeek7VoteArena();
+  }
+}
+
+function renderDualVoteTicker() {
+  const thuList = (state.week7Vote.thuGames || []).map(g => ({ ...g, dayTag: 'THU 11/19' }));
+  const satList = (state.week7Vote.satGames || []).map(g => ({ ...g, dayTag: 'SAT 11/21' }));
+  const combined = [...thuList, ...satList];
+
+  if (DOM.ribbonDayLabel) DOM.ribbonDayLabel.textContent = 'THU / SAT SLATES';
+  if (DOM.tickerGamesCount) DOM.tickerGamesCount.textContent = `${combined.length} GAMES`;
+
+  if (!DOM.gamesTicker) return;
+  DOM.gamesTicker.innerHTML = combined.map(g => {
+    const timeStr = formatGameTime(g.startTimeUTC);
+    return `
+      <div class="ticker-game-chip" data-vote-day="${g.dayTag.startsWith('THU') ? WEEK7_THU_DATE : WEEK7_SAT_DATE}">
+        <div class="ticker-teams">
+          <div class="ticker-team-line">
+            <div class="ticker-team-left">
+              <img src="${g.away.logo}" class="ticker-team-logo" alt="${g.away.abbrev}" onerror="this.style.display='none'" />
+              <span class="ticker-team-abbrev">${g.away.abbrev}</span>
+            </div>
+          </div>
+          <div class="ticker-team-line">
+            <div class="ticker-team-left">
+              <img src="${g.home.logo}" class="ticker-team-logo" alt="${g.home.abbrev}" onerror="this.style.display='none'" />
+              <span class="ticker-team-abbrev">${g.home.abbrev}</span>
+            </div>
+          </div>
+        </div>
+        <div class="ticker-status">
+          <div class="ticker-time" style="color:${g.dayTag.startsWith('THU') ? 'var(--nhl-blue)' : 'var(--green-win)'};">${g.dayTag}</div>
+          <div class="ticker-state">${timeStr}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  document.querySelectorAll('.ticker-game-chip[data-vote-day]').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const targetDay = chip.getAttribute('data-vote-day');
+      state.week7Vote.slateFilter = targetDay;
+      switchView('slipBuilderView');
+      renderWeek7VoteArena();
+      const slatesEl = document.getElementById('week7DualSlatesSection');
+      if (slatesEl) slatesEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+}
+
+function parseWeek7LockRow(masterRow) {
+  if (!masterRow) return null;
+  const st = String(masterRow.status || '').toLowerCase();
+  if (st === 'voting') {
+    return { unlocked: true };
+  }
+  if (st === 'vote_locked' && masterRow.notes) {
+    try {
+      const parsed = JSON.parse(masterRow.notes);
+      if (parsed && (parsed.resolvedDate === WEEK7_THU_DATE || parsed.resolvedDate === WEEK7_SAT_DATE)) {
+        return { resolvedDate: parsed.resolvedDate };
+      }
+    } catch (e) {
+      if (String(masterRow.notes).includes(WEEK7_THU_DATE)) return { resolvedDate: WEEK7_THU_DATE };
+      if (String(masterRow.notes).includes(WEEK7_SAT_DATE)) return { resolvedDate: WEEK7_SAT_DATE };
+    }
+  }
+  return null;
+}
+
+async function fetchWeek7VotesFromSupabase() {
+  if (!state.supabase) return;
+  try {
+    const [votesResp, lockResp] = await Promise.all([
+      state.supabase.from('parlay_legs').select('*').eq('week_date', WEEK7_VOTE_DATE_KEY),
+      state.supabase.from('friday_parlays').select('*').eq('id', WEEK7_FRIDAY_ANCHOR).maybeSingle()
+    ]);
+
+    if (!votesResp.error && Array.isArray(votesResp.data)) {
+      const map = {};
+      votesResp.data.forEach(row => {
+        const choice = (row.pick_text === WEEK7_THU_DATE || row.odds === 'THU')
+          ? WEEK7_THU_DATE
+          : ((row.pick_text === WEEK7_SAT_DATE || row.odds === 'SAT') ? WEEK7_SAT_DATE : null);
+        if (choice && SQUAD.some(b => b.name === row.user_name)) {
+          map[row.user_name] = {
+            choice,
+            updatedAt: row.updated_at || row.created_at || ''
+          };
+        }
+      });
+      state.week7Vote.votes = map;
+    }
+
+    if (!lockResp.error && lockResp.data) {
+      const lockInfo = parseWeek7LockRow(lockResp.data);
+      if (lockInfo?.unlocked) {
+        state.week7Vote.lockedDate = null;
+      } else if (lockInfo?.resolvedDate) {
+        state.week7Vote.lockedDate = lockInfo.resolvedDate;
+      }
+    }
+
+    state.week7Vote.supabaseLoaded = true;
+    saveLocalWeek7Votes();
+
+    // If Week 7 vote is locked (either via Wed 8 PM deadline or explicit lock), transition active Week 7 date
+    if (isWeek7DateStr(state.currentFridayStr)) {
+      const targetStr = getResolvedWeek7DateStr();
+      if (targetStr !== state.currentFridayStr) {
+        applyWeek7ResolvedTransition(targetStr, false);
+        return;
+      }
+    }
+
+    renderAll();
+  } catch (err) {
+    console.warn('Week 7 vote fetch error:', err);
+  }
+}
+
+async function castWeek7Vote(boyName, choiceDateStr) {
+  if (!boyName || !SQUAD.some(b => b.name === boyName)) {
+    showToast('Tap your name in Step 1 first to cast your vote!', 'alert');
+    const step1 = document.getElementById('voteIdentityStepBar');
+    if (step1) {
+      step1.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    return;
+  }
+  if (choiceDateStr !== WEEK7_THU_DATE && choiceDateStr !== WEEK7_SAT_DATE) return;
+
+  state.week7Vote.selectedVoter = boyName;
+  localStorage.setItem('bts_voter_identity', boyName);
+
+  state.week7Vote.votes[boyName] = {
+    choice: choiceDateStr,
+    updatedAt: new Date().toISOString()
+  };
+  saveLocalWeek7Votes();
+  playSound('lock');
+  renderAll();
+
+  const label = choiceDateStr === WEEK7_THU_DATE ? 'Thursday, Nov 19' : 'Saturday, Nov 21';
+  showToast(`${boyName} voted for ${label}!`, 'checkCircle');
+
+  if (state.supabase) {
+    try {
+      await state.supabase
+        .from('parlay_legs')
+        .upsert({
+          week_date: WEEK7_VOTE_DATE_KEY,
+          user_name: boyName,
+          game_title: 'WEEK7_DAY_VOTE',
+          pick_text: choiceDateStr,
+          odds: choiceDateStr === WEEK7_THU_DATE ? 'THU' : 'SAT',
+          bet_type: 'Day Vote',
+          chirp: `Voted ${label}`,
+          locked: true,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'week_date,user_name' });
+    } catch (e) {
+      console.warn('Could not sync Week 7 vote to Supabase:', e);
+    }
+  }
+}
+window.castWeek7Vote = castWeek7Vote;
+
+function selectWeek7Voter(boyName) {
+  state.week7Vote.selectedVoter = boyName;
+  localStorage.setItem('bts_voter_identity', boyName);
+  playSound('click');
+  renderWeek7VoteArena();
+}
+window.selectWeek7Voter = selectWeek7Voter;
+
+function setWeek7SlateFilter(filterVal) {
+  state.week7Vote.slateFilter = filterVal;
+  playSound('click');
+  renderWeek7VoteArena();
+}
+window.setWeek7SlateFilter = setWeek7SlateFilter;
+
+function applyWeek7ResolvedTransition(winnerDateStr, celebrate = false) {
+  state.currentFriday = parseLocalISODate(winnerDateStr);
+  state.currentFridayStr = formatDateISO(state.currentFriday);
+  loadLocalData(state.currentFridayStr);
+  initTrackerData();
+  fetchFridayNhlGames(state.currentFridayStr);
+  if (state.supabase) fetchSupabaseParlay(state.currentFridayStr);
+  renderAll();
+  renderTracker();
+
+  if (celebrate) {
+    playSound('triumph');
+    if (window.confetti) confetti({ particleCount: 110, spread: 75, origin: { y: 0.65 } });
+    const dayName = getDayLabelForDateStr(winnerDateStr);
+    showToast(`Week 7 locked for ${dayName}, ${formatWeekDateStr(winnerDateStr)}! Slip Builder is live.`, 'fire');
+  }
+}
+
+async function persistWeek7LockState(resolvedDateOrNull) {
+  state.week7Vote.lockedDate = resolvedDateOrNull;
+  saveLocalWeek7Votes();
+
+  if (state.supabase) {
+    try {
+      const isLocked = resolvedDateOrNull === WEEK7_THU_DATE || resolvedDateOrNull === WEEK7_SAT_DATE;
+      await state.supabase
+        .from('friday_parlays')
+        .upsert({
+          id: WEEK7_FRIDAY_ANCHOR,
+          week_date: WEEK7_FRIDAY_ANCHOR,
+          bettor_name: 'Ben',
+          status: isLocked ? 'vote_locked' : 'voting',
+          stake: 30,
+          total_odds: '--',
+          potential_payout: 0,
+          notes: isLocked
+            ? JSON.stringify({ resolvedDate: resolvedDateOrNull, lockedAt: new Date().toISOString() })
+            : 'Week 7 Thursday vs Saturday Vote Open',
+          updated_at: new Date().toISOString()
+        });
+    } catch (e) {
+      console.warn('Could not persist Week 7 lock state:', e);
+    }
+  }
+}
+
+async function lockWeek7VoteNow(explicitDate = null) {
+  const tally = tallyWeek7Votes();
+  const chosenDate = (explicitDate === WEEK7_THU_DATE || explicitDate === WEEK7_SAT_DATE)
+    ? explicitDate
+    : tally.winnerDate;
+  const label = chosenDate === WEEK7_THU_DATE ? 'Thursday, Nov 19 (12 Games)' : 'Saturday, Nov 21 (14 Games)';
+  if (!explicitDate && !confirm(`Lock in the Week 7 vote right now for ${label} and open Ben's $30 Slip Builder?`)) {
+    return;
+  }
+  await persistWeek7LockState(chosenDate);
+  applyWeek7ResolvedTransition(chosenDate, true);
+}
+window.lockWeek7VoteNow = lockWeek7VoteNow;
+
+async function switchWeek7ResolvedDay() {
+  const nextDate = state.currentFridayStr === WEEK7_THU_DATE ? WEEK7_SAT_DATE : WEEK7_THU_DATE;
+  const label = nextDate === WEEK7_THU_DATE ? 'Thursday, Nov 19 (12 Games)' : 'Saturday, Nov 21 (14 Games)';
+  if (!confirm(`Switch Week 7's active parlay night to ${label}?`)) return;
+  await persistWeek7LockState(nextDate);
+  applyWeek7ResolvedTransition(nextDate, true);
+}
+window.switchWeek7ResolvedDay = switchWeek7ResolvedDay;
+
+async function reopenWeek7Vote() {
+  if (new Date().getTime() >= WEEK7_VOTE_LOCK_AT.getTime()) {
+    showToast('Wednesday 8:00 PM ET deadline has passed — use "Switch Day" to change between Thu & Sat.', 'clock');
+    return;
+  }
+  await persistWeek7LockState(null);
+  state.currentFriday = parseLocalISODate(WEEK7_FRIDAY_ANCHOR);
+  state.currentFridayStr = WEEK7_FRIDAY_ANCHOR;
+  loadLocalData(state.currentFridayStr);
+  initTrackerData();
+  fetchWeek7DualSlates();
+  renderAll();
+  showToast('Week 7 Thursday vs. Saturday vote reopened!', 'bolt');
+}
+window.reopenWeek7Vote = reopenWeek7Vote;
+
+function copyWeek7VoteChirp() {
+  const tally = tallyWeek7Votes();
+  const missing = SQUAD.filter(b => !state.week7Vote.votes[b.name]).map(b => `@${b.name}`);
+  let msg = `[BET THE SHOW — WEEK 7 SCHEDULE VOTE]\n`;
+  msg += `Zero NHL games next Friday (Nov 20), so we're voting on Thursday vs. Saturday!\n\n`;
+  msg += `• THU NOV 19 (12 Games): ${tally.thuCount} vote${tally.thuCount === 1 ? '' : 's'}${tally.thuVoters.length ? ` (${tally.thuVoters.join(', ')})` : ''}\n`;
+  msg += `• SAT NOV 21 (14 Games): ${tally.satCount} vote${tally.satCount === 1 ? '' : 's'}${tally.satVoters.length ? ` (${tally.satVoters.join(', ')})` : ''}\n\n`;
+  if (missing.length > 0) {
+    msg += `Still need votes from: ${missing.join(', ')}\n`;
+  } else {
+    msg += `All 6 votes are in!\n`;
+  }
+  msg += `Vote locks Wednesday, Nov 18 @ 8:00 PM ET (Ben on deck for Week 7):\nhttps://mukpostproduction-debug.github.io/friday-puck-parlay/`;
+
+  navigator.clipboard.writeText(msg).then(() => {
+    playSound('click');
+    showToast('Vote reminder copied! Paste in the group chat', 'chat');
+  });
+}
+window.copyWeek7VoteChirp = copyWeek7VoteChirp;
+
+function formatVoteLockCountdown(now = new Date()) {
+  const diff = WEEK7_VOTE_LOCK_AT.getTime() - now.getTime();
+  if (diff <= 0) return 'LOCKED • WED 8:00 PM ET';
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  const secs = Math.floor((diff % (1000 * 60)) / 1000);
+  const pad = n => String(n).padStart(2, '0');
+  if (days > 0) return `${days}d ${pad(hours)}h ${pad(mins)}m ${pad(secs)}s`;
+  return `${pad(hours)}h ${pad(mins)}m ${pad(secs)}s`;
+}
+
+function checkWeek7AutoLockTransition() {
+  const now = new Date();
+  const timerEl = document.getElementById('voteCountdownTimerEl');
+  if (timerEl) {
+    timerEl.textContent = formatVoteLockCountdown(now);
+  }
+
+  // Automatic Wednesday 8:00 PM ET lock-in transition!
+  if (state.currentFridayStr === WEEK7_FRIDAY_ANCHOR && isWeek7VoteLocked(now)) {
+    const winnerDate = getResolvedWeek7DateStr(now);
+    persistWeek7LockState(winnerDate);
+    applyWeek7ResolvedTransition(winnerDate, true);
+  }
+}
+
+function renderSlateColumnHtml(titleText, badgeText, gamesList) {
+  const rowsHtml = (gamesList || []).map(g => {
+    const timeStr = formatGameTime(g.startTimeUTC);
+    return `
+      <div class="vote-game-row">
+        <div class="vote-game-teams">
+          <span class="vote-game-team">
+            <img src="${g.away.logo}" alt="${g.away.abbrev}" onerror="this.style.display='none'" />
+            <span>${escapeHTML(g.away.place ? `${g.away.place} ${g.away.name}` : g.away.name)}</span>
+          </span>
+          <span class="vote-game-at">@</span>
+          <span class="vote-game-team">
+            <img src="${g.home.logo}" alt="${g.home.abbrev}" onerror="this.style.display='none'" />
+            <span>${escapeHTML(g.home.place ? `${g.home.place} ${g.home.name}` : g.home.name)}</span>
+          </span>
+        </div>
+        <div class="vote-game-meta">
+          <div class="vote-game-time">${timeStr}</div>
+          <div class="vote-game-venue">${escapeHTML(g.venue || 'NHL Arena')}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  return `
+    <div class="vote-slate-col">
+      <div class="vote-slate-col-head">
+        <span class="vote-slate-col-title">${titleText}</span>
+        <span class="vote-slate-col-badge">${badgeText}</span>
+      </div>
+      <div class="vote-slate-games-list">
+        ${rowsHtml}
+      </div>
+    </div>
+  `;
+}
+
+function renderWeek7VoteArena() {
+  if (!DOM.week7VoteArena) return;
+  const tally = tallyWeek7Votes();
+  const thuGames = state.week7Vote.thuGames?.length ? state.week7Vote.thuGames : getFallbackGames(WEEK7_THU_DATE);
+  const satGames = state.week7Vote.satGames?.length ? state.week7Vote.satGames : getFallbackGames(WEEK7_SAT_DATE);
+  const selectedVoter = state.week7Vote.selectedVoter;
+  const selectedVoteChoice = selectedVoter ? state.week7Vote.votes[selectedVoter]?.choice : null;
+
+  const thuPct = tally.totalVotes > 0 ? Math.round((tally.thuCount / 6) * 100) : 0;
+  const satPct = tally.totalVotes > 0 ? Math.round((tally.satCount / 6) * 100) : 0;
+  const thuLeading = tally.thuCount > tally.satCount;
+  const satLeading = tally.satCount > tally.thuCount;
+
+  const thuMarquee = [
+    ['LAK', 'TOR'], ['EDM', 'TBL'], ['MTL', 'CAR'], ['DAL', 'VGK'], ['VAN', 'SEA']
+  ];
+  const satMarquee = [
+    ['CBJ', 'TOR'], ['PHI', 'MTL'], ['WSH', 'BOS'], ['EDM', 'CAR'], ['VGK', 'WPG']
+  ];
+
+  const filter = state.week7Vote.slateFilter || 'both';
+  const showThu = filter === 'both' || filter === WEEK7_THU_DATE;
+  const showSat = filter === 'both' || filter === WEEK7_SAT_DATE;
+
+  DOM.week7VoteArena.innerHTML = `
+    <div class="vote-arena-wrap">
+      <!-- HERO HEADER & STEP 1 VOTER IDENTITY -->
+      <div class="nhl-card vote-hero-card">
+        <div class="vote-hero-top">
+          <div>
+            <div class="vote-alert-pill">${getIcon('bolt')} NO FRIDAY NHL GAMES ON NOV 20 • WEEK 7 SPECIAL VOTE</div>
+            <h2 class="vote-hero-title">Pick Week 7 Night: Thursday Nov 19 vs. Saturday Nov 21</h2>
+            <p class="vote-hero-desc">
+              The NHL has zero games scheduled next Friday (Nov 20). Vote below for whether the squad runs our <strong>$30 6-Leg Parlay</strong> (<strong>Ben</strong> on deck!) on <strong>Thursday night's 12-game slate</strong> or <strong>Saturday's 14-game slate</strong>. At <strong>Wednesday, Nov 18 @ 8:00 PM ET</strong>, the winning night locks in automatically and opens the Slip Builder!
+            </p>
+          </div>
+          <div class="vote-deadline-box">
+            <div class="vote-deadline-label">Auto-Locks Wed Nov 18 • 8:00 PM ET</div>
+            <div class="vote-deadline-timer" id="voteCountdownTimerEl">${formatVoteLockCountdown()}</div>
+            <div class="vote-deadline-sub">${tally.totalVotes} of 6 Squad Votes Cast</div>
+          </div>
+        </div>
+
+        <div class="vote-identity-bar" id="voteIdentityStepBar">
+          <div class="vote-step-label">
+            <span>Step 1 — Tap Your Name to Vote (${selectedVoter ? `Voting as ${selectedVoter}` : 'Select yourself below'})</span>
+            <span style="color:var(--nhl-blue);">${state.isLiveSync ? '● Live Cloud Sync Active' : 'Local Mode'}</span>
+          </div>
+          <div class="vote-boys-grid">
+            ${SQUAD.map(boy => {
+              const bVote = state.week7Vote.votes[boy.name]?.choice;
+              const isSelected = selectedVoter === boy.name;
+              const tagClass = bVote === WEEK7_THU_DATE ? 'voted-thu' : (bVote === WEEK7_SAT_DATE ? 'voted-sat' : '');
+              const tagText = bVote === WEEK7_THU_DATE ? 'THU' : (bVote === WEEK7_SAT_DATE ? 'SAT' : '--');
+              return `
+                <button type="button" class="vote-boy-chip ${isSelected ? 'active' : ''}" onclick="selectWeek7Voter('${boy.name}')">
+                  <span class="vote-boy-chip-left">
+                    <span class="vote-boy-initials">${boy.initials}</span>
+                    <span>${boy.name}</span>
+                  </span>
+                  <span class="vote-boy-mini-tag ${tagClass}">${tagText}</span>
+                </button>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2: THURSDAY VS SATURDAY VOTE CARDS -->
+      <div class="vote-options-grid">
+        <!-- THURSDAY NOV 19 CARD -->
+        <div class="nhl-card vote-day-card ${thuLeading ? 'leading' : ''} ${selectedVoteChoice === WEEK7_THU_DATE ? 'user-voted' : ''}">
+          <div class="vote-day-top">
+            <div>
+              <div class="vote-day-kicker">Option A • Prime Weeknight</div>
+              <div class="vote-day-title">Thursday, Nov 19</div>
+              <div class="vote-day-window">7:00 PM – 10:00 PM ET • All Evening Games</div>
+            </div>
+            <span class="vote-games-count-pill">${thuGames.length} GAMES</span>
+          </div>
+
+          <div class="vote-marquee-strip">
+            ${thuMarquee.map(([a, h]) => `
+              <span class="vote-marquee-chip">
+                <img src="${NHL_LOGO(a)}" alt="${a}" onerror="this.style.display='none'" />
+                <span>${a} @ ${h}</span>
+                <img src="${NHL_LOGO(h)}" alt="${h}" onerror="this.style.display='none'" />
+              </span>
+            `).join('')}
+            <span class="vote-marquee-chip">+${Math.max(0, thuGames.length - thuMarquee.length)} more</span>
+          </div>
+
+          <div class="vote-tally-box">
+            <div class="vote-tally-row">
+              <span class="vote-tally-num">${tally.thuCount} Vote${tally.thuCount === 1 ? '' : 's'} ${thuLeading ? '• LEADING' : ''}</span>
+              <span class="vote-tally-pct">${tally.thuCount} / 6 Squad</span>
+            </div>
+            <div class="vote-bar-track">
+              <div class="vote-bar-fill thu" style="width: ${thuPct}%;"></div>
+            </div>
+            <div class="vote-voters-list">
+              ${tally.thuVoters.length > 0
+                ? tally.thuVoters.map(v => `<span class="vote-voter-pill">${getIcon('check')} ${v}</span>`).join('')
+                : `<span class="vote-voters-empty">No votes for Thursday yet</span>`}
+            </div>
+          </div>
+
+          <button type="button" class="vote-cast-btn ${selectedVoteChoice === WEEK7_THU_DATE ? 'selected' : ''}" onclick="castWeek7Vote('${selectedVoter}', '${WEEK7_THU_DATE}')">
+            <span class="bts-icon">${getIcon(selectedVoteChoice === WEEK7_THU_DATE ? 'checkCircle' : 'bolt')}</span>
+            <span>${selectedVoter
+              ? (selectedVoteChoice === WEEK7_THU_DATE ? `${selectedVoter} Voted Thursday` : `Vote Thursday as ${selectedVoter}`)
+              : 'Tap Your Name Above to Vote Thursday'}</span>
+          </button>
+        </div>
+
+        <!-- SATURDAY NOV 21 CARD -->
+        <div class="nhl-card vote-day-card ${satLeading ? 'leading' : ''} ${selectedVoteChoice === WEEK7_SAT_DATE ? 'user-voted' : ''}">
+          <div class="vote-day-top">
+            <div>
+              <div class="vote-day-kicker">Option B • Hockey Night in Canada</div>
+              <div class="vote-day-title">Saturday, Nov 21</div>
+              <div class="vote-day-window">1:00 PM – 10:00 PM ET • Matinees + HNIC Slate</div>
+            </div>
+            <span class="vote-games-count-pill">${satGames.length} GAMES</span>
+          </div>
+
+          <div class="vote-marquee-strip">
+            ${satMarquee.map(([a, h]) => `
+              <span class="vote-marquee-chip">
+                <img src="${NHL_LOGO(a)}" alt="${a}" onerror="this.style.display='none'" />
+                <span>${a} @ ${h}</span>
+                <img src="${NHL_LOGO(h)}" alt="${h}" onerror="this.style.display='none'" />
+              </span>
+            `).join('')}
+            <span class="vote-marquee-chip">+${Math.max(0, satGames.length - satMarquee.length)} more</span>
+          </div>
+
+          <div class="vote-tally-box">
+            <div class="vote-tally-row">
+              <span class="vote-tally-num">${tally.satCount} Vote${tally.satCount === 1 ? '' : 's'} ${satLeading ? '• LEADING' : ''}</span>
+              <span class="vote-tally-pct">${tally.satCount} / 6 Squad</span>
+            </div>
+            <div class="vote-bar-track">
+              <div class="vote-bar-fill sat" style="width: ${satPct}%;"></div>
+            </div>
+            <div class="vote-voters-list">
+              ${tally.satVoters.length > 0
+                ? tally.satVoters.map(v => `<span class="vote-voter-pill">${getIcon('check')} ${v}</span>`).join('')
+                : `<span class="vote-voters-empty">No votes for Saturday yet</span>`}
+            </div>
+          </div>
+
+          <button type="button" class="vote-cast-btn ${selectedVoteChoice === WEEK7_SAT_DATE ? 'selected' : ''}" onclick="castWeek7Vote('${selectedVoter}', '${WEEK7_SAT_DATE}')">
+            <span class="bts-icon">${getIcon(selectedVoteChoice === WEEK7_SAT_DATE ? 'checkCircle' : 'bolt')}</span>
+            <span>${selectedVoter
+              ? (selectedVoteChoice === WEEK7_SAT_DATE ? `${selectedVoter} Voted Saturday` : `Vote Saturday as ${selectedVoter}`)
+              : 'Tap Your Name Above to Vote Saturday'}</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- SQUAD ROLL-CALL & COMMISSIONER CONTROLS -->
+      <div class="nhl-card vote-rollcall-card">
+        <div class="vote-rollcall-left">
+          <span class="vote-rollcall-title">Squad Roll Call (${tally.totalVotes}/6):</span>
+          ${SQUAD.map(boy => {
+            const c = state.week7Vote.votes[boy.name]?.choice;
+            const cls = c === WEEK7_THU_DATE ? 'thu' : (c === WEEK7_SAT_DATE ? 'sat' : '');
+            const lbl = c === WEEK7_THU_DATE ? 'THU' : (c === WEEK7_SAT_DATE ? 'SAT' : 'Pending');
+            return `<span class="vote-rollcall-pill ${cls}">${boy.name}: ${lbl}</span>`;
+          }).join('')}
+        </div>
+        <div class="vote-rollcall-actions">
+          <button type="button" class="nhl-action-btn secondary" onclick="jumpToWeekDate('2026-11-13')" title="Review settled Week 6 slip">
+            <span>← Week 6 Results (4/5)</span>
+          </button>
+          <button type="button" class="nhl-action-btn secondary" onclick="copyWeek7VoteChirp()">
+            <span class="bts-icon">${getIcon('chat')}</span>
+            <span>Chirp Missing Voters</span>
+          </button>
+          <button type="button" class="nhl-action-btn primary" onclick="lockWeek7VoteNow()">
+            <span class="bts-icon">${getIcon('lock')}</span>
+            <span>Lock Vote Early</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- FULL NHL SLATES FOR BOTH DAYS -->
+      <div class="nhl-card vote-slates-panel" id="week7DualSlatesSection">
+        <div class="vote-slates-header">
+          <div>
+            <h3 class="panel-heading">Full NHL Slates: Thursday vs. Saturday</h3>
+            <p class="panel-sub-caption">Compare every scheduled matchup before Wednesday's 8:00 PM ET lock-in</p>
+          </div>
+          <div class="vote-filter-tabs">
+            <button type="button" class="vote-filter-btn ${filter === 'both' ? 'active' : ''}" onclick="setWeek7SlateFilter('both')">Both Days (${thuGames.length + satGames.length})</button>
+            <button type="button" class="vote-filter-btn ${filter === WEEK7_THU_DATE ? 'active' : ''}" onclick="setWeek7SlateFilter('${WEEK7_THU_DATE}')">Thu Nov 19 (${thuGames.length})</button>
+            <button type="button" class="vote-filter-btn ${filter === WEEK7_SAT_DATE ? 'active' : ''}" onclick="setWeek7SlateFilter('${WEEK7_SAT_DATE}')">Sat Nov 21 (${satGames.length})</button>
+          </div>
+        </div>
+
+        <div class="vote-slates-columns ${filter === 'both' ? '' : 'single-col'}">
+          ${showThu ? renderSlateColumnHtml('Thursday, Nov 19, 2026', `${thuGames.length} NHL GAMES`, thuGames) : ''}
+          ${showSat ? renderSlateColumnHtml('Saturday, Nov 21, 2026', `${satGames.length} NHL GAMES`, satGames) : ''}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderWeek7SettledBanner() {
+  if (!DOM.week7VoteSettledBanner) return;
+  if (!isWeek7DateStr(state.currentFridayStr) || isViewingWeek7Vote()) {
+    DOM.week7VoteSettledBanner.style.display = 'none';
+    DOM.week7VoteSettledBanner.innerHTML = '';
+    return;
+  }
+
+  const tally = tallyWeek7Votes();
+  const activeDayLabel = getDayLabelForDateStr(state.currentFridayStr);
+  const otherDayLabel = state.currentFridayStr === WEEK7_THU_DATE ? 'Saturday, Nov 21' : 'Thursday, Nov 19';
+  const gamesCount = state.games?.length || (state.currentFridayStr === WEEK7_THU_DATE ? 12 : 14);
+  const canReopen = new Date().getTime() < WEEK7_VOTE_LOCK_AT.getTime();
+
+  DOM.week7VoteSettledBanner.style.display = 'flex';
+  DOM.week7VoteSettledBanner.className = 'vote-settled-banner';
+  DOM.week7VoteSettledBanner.innerHTML = `
+    <div class="vote-settled-text">
+      <span class="vote-settled-pill">${getIcon('check')} WEEK 7 NIGHT LOCKED</span>
+      <span>
+        Squad set for <strong>${activeDayLabel}, ${formatWeekDateStr(state.currentFridayStr)}</strong> (${gamesCount} NHL games • Vote tally: ${tally.thuCount} Thu – ${tally.satCount} Sat). <strong>Ben</strong> is on deck for the $30 6-leg slip!
+      </span>
+    </div>
+    <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+      ${canReopen ? `<button type="button" class="nhl-action-btn secondary" onclick="reopenWeek7Vote()">Reopen Vote</button>` : ''}
+      <button type="button" class="nhl-action-btn secondary" onclick="switchWeek7ResolvedDay()">Switch to ${otherDayLabel}</button>
+    </div>
+  `;
+}
+
 function initSupabase() {
   const url = localStorage.getItem('bts_supabase_url') || DEFAULT_SUPABASE_CONFIG.url;
   const key = localStorage.getItem('bts_supabase_key') || DEFAULT_SUPABASE_CONFIG.key;
@@ -4400,7 +5341,10 @@ function initSupabase() {
       DOM.syncStatusBtn.classList.add('live');
       DOM.syncStatusText.textContent = 'Cloud Live';
       setupSupabaseRealtime();
-      fetchSupabaseParlay(state.currentFridayStr);
+      fetchWeek7VotesFromSupabase();
+      if (!isViewingWeek7Vote()) {
+        fetchSupabaseParlay(state.currentFridayStr);
+      }
     } catch (e) {
       console.warn('Supabase connect failed:', e);
       state.isLiveSync = false;
@@ -4468,10 +5412,37 @@ function setupSupabaseRealtime() {
   if (!state.supabase) return;
   try {
     state.supabase
-      .channel('public:parlay_legs')
+      .channel('public:bts_realtime_v7')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'parlay_legs' }, payload => {
         const row = payload.new || payload.old;
-        if (row && row.week_date === state.currentFridayStr) {
+        if (!row) return;
+
+        // Live sync for Week 7 Thursday vs. Saturday votes!
+        if (row.week_date === WEEK7_VOTE_DATE_KEY) {
+          if (payload.eventType === 'DELETE') {
+            delete state.week7Vote.votes[row.user_name];
+          } else if (payload.new) {
+            const choice = (payload.new.pick_text === WEEK7_THU_DATE || payload.new.odds === 'THU')
+              ? WEEK7_THU_DATE
+              : ((payload.new.pick_text === WEEK7_SAT_DATE || payload.new.odds === 'SAT') ? WEEK7_SAT_DATE : null);
+            if (choice) {
+              state.week7Vote.votes[row.user_name] = {
+                choice,
+                updatedAt: payload.new.updated_at || new Date().toISOString()
+              };
+            }
+          }
+          saveLocalWeek7Votes();
+          playSound('lock');
+          renderAll();
+          if (payload.eventType !== 'DELETE' && payload.new) {
+            const votedDay = payload.new.pick_text === WEEK7_THU_DATE ? 'Thursday' : 'Saturday';
+            showToast(`${row.user_name} voted for ${votedDay}!`, 'bolt');
+          }
+          return;
+        }
+
+        if (row.week_date === state.currentFridayStr) {
           if (payload.eventType === 'DELETE') {
             delete state.legs[row.user_name];
           } else {
@@ -4481,6 +5452,31 @@ function setupSupabaseRealtime() {
           playSound('lock');
           renderAll();
           showToast(`${row.user_name} locked in their pick live!`, 'fire');
+        }
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'friday_parlays' }, payload => {
+        const row = payload.new || payload.old;
+        if (!row) return;
+        if (row.id === WEEK7_FRIDAY_ANCHOR && payload.new) {
+          const lockInfo = parseWeek7LockRow(payload.new);
+          if (lockInfo?.unlocked) {
+            state.week7Vote.lockedDate = null;
+            saveLocalWeek7Votes();
+            if (isWeek7DateStr(state.currentFridayStr) && new Date().getTime() < WEEK7_VOTE_LOCK_AT.getTime()) {
+              state.currentFriday = parseLocalISODate(WEEK7_FRIDAY_ANCHOR);
+              state.currentFridayStr = WEEK7_FRIDAY_ANCHOR;
+              fetchWeek7DualSlates();
+              renderAll();
+            }
+          } else if (lockInfo?.resolvedDate) {
+            state.week7Vote.lockedDate = lockInfo.resolvedDate;
+            saveLocalWeek7Votes();
+            if (isWeek7DateStr(state.currentFridayStr) && state.currentFridayStr !== lockInfo.resolvedDate) {
+              applyWeek7ResolvedTransition(lockInfo.resolvedDate, true);
+            } else {
+              renderAll();
+            }
+          }
         }
       })
       .subscribe();
@@ -4741,8 +5737,9 @@ function renderBettorBanner() {
   state.weekNumber = weekNum;
   const isFiveLegWeek = state.currentFridayStr === '2026-10-02' || state.currentFridayStr === '2026-10-16' || state.currentFridayStr === '2026-11-13';
   const expectedLegs = isFiveLegWeek ? 5 : 6;
+  const dayLabel = getDayLabelForDateStr(state.currentFridayStr);
 
-  DOM.weekPill.textContent = `WEEK ${weekNum} OF THE REGULAR SEASON`;
+  DOM.weekPill.textContent = `WEEK ${weekNum} OF THE REGULAR SEASON${dayLabel !== 'Friday' ? ` • SPECIAL ${dayLabel.toUpperCase()} SLATE` : ''}`;
   DOM.bettorName.textContent = bettor.name;
   DOM.bettorAvatar.textContent = bettor.initials;
   
@@ -4751,7 +5748,9 @@ function renderBettorBanner() {
   } else if (weekNum === 2) {
     DOM.bettorDesc.innerHTML = `Week 1 was placed by Ben. For Week 2, <strong>${bettor.name}</strong> placed the 5-leg parlay ticket ($${state.stake} total wager).`;
   } else if (state.currentFridayStr === '2026-11-13') {
-    DOM.bettorDesc.innerHTML = `<strong>${bettor.name}</strong> locked in tonight's <strong>5-leg $25.00 Betway BetBuilder+</strong> (@ +5525 → $1,406.25 return)! Alex sat out this week.`;
+    DOM.bettorDesc.innerHTML = `<strong>${bettor.name}</strong> placed Week 6's <strong>5-leg $25.00 Betway BetBuilder+</strong> (@ +5525 → $1,406.25) — 4 of 5 hit (Will, Ben, Jackson & Axel cashed; Edward sold on Liam Ohgren 0G!).`;
+  } else if (dayLabel !== 'Friday') {
+    DOM.bettorDesc.innerHTML = `Special <strong>${dayLabel} NHL Edition</strong> (0 games Fri Nov 20)! It's <strong>${bettor.name}</strong>'s turn in the 6-week rotation to place our ${expectedLegs}-leg $${state.stake} ticket.`;
   } else {
     DOM.bettorDesc.innerHTML = `It's <strong>${bettor.name}</strong>'s turn in the 6-week rotation to place this week's ${expectedLegs}-leg ticket ($${state.stake} total wager) on his sportsbook account.`;
   }
@@ -4760,17 +5759,20 @@ function renderBettorBanner() {
   DOM.slipProgressText.textContent = `${legsCount} / ${expectedLegs} LEGS`;
   DOM.slipProgressBar.style.width = `${Math.min(100, (legsCount / expectedLegs) * 100)}%`;
 
-  if (state.isPlaced && legsCount >= expectedLegs) {
+  if (state.masterSlip && state.masterSlip.status === 'lost') {
+    DOM.slipStatusMsg.innerHTML = `<span class="msg-icon">${getIcon('cross')}</span> Settled Loss • ${state.currentFridayStr === '2026-11-13' ? '4 of 5 legs hit — Edward sold on Liam Ohgren!' : `Placed by ${bettor.name} ($${state.stake} ticket)`}`;
+    DOM.slipStatusMsg.style.color = 'var(--red-loss)';
+  } else if (state.isPlaced && legsCount >= expectedLegs) {
     DOM.slipStatusMsg.innerHTML = `<span class="msg-icon">${getIcon('checkCircle')}</span> Locked in by ${bettor.name}! $${state.stake} ${expectedLegs}-leg ticket is live on the sportsbook!`;
     DOM.slipStatusMsg.style.color = 'var(--b365-green)';
   } else if (legsCount >= expectedLegs) {
     DOM.slipStatusMsg.innerHTML = `<span class="msg-icon">${getIcon('fire')}</span> All ${expectedLegs} legs locked in! ${bettor.name} is clear to submit the $${state.stake} ticket to the book!`;
     DOM.slipStatusMsg.style.color = 'var(--b365-green)';
   } else if (legsCount === 0) {
-    DOM.slipStatusMsg.textContent = `No picks locked in yet for Week ${weekNum}. Let's build the $${state.stake} ticket!`;
+    DOM.slipStatusMsg.textContent = `No picks locked in yet for Week ${weekNum} (${dayLabel}). Let's build the $${state.stake} ticket!`;
     DOM.slipStatusMsg.style.color = 'var(--text-muted)';
   } else {
-    DOM.slipStatusMsg.textContent = `Need ${expectedLegs - legsCount} more leg${expectedLegs - legsCount === 1 ? '' : 's'} to complete the ${expectedLegs}-legger ($${state.stake} stake).`;
+    DOM.slipStatusMsg.textContent = `Need ${expectedLegs - legsCount} more leg${expectedLegs - legsCount === 1 ? '' : 's'} to complete ${dayLabel}'s ${expectedLegs}-legger ($${state.stake} stake).`;
     DOM.slipStatusMsg.style.color = 'var(--gold-odds)';
   }
 
@@ -4778,6 +5780,12 @@ function renderBettorBanner() {
 }
 
 function updateCountdown() {
+  if (isViewingWeek7Vote()) {
+    DOM.puckDropCountdown.innerHTML = `<span class="msg-icon">${getIcon('clock')}</span> ${formatVoteLockCountdown()} until Wed 8 PM Vote Lock`;
+    return;
+  }
+
+  const dayLabel = getDayLabelForDateStr(state.currentFridayStr);
   let target = null;
   if (state.games && state.games.length > 0) {
     const validTimes = state.games
@@ -4789,7 +5797,7 @@ function updateCountdown() {
   }
   if (!target) {
     target = new Date(state.currentFriday);
-    target.setHours(state.currentFridayStr === '2026-11-13' ? 21 : 19, 0, 0, 0);
+    target.setHours(state.currentFridayStr === '2026-11-13' ? 21 : (state.currentFridayStr === '2026-11-21' ? 13 : 19), 0, 0, 0);
   }
   const diff = target - new Date();
 
@@ -4800,7 +5808,7 @@ function updateCountdown() {
     const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
     const timeStr = days > 0 ? `${days}d ${hours}h ${mins}m` : (hours > 0 ? `${hours}h ${mins}m` : `${mins}m`);
-    DOM.puckDropCountdown.innerHTML = `<span class="msg-icon">${getIcon('clock')}</span> ${timeStr} until Friday puck drop`;
+    DOM.puckDropCountdown.innerHTML = `<span class="msg-icon">${getIcon('clock')}</span> ${timeStr} until ${dayLabel} puck drop`;
   }
 }
 
@@ -4837,6 +5845,9 @@ function renderSportsbookTicket() {
   if (state.masterSlip && state.masterSlip.status === 'won') {
     DOM.ticketStatusBadge.textContent = `TICKET CASHED (${expectedTicketLegs}/${expectedTicketLegs})`;
     DOM.ticketStatusBadge.className = 'ticket-badge ready';
+  } else if (state.masterSlip && state.masterSlip.status === 'lost') {
+    DOM.ticketStatusBadge.textContent = state.currentFridayStr === '2026-11-13' ? `SETTLED • 4/5 HIT` : `SETTLED • LOST`;
+    DOM.ticketStatusBadge.className = 'ticket-badge';
   } else if (state.isPlaced && totals.count >= expectedTicketLegs) {
     DOM.ticketStatusBadge.textContent = `BET PLACED (${expectedTicketLegs}/${expectedTicketLegs})`;
     DOM.ticketStatusBadge.className = 'ticket-badge ready';
@@ -4898,7 +5909,7 @@ function renderSportsbookTicket() {
 
 function renderRotationSchedule() {
   const weeks = [];
-  let cursor = new Date(state.currentFriday);
+  let cursor = toCanonicalFridayDate(state.currentFriday);
   cursor.setDate(cursor.getDate() - 7);
   if (formatDateISO(cursor) === '2026-10-09') {
     cursor.setDate(cursor.getDate() - 7);
@@ -4912,10 +5923,21 @@ function renderRotationSchedule() {
     cursor.setDate(cursor.getDate() + 7);
   }
 
+  const currentCanonicalISO = formatDateISO(toCanonicalFridayDate(state.currentFriday));
+
   DOM.rotationList.innerHTML = weeks.map(fri => {
     const bettor = getBettorForFriday(fri);
-    const dateFormatted = fri.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    const isCurrent = formatDateISO(fri) === state.currentFridayStr;
+    const canonicalISO = formatDateISO(fri);
+    let dateFormatted = fri.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    if (canonicalISO === WEEK7_FRIDAY_ANCHOR) {
+      if (isWeek7VoteLocked()) {
+        const resDate = parseLocalISODate(getResolvedWeek7DateStr());
+        dateFormatted = resDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+      } else {
+        dateFormatted = 'Thu 19 / Sat 21 (Vote)';
+      }
+    }
+    const isCurrent = canonicalISO === currentCanonicalISO;
     const weekNum = getFridayDiffWeeks(fri) + 1;
 
     return `
@@ -4933,7 +5955,38 @@ function renderRotationSchedule() {
 }
 
 function renderAll() {
+  const votingWeek7 = isViewingWeek7Vote();
+  const dayLabel = getDayLabelForDateStr(state.currentFridayStr);
+
+  if (votingWeek7) {
+    DOM.weekPill.textContent = 'WEEK 7 OF THE REGULAR SEASON • SCHEDULE VOTE';
+    DOM.currentFridayDisplay.textContent = 'Week 7 Vote: Thu Nov 19 vs. Sat Nov 21';
+    if (DOM.week7VoteArena) DOM.week7VoteArena.style.display = 'block';
+    if (DOM.week7VoteSettledBanner) DOM.week7VoteSettledBanner.style.display = 'none';
+    if (DOM.slipBettorBanner) DOM.slipBettorBanner.style.display = 'none';
+    if (DOM.slipWorkspace) DOM.slipWorkspace.style.display = 'none';
+    if (DOM.slipMatchupsPanel) DOM.slipMatchupsPanel.style.display = 'none';
+
+    state.weekNumber = 7;
+    renderDualVoteTicker();
+    renderWeek7VoteArena();
+    updateCountdown();
+    renderStatsView();
+    renderTracker();
+    return;
+  }
+
   DOM.currentFridayDisplay.textContent = formatDateDisplay(state.currentFriday);
+  if (DOM.ribbonDayLabel) DOM.ribbonDayLabel.textContent = `${dayLabel.toUpperCase()} NHL`;
+  if (DOM.lineupColCaption) DOM.lineupColCaption.textContent = `Every guy locks in one ${dayLabel} NHL pick`;
+  if (DOM.legModalDayTag) DOM.legModalDayTag.textContent = `1 LEG PER GUY • ${dayLabel.toUpperCase()} NHL`;
+
+  if (DOM.week7VoteArena) DOM.week7VoteArena.style.display = 'none';
+  if (DOM.slipBettorBanner) DOM.slipBettorBanner.style.display = '';
+  if (DOM.slipWorkspace) DOM.slipWorkspace.style.display = '';
+  if (DOM.slipMatchupsPanel) DOM.slipMatchupsPanel.style.display = '';
+
+  renderWeek7SettledBanner();
   renderBettorBanner();
   renderSquadLegs();
   renderSportsbookTicket();
@@ -4973,15 +6026,16 @@ function openLegModal(defaultBoy = null, defaultGame = null) {
 
 function loadBoyModalFields(boyName, defaultGame = null) {
   const existing = state.legs[boyName];
+  const dayLabel = getDayLabelForDateStr(state.currentFridayStr);
   if (existing) {
-    DOM.modalTitle.textContent = `Edit ${boyName}'s Friday Leg`;
+    DOM.modalTitle.textContent = `Edit ${boyName}'s ${dayLabel} Leg`;
     DOM.pickTextInput.value = existing.pick_text || '';
     DOM.oddsInput.value = existing.odds || '';
     DOM.chirpInput.value = existing.chirp || '';
     DOM.betTypeInput.value = existing.bet_type || 'Player Prop';
     if (existing.game_title) DOM.gameSelect.value = existing.game_title;
   } else {
-    DOM.modalTitle.textContent = `Lock In ${boyName}'s Friday Leg`;
+    DOM.modalTitle.textContent = `Lock In ${boyName}'s ${dayLabel} Leg`;
     DOM.pickTextInput.value = '';
     DOM.oddsInput.value = '';
     DOM.chirpInput.value = '';
@@ -5020,7 +6074,8 @@ function copySlipForSportsbook() {
   const finalDecimal = finalPayout > 0 ? (finalPayout / (state.stake || 1)) : totals.decimal;
   const finalProfit = finalPayout > 0 ? (finalPayout - state.stake) : totals.profit;
 
-  let text = `[BET THE SHOW] FRIDAY NHL ${expectedLegs}-LEGGER (${dateFormatted})\n`;
+  const dayLabel = getDayLabelForDateStr(state.currentFridayStr);
+  let text = `[BET THE SHOW] ${dayLabel.toUpperCase()} NHL ${expectedLegs}-LEGGER (${dateFormatted})\n`;
   text += `Bettor On Deck: ${bettor.name} ($${state.stake} Pool Stake • $5/Guy)\n`;
   text += `${totals.count}/${expectedLegs} Legs Locked In:\n\n`;
 
@@ -5051,18 +6106,23 @@ function copySlipForSportsbook() {
 
 // CHIRP THE GUYS
 function generateGroupChirp() {
+  if (isViewingWeek7Vote()) {
+    copyWeek7VoteChirp();
+    return;
+  }
   const bettor = getBettorForFriday(state.currentFriday);
   const missing = SQUAD.filter(b => !state.legs[b.name]);
+  const dayLabel = getDayLabelForDateStr(state.currentFridayStr);
 
   let msg = '';
   if (missing.length === 0) {
-    msg = `[BET THE SHOW] ALL 6 LEGS ARE LOCKED IN! @${bettor.name} is on deck to place the $30 ticket on his sportsbook right now! Let's get that bag guys.`;
+    msg = `[BET THE SHOW] ALL 6 LEGS ARE LOCKED IN! @${bettor.name} is on deck to place ${dayLabel}'s $30 ticket on his sportsbook right now! Let's get that bag guys.`;
   } else {
     const names = missing.map(b => `@${b.name}`).join(', ');
     const insults = [
-      `Lock in your Friday leg before puck drop!`,
+      `Lock in your ${dayLabel} leg before puck drop!`,
       `Stop sleeping and get your picks in. Don't sell our parlay!`,
-      `We need the final legs before Friday puck drop. Lock it down!`
+      `We need the final legs before ${dayLabel} puck drop. Lock it down!`
     ];
     const pickInsult = insults[Math.floor(Math.random() * insults.length)];
     msg = `[BET THE SHOW ALERT] ${names} — ${pickInsult} (Bettor this week: ${bettor.name})`;
@@ -5472,7 +6532,6 @@ async function confirmAndLockInSlip() {
           await state.supabase
             .from('parlay_legs')
             .upsert({
-              id: `${state.currentFridayStr}_${scanned.boyName}`,
               week_date: state.currentFridayStr,
               user_name: scanned.boyName,
               game_title: updatedLeg.game_title,
@@ -5482,7 +6541,7 @@ async function confirmAndLockInSlip() {
               chirp: updatedLeg.chirp,
               locked: true,
               updated_at: new Date().toISOString()
-            });
+            }, { onConflict: 'week_date,user_name' });
         } catch (legErr) {
           console.warn('Could not sync scanned leg to Supabase:', legErr);
         }
@@ -5602,32 +6661,44 @@ function setupEvents() {
     if (e.target === DOM.installModalBackdrop) DOM.installModalBackdrop.classList.remove('open');
   });
 
-  // Week navigation (skipping non-parlay Friday 2026-10-09)
+  // Week navigation (skipping non-parlay Friday 2026-10-09 & resolving Week 7 Thu/Sat/Vote)
   DOM.prevWeekBtn.addEventListener('click', () => {
-    state.currentFriday.setDate(state.currentFriday.getDate() - 7);
-    if (formatDateISO(state.currentFriday) === '2026-10-09') {
-      state.currentFriday.setDate(state.currentFriday.getDate() - 7);
+    const canonical = toCanonicalFridayDate(state.currentFriday);
+    canonical.setDate(canonical.getDate() - 7);
+    if (formatDateISO(canonical) === '2026-10-09') {
+      canonical.setDate(canonical.getDate() - 7);
     }
+    state.currentFriday = resolvePoolWeekDate(canonical);
     state.currentFridayStr = formatDateISO(state.currentFriday);
     loadLocalData(state.currentFridayStr);
     initTrackerData();
-    fetchFridayNhlGames(state.currentFridayStr);
-    if (state.supabase) fetchSupabaseParlay(state.currentFridayStr);
+    if (isViewingWeek7Vote()) {
+      fetchWeek7DualSlates();
+    } else {
+      fetchFridayNhlGames(state.currentFridayStr);
+      if (state.supabase) fetchSupabaseParlay(state.currentFridayStr);
+    }
     renderAll();
     renderTracker();
     playSound('click');
   });
 
   DOM.nextWeekBtn.addEventListener('click', () => {
-    state.currentFriday.setDate(state.currentFriday.getDate() + 7);
-    if (formatDateISO(state.currentFriday) === '2026-10-09') {
-      state.currentFriday.setDate(state.currentFriday.getDate() + 7);
+    const canonical = toCanonicalFridayDate(state.currentFriday);
+    canonical.setDate(canonical.getDate() + 7);
+    if (formatDateISO(canonical) === '2026-10-09') {
+      canonical.setDate(canonical.getDate() + 7);
     }
+    state.currentFriday = resolvePoolWeekDate(canonical);
     state.currentFridayStr = formatDateISO(state.currentFriday);
     loadLocalData(state.currentFridayStr);
     initTrackerData();
-    fetchFridayNhlGames(state.currentFridayStr);
-    if (state.supabase) fetchSupabaseParlay(state.currentFridayStr);
+    if (isViewingWeek7Vote()) {
+      fetchWeek7DualSlates();
+    } else {
+      fetchFridayNhlGames(state.currentFridayStr);
+      if (state.supabase) fetchSupabaseParlay(state.currentFridayStr);
+    }
     renderAll();
     renderTracker();
     playSound('click');
@@ -5687,7 +6758,8 @@ function setupEvents() {
   DOM.legForm.addEventListener('submit', async e => {
     e.preventDefault();
     const userName = DOM.selectedBoyInput.value;
-    const gameTitle = DOM.gameSelect.value || 'Friday NHL Game';
+    const dayLabel = getDayLabelForDateStr(state.currentFridayStr);
+    const gameTitle = DOM.gameSelect.value || `${dayLabel} NHL Game`;
     const pickText = DOM.pickTextInput.value.trim();
     const odds = DOM.oddsInput.value.trim();
     const betType = DOM.betTypeInput.value;
@@ -5759,7 +6831,9 @@ function setupEvents() {
 
 // INITIALIZATION
 window.addEventListener('DOMContentLoaded', () => {
-  // Automatically rollover every Sunday to the upcoming Friday:
+  initWeek7VoteState();
+
+  // Automatically rollover to the active pool week (Week 7 Vote until Wed Nov 18 @ 8 PM ET, then winning Thu/Sat):
   state.currentFriday = getActiveFridayDate();
   state.currentFridayStr = formatDateISO(state.currentFriday);
 
@@ -5769,12 +6843,16 @@ window.addEventListener('DOMContentLoaded', () => {
   setupEvents();
   renderAll();
   initSupabase();
-  fetchFridayNhlGames(state.currentFridayStr);
+  if (isViewingWeek7Vote()) {
+    fetchWeek7DualSlates();
+  } else {
+    fetchFridayNhlGames(state.currentFridayStr);
+  }
   toggleAutoPoll();
 
-  // If already placed, show Live Tracker by default (unless explicit URL hash was provided)
+  // If already placed (and not in voting mode), show Live Tracker by default (unless explicit URL hash was provided)
   setTimeout(() => {
-    if (state.isPlaced && !window.location.hash) {
+    if (state.isPlaced && !isViewingWeek7Vote() && !window.location.hash) {
       switchView('liveTrackerView', false);
     }
   }, 400);
@@ -5786,7 +6864,7 @@ window.addEventListener('DOMContentLoaded', () => {
       switchView('liveTrackerView', false);
     } else if (hash === '#stats' || hash === '#leaderboard') {
       switchView('statsView', false);
-    } else if (hash === '#slip') {
+    } else if (hash === '#slip' || hash === '#vote') {
       switchView('slipBuilderView', false);
     }
   }
@@ -5795,5 +6873,6 @@ window.addEventListener('DOMContentLoaded', () => {
     handleHash();
   }
 
-  setInterval(updateCountdown, 60000);
+  setInterval(updateCountdown, 30000);
+  setInterval(checkWeek7AutoLockTransition, 1000);
 });

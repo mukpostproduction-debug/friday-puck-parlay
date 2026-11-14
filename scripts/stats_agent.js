@@ -118,6 +118,24 @@ const CANONICAL_WEEKS = [
       { boy: 'Ben',     pick: 'Quinn Hughes — 1+ Points (SJS @ MIN)',              odds: '-390', result: 'hit', playerName: 'Quinn Hughes',     statType: 'points',   target: 1, game: 'SJS @ MIN' },
       { boy: 'Edward',  pick: 'Beckett Sennecke — 1+ Points (ANA @ CGY)',          odds: '-195', result: 'hit', playerName: 'Beckett Sennecke', statType: 'points',   target: 1, game: 'ANA @ CGY' }
     ]
+  },
+  {
+    weekNum: 6,
+    dateStr: '2026-11-13',
+    bettor: 'Edward',
+    stake: 25,
+    totalOdds: '+5525',
+    potentialPayout: 1406.25,
+    actualPayout: 0,
+    book: 'Betway (BetBuilder+)',
+    result: 'loss',
+    legs: [
+      { boy: 'Edward',  pick: 'Liam Ohgren — Over 0.5 Total Goals (NYR @ VAN)',    odds: '+360', result: 'miss', playerName: 'Liam Ohgren',     statType: 'goals',  target: 1,  game: 'NYR @ VAN' },
+      { boy: 'Will',    pick: 'Brock Boeser — Over 0.5 Total Points (NYR @ VAN)',  odds: '-135', result: 'hit',  playerName: 'Brock Boeser',    statType: 'points', target: 1,  game: 'NYR @ VAN' },
+      { boy: 'Ben',     pick: 'J.T. Miller — Over 1.5 Shots on Goal (NYR @ VAN)',  odds: '-140', result: 'hit',  playerName: 'J.T. Miller',     statType: 'shots',  target: 2,  game: 'NYR @ VAN' },
+      { boy: 'Jackson', pick: 'Adin Hill — Over 22.5 Total Saves (NSH @ VGK)',     odds: '-120', result: 'hit',  playerName: 'Adin Hill',       statType: 'saves',  target: 23, game: 'NSH @ VGK' },
+      { boy: 'Axel',    pick: 'Victor Olofsson — Over 2.5 Shots on Goal (NSH @ VGK)', odds: '+125', result: 'hit', playerName: 'Victor Olofsson', statType: 'shots', target: 3,  game: 'NSH @ VGK' }
+    ]
   }
 ];
 

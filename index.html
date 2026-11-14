@@ -25,7 +25,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
 
-  <link rel="stylesheet" href="style.css?v=6.0" />
+  <link rel="stylesheet" href="style.css?v=7.0" />
 </head>
 <body>
   <!-- TOP GLOBAL NAVIGATION BAR (BET365 / BROADCAST DARK AESTHETIC) -->
@@ -83,7 +83,7 @@
   <!-- NHL GAME SCORES / MATCHUP TICKER RIBBON -->
   <section class="scoreboard-ribbon">
     <div class="ribbon-label">
-      <span>FRIDAY NHL</span>
+      <span id="ribbonDayLabel">FRIDAY NHL</span>
       <span class="ribbon-count" id="tickerGamesCount">2 GAMES</span>
     </div>
     <div class="ribbon-scroll" id="gamesTicker">
@@ -114,8 +114,14 @@
         </div>
       </div>
 
+      <!-- WEEK 7 SPECIAL GAME DAY VOTE ARENA (Replaces Slip until Wed Nov 18 @ 8:00 PM ET) -->
+      <div id="week7VoteArena" style="display: none;"></div>
+
+      <!-- WEEK 7 VOTE LOCKED RESULT BANNER (Shown once Wed 8:00 PM ET locks in Thu or Sat) -->
+      <div id="week7VoteSettledBanner" style="display: none;"></div>
+
       <!-- ON DECK SPOTLIGHT BANNER: JACKSON PLACES THE BET FOR WEEK 2 -->
-      <section class="bettor-banner b365-card">
+      <section id="slipBettorBanner" class="bettor-banner b365-card">
         <div class="bettor-banner-inner">
           <div class="bettor-banner-left">
             <div class="bettor-tag">
@@ -165,7 +171,7 @@
       </section>
 
       <!-- MAIN TWO-COLUMN WORKSPACE: LINEUP ON LEFT, SPORTSBOOK TICKET ON RIGHT -->
-      <div class="show-workspace">
+      <div id="slipWorkspace" class="show-workspace">
         <!-- LEFT: 6 BOYS' SLIP LINEUP -->
         <div class="lineup-col">
           <div class="col-header">
@@ -175,7 +181,7 @@
               </span>
               <h2 class="col-title">THE SQUAD'S 6 LEGS</h2>
             </div>
-            <span class="col-caption">1 Pick Per Guy • Friday NHL Only • $5 / Guy</span>
+            <span class="col-caption" id="lineupColCaption">1 Pick Per Guy • Friday NHL Only • $5 / Guy</span>
           </div>
 
           <div class="legs-list" id="legsCardsContainer">
@@ -259,9 +265,9 @@
       </div>
 
       <!-- Friday NHL Matchups Explorer Panel (Below workspace) -->
-      <div class="matchups-panel b365-card" style="margin-top: 20px;">
+      <div id="slipMatchupsPanel" class="matchups-panel b365-card" style="margin-top: 20px;">
         <div class="matchups-panel-header">
-          <h3 class="panel-heading">FRIDAY'S NHL SCHEDULE & LINES</h3>
+          <h3 class="panel-heading" id="schedulePanelHeading">FRIDAY'S NHL SCHEDULE & LINES</h3>
           <span class="panel-sub" id="scheduleDateSubtitle">October 23, 2026</span>
         </div>
         <div class="matchups-list" id="matchupsList">
@@ -555,7 +561,7 @@
     <div class="nhl-modal-card b365-card">
       <div class="modal-top">
         <div class="modal-title-group">
-          <span class="modal-tag">FRIDAY NHL LEG</span>
+          <span class="modal-tag" id="legModalDayTag">FRIDAY NHL LEG</span>
           <h3 class="modal-title" id="modalTitle">Lock In Your Pick</h3>
         </div>
         <button id="closeModalBtn" class="modal-close" aria-label="Close modal">&times;</button>
@@ -834,6 +840,6 @@
 
   <!-- Main JavaScript Controller -->
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-  <script src="app.js?v=6.0"></script>
+  <script src="app.js?v=7.0"></script>
 </body>
 </html>

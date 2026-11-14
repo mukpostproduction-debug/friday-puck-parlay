@@ -4793,3 +4793,727 @@ span svg,
     gap: 10px;
   }
 }
+
+
+/* ==========================================================================
+   WEEK 7 SPECIAL GAME DAY VOTE ARENA & DUAL SLATE EXPLORER
+   (No Friday NHL on Nov 20, 2026 -> Vote Thu Nov 19 vs Sat Nov 21 until Wed 8 PM)
+   ========================================================================== */
+.vote-arena-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.vote-hero-card {
+  position: relative;
+  overflow: hidden;
+  padding: 20px 22px;
+  border-left: 4px solid var(--nhl-blue);
+}
+
+.vote-hero-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.vote-alert-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--gold-odds-bg);
+  color: var(--gold-odds);
+  border: 1px solid var(--gold-odds-border);
+  font-family: var(--font-sports);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: var(--radius-xs);
+  margin-bottom: 8px;
+}
+
+.vote-hero-title {
+  font-family: var(--font-sports);
+  font-size: 1.55rem;
+  font-weight: 900;
+  color: var(--text-main);
+  letter-spacing: -0.3px;
+  line-height: 1.12;
+  text-transform: uppercase;
+}
+
+.vote-hero-desc {
+  font-size: 0.86rem;
+  color: var(--text-secondary);
+  margin-top: 6px;
+  max-width: 720px;
+  line-height: 1.48;
+}
+
+.vote-deadline-box {
+  background: var(--nhl-subcard);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 11px 15px;
+  min-width: 235px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.vote-deadline-label {
+  font-family: var(--font-sports);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.vote-deadline-timer {
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  font-weight: 900;
+  color: var(--nhl-blue);
+  margin-top: 2px;
+}
+
+.vote-deadline-sub {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+/* Step 1: Voter Selector Bar */
+.vote-identity-bar {
+  margin-top: 16px;
+  padding-top: 15px;
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.vote-step-label {
+  font-family: var(--font-sports);
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.vote-boys-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+}
+
+.vote-boy-chip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 9px 10px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border-medium);
+  background: #ffffff;
+  color: var(--text-main);
+  font-family: var(--font-sports);
+  font-size: 0.86rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.vote-boy-chip:hover {
+  border-color: var(--nhl-black);
+  background: var(--nhl-card-hover);
+}
+
+.vote-boy-chip.active {
+  background: var(--nhl-black);
+  color: #ffffff;
+  border-color: var(--nhl-black);
+  box-shadow: 0 3px 10px rgba(17, 20, 24, 0.18);
+}
+
+.vote-boy-chip-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.vote-boy-initials {
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  background: var(--nhl-subcard);
+  color: var(--text-main);
+  font-size: 0.68rem;
+  font-weight: 900;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.vote-boy-chip.active .vote-boy-initials {
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+}
+
+.vote-boy-mini-tag {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 800;
+  padding: 2px 5px;
+  border-radius: 4px;
+  background: var(--nhl-subcard);
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.vote-boy-mini-tag.voted-thu {
+  background: var(--nhl-blue-subtle);
+  color: var(--nhl-blue);
+  border: 1px solid var(--nhl-blue-border);
+}
+
+.vote-boy-mini-tag.voted-sat {
+  background: var(--green-win-light);
+  color: var(--green-win);
+  border: 1px solid var(--green-win-border);
+}
+
+.vote-boy-chip.active .vote-boy-mini-tag:not(.voted-thu):not(.voted-sat) {
+  background: rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* Step 2: Head-to-Head Day Option Cards */
+.vote-options-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+}
+
+.vote-day-card {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  transition: all 0.16s ease;
+  position: relative;
+  border: 1.5px solid var(--border-subtle);
+}
+
+.vote-day-card:hover {
+  border-color: var(--border-medium);
+  box-shadow: var(--shadow-card);
+}
+
+.vote-day-card.leading {
+  border-color: var(--nhl-blue);
+  box-shadow: 0 4px 16px rgba(2, 80, 158, 0.08);
+}
+
+.vote-day-card.user-voted {
+  border-color: var(--nhl-black);
+  border-width: 2px;
+}
+
+.vote-day-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.vote-day-kicker {
+  font-family: var(--font-sports);
+  font-size: 0.70rem;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.vote-day-title {
+  font-family: var(--font-sports);
+  font-size: 1.45rem;
+  font-weight: 900;
+  color: var(--text-main);
+  line-height: 1.1;
+  margin-top: 2px;
+}
+
+.vote-day-window {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  margin-top: 3px;
+}
+
+.vote-games-count-pill {
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 900;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: var(--nhl-subcard);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-main);
+  white-space: nowrap;
+}
+
+.vote-day-card.leading .vote-games-count-pill {
+  background: var(--nhl-blue-subtle);
+  color: var(--nhl-blue);
+  border-color: var(--nhl-blue-border);
+}
+
+.vote-marquee-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.vote-marquee-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: var(--nhl-subcard);
+  border: 1px solid var(--border-subtle);
+  font-family: var(--font-sports);
+  font-size: 0.73rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.vote-marquee-chip img {
+  width: 15px;
+  height: 15px;
+  object-fit: contain;
+}
+
+.vote-tally-box {
+  background: var(--nhl-subcard);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 11px 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.vote-tally-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.vote-tally-num {
+  font-family: var(--font-sports);
+  font-size: 0.92rem;
+  font-weight: 900;
+  color: var(--text-main);
+  text-transform: uppercase;
+}
+
+.vote-tally-pct {
+  font-family: var(--font-mono);
+  font-size: 0.80rem;
+  font-weight: 800;
+  color: var(--text-secondary);
+}
+
+.vote-bar-track {
+  width: 100%;
+  height: 9px;
+  background: #dfe3ea;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.vote-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.vote-bar-fill.thu {
+  background: var(--nhl-blue);
+}
+
+.vote-bar-fill.sat {
+  background: var(--green-win);
+}
+
+.vote-voters-list {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 24px;
+}
+
+.vote-voter-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #ffffff;
+  border: 1px solid var(--border-medium);
+  font-family: var(--font-sports);
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.vote-voters-empty {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.vote-cast-btn {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-sports);
+  font-size: 0.92rem;
+  font-weight: 900;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: 1.5px solid var(--nhl-black);
+  background: #ffffff;
+  color: var(--text-main);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.vote-cast-btn:hover {
+  background: var(--nhl-black);
+  color: #ffffff;
+}
+
+.vote-cast-btn.selected {
+  background: var(--nhl-black);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(17, 20, 24, 0.2);
+}
+
+/* Squad Roll-Call & Actions Strip */
+.vote-rollcall-card {
+  padding: 15px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.vote-rollcall-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.vote-rollcall-title {
+  font-family: var(--font-sports);
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  margin-right: 4px;
+}
+
+.vote-rollcall-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px;
+  border-radius: 6px;
+  background: var(--nhl-subcard);
+  border: 1px solid var(--border-subtle);
+  font-family: var(--font-sports);
+  font-size: 0.76rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.vote-rollcall-pill.thu {
+  background: var(--nhl-blue-subtle);
+  border-color: var(--nhl-blue-border);
+  color: var(--nhl-blue);
+}
+
+.vote-rollcall-pill.sat {
+  background: var(--green-win-light);
+  border-color: var(--green-win-border);
+  color: var(--green-win);
+}
+
+.vote-rollcall-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Dual Slate Comparison Explorer */
+.vote-slates-panel {
+  padding: 18px 20px;
+}
+
+.vote-slates-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border-subtle);
+  margin-bottom: 16px;
+}
+
+.vote-filter-tabs {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--nhl-subcard);
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+}
+
+.vote-filter-btn {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-sports);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.14s ease;
+}
+
+.vote-filter-btn.active {
+  background: var(--nhl-black);
+  color: #ffffff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+}
+
+.vote-slates-columns {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.vote-slates-columns.single-col {
+  grid-template-columns: 1fr;
+}
+
+.vote-slate-col {
+  background: var(--nhl-subcard);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 14px;
+}
+
+.vote-slate-col-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.vote-slate-col-title {
+  font-family: var(--font-sports);
+  font-size: 0.96rem;
+  font-weight: 900;
+  color: var(--text-main);
+  text-transform: uppercase;
+}
+
+.vote-slate-col-badge {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #ffffff;
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+}
+
+.vote-slate-games-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.vote-game-row {
+  background: #ffffff;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 9px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.vote-game-teams {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.vote-game-team {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-sports);
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.vote-game-team img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.vote-game-at {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.vote-game-meta {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.vote-game-time {
+  font-family: var(--font-mono);
+  font-size: 0.73rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.vote-game-venue {
+  font-size: 0.66rem;
+  color: var(--text-muted);
+}
+
+/* Settled Vote Result Banner (Shown after Wed 8 PM Lock) */
+.vote-settled-banner {
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  background: var(--green-win-light);
+  border: 1px solid var(--green-win-border);
+  border-radius: var(--radius-md);
+}
+
+.vote-settled-text {
+  font-size: 0.84rem;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.vote-settled-pill {
+  font-family: var(--font-sports);
+  font-size: 0.70rem;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: var(--green-win);
+  color: #ffffff;
+}
+
+@media (max-width: 920px) {
+  .vote-boys-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .vote-options-grid {
+    grid-template-columns: 1fr;
+  }
+  .vote-slates-columns {
+    grid-template-columns: 1fr;
+  }
+  .vote-deadline-box {
+    width: 100%;
+    text-align: left;
+  }
+}
+
+@media (max-width: 520px) {
+  .vote-boys-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .vote-hero-card,
+  .vote-day-card,
+  .vote-slates-panel {
+    padding: 14px;
+  }
+  .vote-hero-title {
+    font-size: 1.28rem;
+  }
+  .vote-filter-tabs {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .vote-filter-btn {
+    flex: 1;
+    padding: 6px 6px;
+    font-size: 0.72rem;
+    text-align: center;
+  }
+}

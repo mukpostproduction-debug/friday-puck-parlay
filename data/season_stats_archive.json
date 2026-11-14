@@ -1,37 +1,37 @@
 {
-  "generatedAt": "2026-11-07T04:53:25.256Z",
+  "generatedAt": "2026-11-14T08:18:20.914Z",
   "season": "2026-2027",
   "poolSummary": {
-    "settledParlays": 5,
+    "settledParlays": 6,
     "parlaysWon": 1,
-    "parlaysLost": 4,
-    "parlayWinPct": "20.0%",
-    "totalGradedLegs": 28,
-    "totalHitLegs": 17,
-    "overallLegWinPct": "60.7%",
-    "totalStaked": 120,
+    "parlaysLost": 5,
+    "parlayWinPct": "16.7%",
+    "totalGradedLegs": 33,
+    "totalHitLegs": 21,
+    "overallLegWinPct": "63.6%",
+    "totalStaked": 145,
     "totalCashed": 454.41,
-    "netPoolProfit": 334.41
+    "netPoolProfit": 309.41
   },
   "profiles": [
     {
       "name": "Axel",
       "role": "Leg #3",
-      "hits": 4,
+      "hits": 5,
       "misses": 1,
       "pending": 0,
-      "totalGraded": 5,
-      "totalPicks": 5,
-      "winRate": 80,
-      "streak": "W4",
-      "avgGradedOdds": "-152",
-      "avgAllOdds": "-152",
-      "bestHitOdds": "-120",
-      "bestHitPick": "Kent Johnson — 1+ Points (CBJ @ BUF)",
+      "totalGraded": 6,
+      "totalPicks": 6,
+      "winRate": 83,
+      "streak": "W5",
+      "avgGradedOdds": "-132",
+      "avgAllOdds": "-132",
+      "bestHitOdds": "+125",
+      "bestHitPick": "Victor Olofsson — Over 2.5 Shots on Goal (NSH @ VGK)",
       "favMarket": "Points",
       "favMarketRecord": "4/4",
-      "flatBetPL": "+$17.44",
-      "flatBetRoi": "+35%",
+      "flatBetPL": "+$29.94",
+      "flatBetRoi": "+50%",
       "ticketsPlacedCount": 1,
       "ticketsPlacedWeeks": [
         {
@@ -86,57 +86,13 @@
           "odds": "-120",
           "market": "Points",
           "result": "hit"
-        }
-      ]
-    },
-    {
-      "name": "Edward",
-      "role": "Leg #2",
-      "hits": 2,
-      "misses": 1,
-      "pending": 0,
-      "totalGraded": 3,
-      "totalPicks": 3,
-      "winRate": 67,
-      "streak": "W1",
-      "avgGradedOdds": "-133",
-      "avgAllOdds": "-133",
-      "bestHitOdds": "-145",
-      "bestHitPick": "Cole Caufield Over 3.5 SOG (MTL @ CHI)",
-      "favMarket": "Points",
-      "favMarketRecord": "1/2",
-      "flatBetPL": "+$2.02",
-      "flatBetRoi": "+7%",
-      "ticketsPlacedCount": 0,
-      "ticketsPlacedWeeks": [],
-      "placedAmount": 0,
-      "earningsShare": 75.74,
-      "netPoolProfit": 75.74,
-      "netPoolProfitFormatted": "+$75.74",
-      "nextTurnWeekNum": 6,
-      "pickHistory": [
+        },
         {
-          "weekNum": 3,
-          "dateStr": "2026-10-23",
-          "pick": "Cole Caufield Over 3.5 SOG (MTL @ CHI)",
-          "odds": "-145",
+          "weekNum": 6,
+          "dateStr": "2026-11-13",
+          "pick": "Victor Olofsson — Over 2.5 Shots on Goal (NSH @ VGK)",
+          "odds": "+125",
           "market": "Shots on Goal",
-          "result": "hit"
-        },
-        {
-          "weekNum": 4,
-          "dateStr": "2026-10-30",
-          "pick": "Brandon Montour — Over 0.5 Points (SEA @ CGY)",
-          "odds": "+105",
-          "market": "Points",
-          "result": "miss"
-        },
-        {
-          "weekNum": 5,
-          "dateStr": "2026-11-06",
-          "pick": "Beckett Sennecke — 1+ Points (ANA @ CGY)",
-          "odds": "-195",
-          "market": "Points",
           "result": "hit"
         }
       ]
@@ -144,21 +100,21 @@
     {
       "name": "Jackson",
       "role": "Leg #1",
-      "hits": 3,
+      "hits": 4,
       "misses": 2,
       "pending": 0,
-      "totalGraded": 5,
-      "totalPicks": 5,
-      "winRate": 60,
-      "streak": "W1",
-      "avgGradedOdds": "-129",
-      "avgAllOdds": "-129",
-      "bestHitOdds": "-130",
-      "bestHitPick": "Nathan MacKinnon 4+ Shots (PIT @ COL)",
+      "totalGraded": 6,
+      "totalPicks": 6,
+      "winRate": 67,
+      "streak": "W2",
+      "avgGradedOdds": "-128",
+      "avgAllOdds": "-128",
+      "bestHitOdds": "-120",
+      "bestHitPick": "Adin Hill — Over 22.5 Total Saves (NSH @ VGK)",
       "favMarket": "Shots on Goal",
       "favMarketRecord": "3/4",
-      "flatBetPL": "+$2.00",
-      "flatBetRoi": "+4%",
+      "flatBetPL": "+$10.33",
+      "flatBetRoi": "+17%",
       "ticketsPlacedCount": 1,
       "ticketsPlacedWeeks": [
         {
@@ -212,6 +168,97 @@
           "pick": "Matt Boldy — 3+ Shots on Goal (SJS @ MIN)",
           "odds": "-135",
           "market": "Shots on Goal",
+          "result": "hit"
+        },
+        {
+          "weekNum": 6,
+          "dateStr": "2026-11-13",
+          "pick": "Adin Hill — Over 22.5 Total Saves (NSH @ VGK)",
+          "odds": "-120",
+          "market": "Goalie Saves",
+          "result": "hit"
+        }
+      ]
+    },
+    {
+      "name": "Will",
+      "role": "Leg #6",
+      "hits": 4,
+      "misses": 2,
+      "pending": 0,
+      "totalGraded": 6,
+      "totalPicks": 6,
+      "winRate": 67,
+      "streak": "W3",
+      "avgGradedOdds": "+124",
+      "avgAllOdds": "+124",
+      "bestHitOdds": "+155",
+      "bestHitPick": "Chandler Stephenson — Over 0.5 Assists (SEA @ CGY)",
+      "favMarket": "Points",
+      "favMarketRecord": "2/3",
+      "flatBetPL": "+$28.61",
+      "flatBetRoi": "+48%",
+      "ticketsPlacedCount": 1,
+      "ticketsPlacedWeeks": [
+        {
+          "weekNum": 4,
+          "dateStr": "2026-10-30",
+          "stake": 30,
+          "book": "BET99 (SGP+)"
+        }
+      ],
+      "placedAmount": 30,
+      "earningsShare": 75.74,
+      "netPoolProfit": 45.74,
+      "netPoolProfitFormatted": "+$45.74",
+      "nextTurnWeekNum": 10,
+      "pickHistory": [
+        {
+          "weekNum": 1,
+          "dateStr": "2026-10-02",
+          "pick": "Patrick Kane — Anytime Goal Scorer (CHI @ BUF)",
+          "odds": "+200",
+          "market": "Goals",
+          "result": "miss"
+        },
+        {
+          "weekNum": 2,
+          "dateStr": "2026-10-16",
+          "pick": "Pavel Zacha 1+ Points (BOS @ ANA)",
+          "odds": "+120",
+          "market": "Points",
+          "result": "hit"
+        },
+        {
+          "weekNum": 3,
+          "dateStr": "2026-10-23",
+          "pick": "Juraj Slafkovsky Over 0.5 Points (MTL @ CHI)",
+          "odds": "-175",
+          "market": "Points",
+          "result": "miss"
+        },
+        {
+          "weekNum": 4,
+          "dateStr": "2026-10-30",
+          "pick": "Chandler Stephenson — Over 0.5 Assists (SEA @ CGY)",
+          "odds": "+155",
+          "market": "Assists",
+          "result": "hit"
+        },
+        {
+          "weekNum": 5,
+          "dateStr": "2026-11-06",
+          "pick": "Cutter Gauthier — Anytime Goal Scorer (ANA @ CGY)",
+          "odds": "+137",
+          "market": "Goals",
+          "result": "hit"
+        },
+        {
+          "weekNum": 6,
+          "dateStr": "2026-11-13",
+          "pick": "Brock Boeser — Over 0.5 Total Points (NYR @ VAN)",
+          "odds": "-135",
+          "market": "Points",
           "result": "hit"
         }
       ]
@@ -292,98 +339,23 @@
       ]
     },
     {
-      "name": "Will",
-      "role": "Leg #6",
-      "hits": 3,
-      "misses": 2,
-      "pending": 0,
-      "totalGraded": 5,
-      "totalPicks": 5,
-      "winRate": 60,
-      "streak": "W2",
-      "avgGradedOdds": "+134",
-      "avgAllOdds": "+134",
-      "bestHitOdds": "+155",
-      "bestHitPick": "Chandler Stephenson — Over 0.5 Assists (SEA @ CGY)",
-      "favMarket": "Goals",
-      "favMarketRecord": "1/2",
-      "flatBetPL": "+$21.20",
-      "flatBetRoi": "+42%",
-      "ticketsPlacedCount": 1,
-      "ticketsPlacedWeeks": [
-        {
-          "weekNum": 4,
-          "dateStr": "2026-10-30",
-          "stake": 30,
-          "book": "BET99 (SGP+)"
-        }
-      ],
-      "placedAmount": 30,
-      "earningsShare": 75.74,
-      "netPoolProfit": 45.74,
-      "netPoolProfitFormatted": "+$45.74",
-      "nextTurnWeekNum": 10,
-      "pickHistory": [
-        {
-          "weekNum": 1,
-          "dateStr": "2026-10-02",
-          "pick": "Patrick Kane — Anytime Goal Scorer (CHI @ BUF)",
-          "odds": "+200",
-          "market": "Goals",
-          "result": "miss"
-        },
-        {
-          "weekNum": 2,
-          "dateStr": "2026-10-16",
-          "pick": "Pavel Zacha 1+ Points (BOS @ ANA)",
-          "odds": "+120",
-          "market": "Points",
-          "result": "hit"
-        },
-        {
-          "weekNum": 3,
-          "dateStr": "2026-10-23",
-          "pick": "Juraj Slafkovsky Over 0.5 Points (MTL @ CHI)",
-          "odds": "-175",
-          "market": "Points",
-          "result": "miss"
-        },
-        {
-          "weekNum": 4,
-          "dateStr": "2026-10-30",
-          "pick": "Chandler Stephenson — Over 0.5 Assists (SEA @ CGY)",
-          "odds": "+155",
-          "market": "Assists",
-          "result": "hit"
-        },
-        {
-          "weekNum": 5,
-          "dateStr": "2026-11-06",
-          "pick": "Cutter Gauthier — Anytime Goal Scorer (ANA @ CGY)",
-          "odds": "+137",
-          "market": "Goals",
-          "result": "hit"
-        }
-      ]
-    },
-    {
       "name": "Ben",
       "role": "Leg #5",
-      "hits": 2,
+      "hits": 3,
       "misses": 3,
       "pending": 0,
-      "totalGraded": 5,
-      "totalPicks": 5,
-      "winRate": 40,
-      "streak": "W1",
-      "avgGradedOdds": "-155",
-      "avgAllOdds": "-155",
-      "bestHitOdds": "-200",
-      "bestHitPick": "Mitch Marner — 1+ Points (ANA @ VGK)",
+      "totalGraded": 6,
+      "totalPicks": 6,
+      "winRate": 50,
+      "streak": "W2",
+      "avgGradedOdds": "-152",
+      "avgAllOdds": "-152",
+      "bestHitOdds": "-140",
+      "bestHitPick": "J.T. Miller — Over 1.5 Shots on Goal (NYR @ VAN)",
       "favMarket": "Points",
       "favMarketRecord": "2/4",
-      "flatBetPL": "-$22.44",
-      "flatBetRoi": "-45%",
+      "flatBetPL": "-$15.29",
+      "flatBetRoi": "-25%",
       "ticketsPlacedCount": 1,
       "ticketsPlacedWeeks": [
         {
@@ -438,6 +410,81 @@
           "odds": "-390",
           "market": "Points",
           "result": "hit"
+        },
+        {
+          "weekNum": 6,
+          "dateStr": "2026-11-13",
+          "pick": "J.T. Miller — Over 1.5 Shots on Goal (NYR @ VAN)",
+          "odds": "-140",
+          "market": "Shots on Goal",
+          "result": "hit"
+        }
+      ]
+    },
+    {
+      "name": "Edward",
+      "role": "Leg #2",
+      "hits": 2,
+      "misses": 2,
+      "pending": 0,
+      "totalGraded": 4,
+      "totalPicks": 4,
+      "winRate": 50,
+      "streak": "L1",
+      "avgGradedOdds": "+146",
+      "avgAllOdds": "+146",
+      "bestHitOdds": "-145",
+      "bestHitPick": "Cole Caufield Over 3.5 SOG (MTL @ CHI)",
+      "favMarket": "Points",
+      "favMarketRecord": "1/2",
+      "flatBetPL": "-$7.98",
+      "flatBetRoi": "-20%",
+      "ticketsPlacedCount": 1,
+      "ticketsPlacedWeeks": [
+        {
+          "weekNum": 6,
+          "dateStr": "2026-11-13",
+          "stake": 25,
+          "book": "Betway (BetBuilder+)"
+        }
+      ],
+      "placedAmount": 25,
+      "earningsShare": 75.74,
+      "netPoolProfit": 50.74,
+      "netPoolProfitFormatted": "+$50.74",
+      "nextTurnWeekNum": 12,
+      "pickHistory": [
+        {
+          "weekNum": 3,
+          "dateStr": "2026-10-23",
+          "pick": "Cole Caufield Over 3.5 SOG (MTL @ CHI)",
+          "odds": "-145",
+          "market": "Shots on Goal",
+          "result": "hit"
+        },
+        {
+          "weekNum": 4,
+          "dateStr": "2026-10-30",
+          "pick": "Brandon Montour — Over 0.5 Points (SEA @ CGY)",
+          "odds": "+105",
+          "market": "Points",
+          "result": "miss"
+        },
+        {
+          "weekNum": 5,
+          "dateStr": "2026-11-06",
+          "pick": "Beckett Sennecke — 1+ Points (ANA @ CGY)",
+          "odds": "-195",
+          "market": "Points",
+          "result": "hit"
+        },
+        {
+          "weekNum": 6,
+          "dateStr": "2026-11-13",
+          "pick": "Liam Ohgren — Over 0.5 Total Goals (NYR @ VAN)",
+          "odds": "+360",
+          "market": "Goals",
+          "result": "miss"
         }
       ]
     }
@@ -721,6 +768,69 @@
           "statType": "points",
           "target": 1,
           "game": "ANA @ CGY"
+        }
+      ]
+    },
+    {
+      "weekNum": 6,
+      "dateStr": "2026-11-13",
+      "bettor": "Edward",
+      "stake": 25,
+      "totalOdds": "+5525",
+      "potentialPayout": 1406.25,
+      "actualPayout": 0,
+      "book": "Betway (BetBuilder+)",
+      "result": "loss",
+      "legs": [
+        {
+          "boy": "Edward",
+          "pick": "Liam Ohgren — Over 0.5 Total Goals (NYR @ VAN)",
+          "odds": "+360",
+          "result": "miss",
+          "playerName": "Liam Ohgren",
+          "statType": "goals",
+          "target": 1,
+          "game": "NYR @ VAN"
+        },
+        {
+          "boy": "Will",
+          "pick": "Brock Boeser — Over 0.5 Total Points (NYR @ VAN)",
+          "odds": "-135",
+          "result": "hit",
+          "playerName": "Brock Boeser",
+          "statType": "points",
+          "target": 1,
+          "game": "NYR @ VAN"
+        },
+        {
+          "boy": "Ben",
+          "pick": "J.T. Miller — Over 1.5 Shots on Goal (NYR @ VAN)",
+          "odds": "-140",
+          "result": "hit",
+          "playerName": "J.T. Miller",
+          "statType": "shots",
+          "target": 2,
+          "game": "NYR @ VAN"
+        },
+        {
+          "boy": "Jackson",
+          "pick": "Adin Hill — Over 22.5 Total Saves (NSH @ VGK)",
+          "odds": "-120",
+          "result": "hit",
+          "playerName": "Adin Hill",
+          "statType": "saves",
+          "target": 23,
+          "game": "NSH @ VGK"
+        },
+        {
+          "boy": "Axel",
+          "pick": "Victor Olofsson — Over 2.5 Shots on Goal (NSH @ VGK)",
+          "odds": "+125",
+          "result": "hit",
+          "playerName": "Victor Olofsson",
+          "statType": "shots",
+          "target": 3,
+          "game": "NSH @ VGK"
         }
       ]
     }
