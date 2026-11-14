@@ -4997,26 +4997,36 @@ span svg,
   border: 1px solid var(--green-win-border);
 }
 
-.vote-boy-chip.active .vote-boy-mini-tag:not(.voted-thu):not(.voted-sat) {
+.vote-boy-mini-tag.voted-both {
+  background: var(--gold-odds-bg);
+  color: var(--gold-odds);
+  border: 1px solid var(--gold-odds-border);
+}
+
+.vote-boy-chip.active .vote-boy-mini-tag:not(.voted-thu):not(.voted-sat):not(.voted-both) {
   background: rgba(255, 255, 255, 0.15);
   color: rgba(255, 255, 255, 0.85);
 }
 
-/* Step 2: Head-to-Head Day Option Cards */
+/* Step 2: 3-Way Format Option Cards */
 .vote-options-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 18px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
 }
 
 .vote-day-card {
-  padding: 20px;
+  padding: 18px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 13px;
   transition: all 0.16s ease;
   position: relative;
   border: 1.5px solid var(--border-subtle);
+}
+
+.vote-day-card.split-option {
+  background: linear-gradient(180deg, rgba(254, 243, 199, 0.28) 0%, #ffffff 42%);
 }
 
 .vote-day-card:hover {
@@ -5163,6 +5173,10 @@ span svg,
   background: var(--green-win);
 }
 
+.vote-bar-fill.both {
+  background: var(--gold-odds);
+}
+
 .vote-voters-list {
   display: flex;
   align-items: center;
@@ -5274,6 +5288,12 @@ span svg,
   background: var(--green-win-light);
   border-color: var(--green-win-border);
   color: var(--green-win);
+}
+
+.vote-rollcall-pill.both {
+  background: var(--gold-odds-bg);
+  border-color: var(--gold-odds-border);
+  color: var(--gold-odds);
 }
 
 .vote-rollcall-actions {
@@ -5457,6 +5477,10 @@ span svg,
   border-radius: var(--radius-md);
 }
 
+.vote-settled-banner .nhl-action-btn {
+  white-space: nowrap;
+}
+
 .vote-settled-text {
   font-size: 0.84rem;
   color: var(--text-main);
@@ -5478,12 +5502,56 @@ span svg,
   color: #ffffff;
 }
 
+/* Week 7 Doubleheader ($15 + $15 Split) Switcher Bar */
+.split-day-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #ffffff;
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-medium);
+  flex-wrap: wrap;
+}
+
+.split-day-btn {
+  padding: 7px 12px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-sports);
+  font-size: 0.80rem;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.14s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.split-day-btn:hover {
+  color: var(--text-main);
+  background: var(--nhl-subcard);
+}
+
+.split-day-btn.active {
+  background: var(--nhl-black);
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(17, 20, 24, 0.18);
+}
+
+@media (max-width: 1080px) {
+  .vote-options-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 920px) {
   .vote-boys-grid {
     grid-template-columns: repeat(3, 1fr);
-  }
-  .vote-options-grid {
-    grid-template-columns: 1fr;
   }
   .vote-slates-columns {
     grid-template-columns: 1fr;
