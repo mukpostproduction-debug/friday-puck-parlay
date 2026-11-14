@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>Bet the Show | Friday NHL 6-Leg Parlay</title>
-  <meta name="description" content="Bet the Show — The boys' Friday NHL 6-leg parlay pool, live bet tracker, and squad stats for Axel, Jackson, Will, Alex, Ben, and Edward." />
+  <meta name="description" content="Bet the Show — The guys' Friday NHL 6-leg parlay pool, live bet tracker, and squad stats for Axel, Jackson, Will, Alex, Ben, and Edward." />
   
   <!-- PWA & Mobile Web App Meta -->
   <meta name="theme-color" content="#121212" />
@@ -25,7 +25,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
 
-  <link rel="stylesheet" href="style.css?v=5.9" />
+  <link rel="stylesheet" href="style.css?v=6.0" />
 </head>
 <body>
   <!-- TOP GLOBAL NAVIGATION BAR (BET365 / BROADCAST DARK AESTHETIC) -->
@@ -153,7 +153,7 @@
             <div class="bettor-actions">
               <button id="quickChirpBtn" class="nhl-action-btn secondary">
                 <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                <span>Chirp The Boys</span>
+                <span>Chirp The Guys</span>
               </button>
               <button id="copySportsbookSlipBtn" class="nhl-action-btn primary">
                 <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
@@ -175,7 +175,7 @@
               </span>
               <h2 class="col-title">THE SQUAD'S 6 LEGS</h2>
             </div>
-            <span class="col-caption">1 Pick Per Guy • Friday NHL Only • $5 / Boy</span>
+            <span class="col-caption">1 Pick Per Guy • Friday NHL Only • $5 / Guy</span>
           </div>
 
           <div class="legs-list" id="legsCardsContainer">
@@ -212,7 +212,7 @@
                 <span class="math-label">WEEKLY POOL WAGER:</span>
                 <div class="stake-control">
                   <span class="dollar-sign">$</span>
-                  <input type="number" id="stakeInput" value="30" min="6" max="1000" step="6" class="stake-field" />
+                  <input type="number" id="stakeInput" value="25" min="5" max="1000" step="5" class="stake-field" />
                 </div>
               </div>
 
@@ -249,7 +249,7 @@
           <div class="rotation-card b365-card">
             <div class="rot-card-header">
               <span class="rot-title">6-WEEK BETTOR ROTATION</span>
-              <span class="rot-subtitle">Axel → Jackson → Will → Alex → Ben → Edward</span>
+              <span class="rot-subtitle">Ben → Axel → Jackson → Will → Alex → Edward</span>
             </div>
             <div class="rot-list" id="rotationList">
               <!-- 6 weeks listed -->
@@ -324,7 +324,7 @@
           <div class="tracker-footer-card">
             <div class="tracker-footer-metrics">
               <div>
-                <div class="tracker-metric-label">Wager ($5 / Boy)</div>
+                <div class="tracker-metric-label">Wager ($5 / Guy)</div>
                 <div class="tracker-metric-val" id="trackerWagerDisplay">$30.00</div>
               </div>
               <div style="text-align: center;">
@@ -451,7 +451,7 @@
           <div class="section-title-bar bankroll-title-bar">
             <div>
               <h3 class="section-title">SQUAD BANKROLL &amp; INDIVIDUAL EARNINGS</h3>
-              <span class="section-subtitle">Tracks every boy's out-of-pocket tickets placed vs. equal 6-way parlay payout splits</span>
+              <span class="section-subtitle">Tracks every guy's out-of-pocket tickets placed vs. equal 6-way parlay payout splits</span>
             </div>
             <div class="bankroll-pool-pill" id="bankrollPoolSummaryPill">
               Pool Profit: +$339.41
@@ -470,7 +470,7 @@
           <div class="section-title-bar">
             <div>
               <h3 class="section-title">THE SQUAD STANDINGS</h3>
-              <span class="section-subtitle">Tap any boy's name or profile chip to inspect his full pick history, odds &amp; bankroll</span>
+              <span class="section-subtitle">Tap any guy's name or profile chip to inspect his full pick history, odds &amp; bankroll</span>
             </div>
             <div class="legend-pills">
               <span class="legend-pill hit"><svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Hit</span>
@@ -515,6 +515,10 @@
               <button onclick="exportSeasonStatsReport()" class="nhl-nav-btn" type="button">📊 Copy Season Report</button>
               <button onclick="resetStatsHistory()" class="text-xs text-zinc-400 hover:text-white underline" type="button">Reset to Season Baseline</button>
             </div>
+          </div>
+
+          <div class="history-week-toggle-bar" id="historyWeekToggleBar">
+            <!-- Populated dynamically via JS: Week 5, Week 4, Week 3, Week 2, Week 1, All -->
           </div>
 
           <div class="history-weeks-list" id="historyWeeksContainer">
@@ -604,7 +608,7 @@
         <!-- 5. Chirp / Trash Talk -->
         <div class="form-group">
           <label class="form-label" for="chirpInput">CHIRP / HOT TAKE <span class="optional-note">(Optional)</span></label>
-          <input type="text" id="chirpInput" class="nhl-input" placeholder="e.g. Free money boys, goalie on a cold streak" maxlength="120" />
+          <input type="text" id="chirpInput" class="nhl-input" placeholder="e.g. Free money guys, goalie on a cold streak" maxlength="120" />
         </div>
 
         <div class="modal-bottom">
@@ -789,6 +793,7 @@
             <div class="form-group">
               <label class="form-label" for="slipBookInput">SPORTSBOOK</label>
               <select id="slipBookInput" class="nhl-input">
+                <option value="Betway">Betway</option>
                 <option value="BET99">BET99 Ontario</option>
                 <option value="FanDuel">FanDuel Ontario</option>
                 <option value="BetMGM">BetMGM Ontario</option>
@@ -829,6 +834,6 @@
 
   <!-- Main JavaScript Controller -->
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-  <script src="app.js?v=5.9"></script>
+  <script src="app.js?v=6.0"></script>
 </body>
 </html>

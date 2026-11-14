@@ -13,7 +13,7 @@
 // Week 3: Friday, Oct 23, 2026 (Jackson placed $30 6-leg ticket — Edward joined!)
 // Week 4: Friday, Oct 30, 2026 (Will placed $30 6-leg ticket)
 // Week 5: Friday, Nov 6, 2026 (Alex placed $30 6-leg ticket — CASHED $454.41!)
-// Week 6: Friday, Nov 13, 2026 (Edward ON DECK)
+// Week 6: Friday, Nov 13, 2026 (Edward placed $25 5-leg Betway ticket @ +5525 -> $1,406.25 — Alex sat out!)
 // 6-week cycle: Ben -> Axel -> Jackson -> Will -> Alex -> Edward (repeats)
 const SQUAD = [
   { id: 'ben', name: 'Ben', initials: 'BE', color: '#ec4899', defaultRole: 'Week 1 Bettor' },
@@ -71,7 +71,8 @@ const state = {
   // Live tracker parlay data (Aragon's template + 6th leg for Edward)
   trackerData: [],
   // Stats & Leaderboard historical data
-  statsHistory: []
+  statsHistory: [],
+  selectedHistoryWeek: 6 // Default to latest week (Week 6) for single-week view
 };
 
 // AUDIO SYNTHESIZER (Web Audio API)
@@ -360,7 +361,8 @@ const DOM = {
   trophyChalkLabel: document.getElementById('trophyChalkLabel'),
   trophyChalkNote: document.getElementById('trophyChalkNote'),
   leaderboardTbody: document.getElementById('leaderboardTbody'),
-  historyWeeksContainer: document.getElementById('historyWeeksContainer')
+  historyWeeksContainer: document.getElementById('historyWeeksContainer'),
+  historyWeekToggleBar: document.getElementById('historyWeekToggleBar')
 };
 
 // =============================================================================
@@ -1066,6 +1068,104 @@ const DEFAULT_OCT02_SLATE = [
   }
 ];
 
+const DEFAULT_NOV13_SLATE = [
+  {
+    gameId: "NYR_VAN",
+    title: "SAME GAME PARLAY",
+    odds: "SGP",
+    awayTeam: "NYR",
+    awayName: "NYR Rangers",
+    homeTeam: "VAN",
+    homeName: "VAN Canucks",
+    gameStatus: "pre",
+    statusDetail: "9:00 PM ET",
+    startTime: "Fri Nov 13 • 9:00 PM ET",
+    gameStateText: "9:00 PM ET",
+    legs: [
+      {
+        id: "ohgren_goals_nov13",
+        boyName: "Edward",
+        playerName: "Liam Ohgren",
+        team: "VAN",
+        odds: "+360",
+        marketLabel: "Over 0.5 Total Goals (+360)",
+        statType: "goals",
+        target: 1,
+        apiStat: 0,
+        manualDelta: 0,
+        subDetail: "0G, 0A • 0 SOG"
+      },
+      {
+        id: "boeser_pts_nov13",
+        boyName: "Will",
+        playerName: "Brock Boeser",
+        team: "VAN",
+        odds: "-135",
+        marketLabel: "Over 0.5 Total Points (-135)",
+        statType: "points",
+        target: 1,
+        apiStat: 0,
+        manualDelta: 0,
+        subDetail: "0G, 0A • 0 SOG"
+      },
+      {
+        id: "jtmiller_sog_nov13",
+        boyName: "Ben",
+        playerName: "J.T. Miller",
+        team: "NYR",
+        odds: "-140",
+        marketLabel: "Over 1.5 Shots on Goal (-140)",
+        statType: "shots",
+        target: 2,
+        apiStat: 0,
+        manualDelta: 0,
+        subDetail: "0G, 0A • 0 SOG"
+      }
+    ]
+  },
+  {
+    gameId: "NSH_VGK",
+    title: "SAME GAME PARLAY",
+    odds: "SGP",
+    awayTeam: "NSH",
+    awayName: "NSH Predators",
+    homeTeam: "VGK",
+    homeName: "VGK Golden Knights",
+    gameStatus: "pre",
+    statusDetail: "10:00 PM ET",
+    startTime: "Fri Nov 13 • 10:00 PM ET",
+    gameStateText: "10:00 PM ET",
+    legs: [
+      {
+        id: "hill_saves_nov13",
+        boyName: "Jackson",
+        playerName: "Adin Hill",
+        team: "VGK",
+        odds: "-120",
+        marketLabel: "Over 22.5 Total Saves (-120)",
+        statType: "saves",
+        target: 23,
+        apiStat: 0,
+        manualDelta: 0,
+        subDetail: "0 SV • 0 SA, 0 GA"
+      },
+      {
+        id: "olofsson_sog_nov13",
+        boyName: "Axel",
+        playerName: "Victor Olofsson",
+        team: "VGK",
+        odds: "+125",
+        marketLabel: "Over 2.5 Shots on Goal (+125)",
+        statType: "shots",
+        target: 3,
+        apiStat: 0,
+        manualDelta: 0,
+        subDetail: "0G, 0A • 0 SOG"
+      }
+    ]
+  }
+];
+
 function getSlateForDate(dateStr) {
   if (dateStr === '2026-10-02') {
     return JSON.parse(JSON.stringify(DEFAULT_OCT02_SLATE));
@@ -1082,8 +1182,19 @@ function getSlateForDate(dateStr) {
   if (dateStr === '2026-11-06') {
     return JSON.parse(JSON.stringify(DEFAULT_NOV06_SLATE));
   }
+  if (dateStr === '2026-11-13') {
+    return JSON.parse(JSON.stringify(DEFAULT_NOV13_SLATE));
+  }
   return [];
 }
+
+const KNOWN_NOV13_PLAYERS = {
+  Edward: { name: 'Liam Ohgren', target: 1, type: 'goals', odds: '+360', label: 'Over 0.5 Total Goals (+360)' },
+  Will: { name: 'Brock Boeser', target: 1, type: 'points', odds: '-135', label: 'Over 0.5 Total Points (-135)' },
+  Ben: { name: 'J.T. Miller', target: 2, type: 'shots', odds: '-140', label: 'Over 1.5 Shots on Goal (-140)' },
+  Jackson: { name: 'Adin Hill', target: 23, type: 'saves', odds: '-120', label: 'Over 22.5 Total Saves (-120)' },
+  Axel: { name: 'Victor Olofsson', target: 3, type: 'shots', odds: '+125', label: 'Over 2.5 Shots on Goal (+125)' }
+};
 
 const KNOWN_NOV06_PLAYERS = {
   Jackson: { name: 'Matt Boldy', target: 3, type: 'shots', odds: '-135', label: '3+ Shots on Goal (-135)' },
@@ -1173,6 +1284,10 @@ const PLAYER_NICKNAME_ALIASES = {
   'mcmann': 'Bobby McMann',
   'sennecke': 'Beckett Sennecke',
   'boldy': 'Matt Boldy',
+  'boesr': 'Brock Boeser',
+  'boeser': 'Brock Boeser',
+  'ohgren': 'Liam Ohgren',
+  'jt miller': 'J.T. Miller',
   'bedsy': 'Connor Bedard',
   'pasta': 'David Pastrnak',
   'ovi': 'Alex Ovechkin',
@@ -1200,6 +1315,25 @@ function parsePickIntoLeg(boyName, pickObj) {
   const pickText = (pickObj.pick_text || '').trim();
   const oddsStr = (pickObj.odds || '').trim();
   const betTypeRaw = (pickObj.bet_type || pickObj.betType || '').toLowerCase();
+
+  // Official Nov 13 canonical mapping (Betway 5-Fold BetBuilder+ @ +5525)
+  if (state.currentFridayStr === '2026-11-13' && KNOWN_NOV13_PLAYERS[boyName]) {
+    const known = KNOWN_NOV13_PLAYERS[boyName];
+    const lastToken = known.name.split(' ').slice(-1)[0].toLowerCase();
+    if (!pickText || pickText.toLowerCase().includes(lastToken) || (boyName === 'Will' && pickText.toLowerCase().includes('boes'))) {
+      return {
+        id: `${boyName.toLowerCase()}_${known.type}_nov13`,
+        boyName: boyName,
+        playerName: known.name,
+        odds: oddsStr || known.odds,
+        marketLabel: known.label,
+        statType: known.type,
+        target: known.target,
+        apiStat: 0,
+        subDetail: known.type === 'saves' ? '0 SV • 0 SA, 0 GA' : '0G, 0A • 0 SOG'
+      };
+    }
+  }
 
   // Official Nov 6 canonical mapping
   if (state.currentFridayStr === '2026-11-06' && KNOWN_NOV06_PLAYERS[boyName]) {
@@ -1475,7 +1609,8 @@ function syncTrackerFromRealPicks() {
   // Check if this is a future/custom week where picks belong to games outside the default slate
   const isKnownWeek = state.currentFridayStr === '2026-10-23' ||
                       state.currentFridayStr === '2026-10-30' ||
-                      state.currentFridayStr === '2026-11-06';
+                      state.currentFridayStr === '2026-11-06' ||
+                      state.currentFridayStr === '2026-11-13';
   if (!isKnownWeek) {
     const groupedGames = {};
     SQUAD.forEach(boy => {
@@ -1559,7 +1694,7 @@ function syncTrackerFromRealPicks() {
 }
 
 // Initialize Tracker Data from LocalStorage or Default (Purely NHL API Data-Driven)
-const TRACKER_STORAGE_KEY = "b365_sgp_tracker_data_v7";
+const TRACKER_STORAGE_KEY = "b365_sgp_tracker_data_v8";
 
 function initTrackerData() {
   const currentKey = `${TRACKER_STORAGE_KEY}_${state.currentFridayStr}`;
@@ -1600,7 +1735,7 @@ function loadAragonDemoSlate() {
 // =============================================================================
 // 7. SQUAD STATS & LEADERBOARD HISTORICAL ENGINE
 // =============================================================================
-const STATS_STORAGE_KEY = "bts_squad_stats_history_v10";
+const STATS_STORAGE_KEY = "bts_squad_stats_history_v11";
 
 const DEFAULT_STATS_HISTORY = [
   {
@@ -1611,7 +1746,7 @@ const DEFAULT_STATS_HISTORY = [
     totalOdds: '+1500',
     payout: 0,
     result: 'loss', // 2 of 5 hit!
-    notes: 'Inaugural Friday Puck Parlay! Ben lowered the wager to $5 on Bet365 (+1500 -> $80.00 potential payout) with the original 5 boys before Edward joined. 2 of 5 legs hit: Ben (Marner 1A) and Alex (Eichel 2 SOG) cashed Friday night, while Jackson (Wyatt Johnston 0 PTS), Axel (Canes ML 2-5), and Will (Patrick Kane 0G) missed.',
+    notes: 'Inaugural Friday Puck Parlay! Ben lowered the wager to $5 on Bet365 (+1500 -> $80.00 potential payout) with the original 5 guys before Edward joined. 2 of 5 legs hit: Ben (Marner 1A) and Alex (Eichel 2 SOG) cashed Friday night, while Jackson (Wyatt Johnston 0 PTS), Axel (Canes ML 2-5), and Will (Patrick Kane 0G) missed.',
     legs: [
       { boy: 'Ben', pick: 'Mitch Marner — 1+ Points', odds: '-200', result: 'hit' },
       { boy: 'Alex', pick: 'Jack Eichel — 2+ Shots on Goal', odds: '-300', result: 'hit' },
@@ -1681,7 +1816,7 @@ const DEFAULT_STATS_HISTORY = [
     totalOdds: '+1414',
     payout: 454.41,
     result: 'win',
-    notes: 'FIRST PARLAY CASHED IN FRANCHISE HISTORY! Alex placed on FanDuel ($30 SGP+ at +1414 -> $454.41 payout, $75.74/boy). All 6/6 legs hit: Boldy 7 SOG, Wild -1.5 (4-1), Quinn Hughes 3 PTS, Cutter Gauthier 1G, Beckett Sennecke 2A, and Kent Johnson 2 PTS!',
+    notes: 'FIRST PARLAY CASHED IN FRANCHISE HISTORY! Alex placed on FanDuel ($30 SGP+ at +1414 -> $454.41 payout, $75.74/guy). All 6/6 legs hit: Boldy 7 SOG, Wild -1.5 (4-1), Quinn Hughes 3 PTS, Cutter Gauthier 1G, Beckett Sennecke 2A, and Kent Johnson 2 PTS!',
     legs: [
       { boy: 'Axel', pick: 'Kent Johnson — 1+ Points', odds: '-120', result: 'hit' },
       { boy: 'Jackson', pick: 'Matt Boldy — 3+ Shots on Goal', odds: '-135', result: 'hit' },
@@ -1689,6 +1824,23 @@ const DEFAULT_STATS_HISTORY = [
       { boy: 'Alex', pick: 'Minnesota Wild -1.5 Puck Line', odds: '+110', result: 'hit' },
       { boy: 'Ben', pick: 'Quinn Hughes — 1+ Points', odds: '-390', result: 'hit' },
       { boy: 'Edward', pick: 'Beckett Sennecke — 1+ Points', odds: '-195', result: 'hit' }
+    ]
+  },
+  {
+    weekNum: 6,
+    dateStr: '2026-11-13',
+    bettor: 'Edward',
+    stake: 25,
+    totalOdds: '+5525',
+    payout: 0,
+    result: 'pending',
+    notes: 'Edward locked in a $25 5-Fold BetBuilder+ on Betway (@ +5525 -> $1,406.25 potential return, $281.25/guy)! Alex was buckled in the sauna with Taylor Hall and sat out Week 6.',
+    legs: [
+      { boy: 'Edward', pick: 'Liam Ohgren — Over 0.5 Total Goals', odds: '+360', result: 'pending' },
+      { boy: 'Will', pick: 'Brock Boeser — Over 0.5 Total Points', odds: '-135', result: 'pending' },
+      { boy: 'Ben', pick: 'J.T. Miller — Over 1.5 Shots on Goal', odds: '-140', result: 'pending' },
+      { boy: 'Jackson', pick: 'Adin Hill — Over 22.5 Total Saves', odds: '-120', result: 'pending' },
+      { boy: 'Axel', pick: 'Victor Olofsson — Over 2.5 Shots on Goal', odds: '+125', result: 'pending' }
     ]
   }
 ];
@@ -2067,7 +2219,7 @@ function computeSquadAnalytics() {
       sharpshooters = {
         names: namesStr,
         stat: `${topRate}% Hit Rate (${topHits}-${tied[0].misses} Each)`,
-        note: `${tied.length}-way tie for the squad lead — all ${tied.length} boys cashed their legs!`,
+        note: `${tied.length}-way tie for the squad lead — all ${tied.length} guys cashed their legs!`,
         isTie: true,
         list: tied
       };
@@ -2272,9 +2424,9 @@ function renderStatsView() {
         <span class="bkpi-sub">${data.wonParlays} of ${data.totalParlays} Ticket${data.totalParlays === 1 ? '' : 's'} Cashed</span>
       </div>
       <div class="bankroll-kpi-box">
-        <span class="bkpi-label">Equal Payout / Boy</span>
+        <span class="bkpi-label">Equal Payout / Guy</span>
         <span class="bkpi-val ${perBoyEqualShare > 0 ? 'green' : ''}">$${perBoyEqualShare.toFixed(2)}</span>
-        <span class="bkpi-sub">${data.totalWon > 0 ? `$${data.totalWon.toFixed(2)} ÷ 6 Boys` : 'Split equally on win'}</span>
+        <span class="bkpi-sub">${data.totalWon > 0 ? `$${data.totalWon.toFixed(2)} ÷ 6 Guys` : 'Split equally on win'}</span>
       </div>
       <div class="bankroll-kpi-box">
         <span class="bkpi-label">Net Squad Profit</span>
@@ -2336,7 +2488,7 @@ function renderStatsView() {
         const othersStr = win.otherBoys.length > 1
           ? `${win.otherBoys.slice(0, -1).join(', ')} & ${win.otherBoys[win.otherBoys.length - 1]}`
           : (win.otherBoys[0] || 'the squad');
-        return `<strong>💸 Week ${win.weekNum} Cashout Split ($${win.payout.toFixed(2)} ÷ ${win.splitCount} boys = $${shareStr} each):</strong> <strong>${win.bettor}</strong> placed the $${win.stake.toFixed(2)} ticket, keeps his <strong>$${shareStr}</strong> share (<strong>+$${bettorNetOnWeek}</strong> net on W${win.weekNum}), and sends <strong>$${shareStr}</strong> each to ${othersStr}.`;
+        return `<strong>💸 Week ${win.weekNum} Cashout Split ($${win.payout.toFixed(2)} ÷ ${win.splitCount} guys = $${shareStr} each):</strong> <strong>${win.bettor}</strong> placed the $${win.stake.toFixed(2)} ticket, keeps his <strong>$${shareStr}</strong> share (<strong>+$${bettorNetOnWeek}</strong> net on W${win.weekNum}), and sends <strong>$${shareStr}</strong> each to ${othersStr}.`;
       }).join('<br/>');
     } else {
       bankrollSettlementNote.style.display = 'none';
@@ -2414,20 +2566,73 @@ function renderStatsView() {
     `;
   }).join('');
 
-  // Weekly History logs
-  DOM.historyWeeksContainer.innerHTML = state.statsHistory.map((week, wIdx) => {
+  // Weekly History logs with interactive single-week toggle
+  renderHistorySection();
+}
+
+window.selectHistoryWeek = function(weekNum) {
+  state.selectedHistoryWeek = weekNum;
+  playSound('click');
+  renderHistorySection();
+};
+
+function renderHistorySection() {
+  const toggleBar = DOM.historyWeekToggleBar || document.getElementById('historyWeekToggleBar');
+  if (!DOM.historyWeeksContainer) return;
+
+  if (state.selectedHistoryWeek === undefined || state.selectedHistoryWeek === null) {
+    const latest = Math.max(...state.statsHistory.map(w => w.weekNum), 1);
+    state.selectedHistoryWeek = latest;
+  }
+
+  // Render Week Toggle Pills (newest to oldest)
+  if (toggleBar) {
+    const sortedWeeks = [...state.statsHistory].sort((a, b) => b.weekNum - a.weekNum);
+    toggleBar.innerHTML = `
+      <div class="h-toggle-scroll">
+        ${sortedWeeks.map(w => {
+          const isSelected = state.selectedHistoryWeek === w.weekNum;
+          const hits = w.legs.filter(l => l.result === 'hit').length;
+          const total = w.legs.length;
+          const isWin = w.result === 'win';
+          const isPending = w.result === 'pending';
+          const tagText = isWin ? `${total}/${total} WIN 💥` : (isPending ? `${hits}/${total} LIVE` : `${hits}/${total}`);
+          const winClass = isWin ? 'is-win' : '';
+          const activeClass = isSelected ? 'active' : '';
+          return `
+            <button type="button" class="h-week-toggle-btn ${winClass} ${activeClass}" onclick="selectHistoryWeek(${w.weekNum})">
+              <span>WEEK ${w.weekNum}</span>
+              <span class="h-toggle-tag">${tagText}</span>
+            </button>
+          `;
+        }).join('')}
+        <button type="button" class="h-week-toggle-btn ${state.selectedHistoryWeek === 'all' ? 'active' : ''}" onclick="selectHistoryWeek('all')">
+          <span>ALL WEEKS</span>
+          <span class="h-toggle-tag">${state.statsHistory.length}</span>
+        </button>
+      </div>
+    `;
+  }
+
+  // Filter weeks to render
+  const weeksToRender = state.selectedHistoryWeek === 'all'
+    ? state.statsHistory
+    : state.statsHistory.filter(w => w.weekNum === state.selectedHistoryWeek);
+
+  DOM.historyWeeksContainer.innerHTML = weeksToRender.map((week) => {
+    const wIdx = state.statsHistory.findIndex(sw => sw.weekNum === week.weekNum);
     const hitsCount = week.legs.filter(l => l.result === 'hit').length;
     const totalLegs = week.legs.length;
     const isWin = week.result === 'win';
     const isLoss = week.result === 'loss';
-    const winPayoutLabel = week.payout ? ` ($${week.payout.toFixed(2)} • $${(Math.round(((week.payout / (totalLegs || 6)) + 1e-9) * 100) / 100).toFixed(2)}/boy)` : '';
+    const winPayoutLabel = week.payout ? ` ($${week.payout.toFixed(2)} • $${(Math.round(((week.payout / (totalLegs || 6)) + 1e-9) * 100) / 100).toFixed(2)}/guy)` : '';
     const statusText = isWin
       ? `${getIcon('checkCircle')} TICKET CASHED!${winPayoutLabel}`
       : (isLoss ? `PARLAY SOLD (${hitsCount}/${totalLegs} HITS)` : `IN PROGRESS (WEEK ${week.weekNum})`);
     const statusClass = isWin ? 'win' : (isLoss ? 'loss' : 'in-progress');
 
     return `
-      <div class="history-week-card">
+      <div class="history-week-card ${isWin ? 'is-winner' : ''}">
         <div class="history-week-header">
           <div>
             <span class="h-week-title">WEEK ${week.weekNum} • ${formatWeekDateStr(week.dateStr)}</span>
@@ -3080,6 +3285,9 @@ function renderTracker() {
   if (state.masterSlip && state.masterSlip.potential_payout) {
     payout = parseFloat(state.masterSlip.potential_payout).toFixed(2);
     totalOddsMulti = parseFloat(state.masterSlip.potential_payout) / (state.stake || 1);
+  } else if (state.currentFridayStr === '2026-11-13') {
+    payout = "1406.25";
+    totalOddsMulti = 56.25;
   } else if (state.currentFridayStr === '2026-11-06') {
     payout = "454.41";
     totalOddsMulti = 15.15;
@@ -3121,6 +3329,8 @@ function autoSettleFromLiveTracker() {
   if (!weekEntry) {
     const bettor = getBettorForFriday(state.currentFriday);
     const weekNum = Math.max(1, getFridayDiffWeeks(state.currentFriday) + 1);
+    const activeBoys = SQUAD.filter(b => state.legs[b.name] && state.legs[b.name].pick_text);
+    const squadForWeek = activeBoys.length > 0 ? activeBoys : SQUAD;
     weekEntry = {
       weekNum: weekNum,
       dateStr: state.currentFridayStr,
@@ -3130,7 +3340,7 @@ function autoSettleFromLiveTracker() {
       payout: 0,
       result: 'pending',
       notes: state.masterSlip?.notes || `Placed by ${bettor.name}`,
-      legs: SQUAD.map(b => {
+      legs: squadForWeek.map(b => {
         const l = state.legs[b.name];
         return {
           boy: b.name,
@@ -3246,19 +3456,18 @@ async function fetchAllLiveStats(isManualClick = false) {
   try {
     let espnResp = null;
     try {
-      espnResp = await fetch(baseEspnUrl);
-    } catch (e) {
       espnResp = await fetch(datedEspnUrl);
+    } catch (e) {
+      espnResp = await fetch(baseEspnUrl);
     }
     if (espnResp && espnResp.ok) {
       let scoreboard = await espnResp.json();
       let events = scoreboard.events || [];
-      const hasMatchingDate = events.some(ev => String(ev.date || '').startsWith(state.currentFridayStr));
-      if (!hasMatchingDate && compactDate) {
+      if (events.length === 0) {
         try {
-          const datedResp = await fetch(datedEspnUrl);
-          if (datedResp.ok) {
-            scoreboard = await datedResp.json();
+          const fallbackResp = await fetch(baseEspnUrl);
+          if (fallbackResp.ok) {
+            scoreboard = await fallbackResp.json();
             events = scoreboard.events || [];
           }
         } catch (e) {}
@@ -3634,19 +3843,18 @@ async function fetchFridayNhlGames(dateStr, isSilentRefresh = false) {
   try {
     let res = null;
     try {
-      res = await fetch(baseScheduleUrl);
-    } catch (e) {
       res = await fetch(espnScheduleUrl);
+    } catch (e) {
+      res = await fetch(baseScheduleUrl);
     }
     if (res && res.ok) {
       let data = await res.json();
       let events = data.events || [];
-      const hasDateMatch = events.some(ev => String(ev.date || '').startsWith(dateStr));
-      if (!hasDateMatch) {
+      if (events.length === 0) {
         try {
-          const datedRes = await fetch(espnScheduleUrl);
-          if (datedRes.ok) {
-            data = await datedRes.json();
+          const fallbackRes = await fetch(baseScheduleUrl);
+          if (fallbackRes.ok) {
+            data = await fallbackRes.json();
             events = data.events || [];
           }
         } catch (e) {}
@@ -3831,27 +4039,45 @@ function getFallbackGames(dateStr) {
       }
     ];
   }
+  if (dateStr === '2026-11-06') {
+    return [
+      {
+        id: 401802569,
+        startTimeUTC: `${dateStr}T00:10:00Z`,
+        venue: 'KeyBank Center',
+        away: { abbrev: 'CBJ', name: 'Blue Jackets', place: 'Columbus', logo: 'https://assets.nhle.com/logos/nhl/svg/CBJ_light.svg' },
+        home: { abbrev: 'BUF', name: 'Sabres', place: 'Buffalo', logo: 'https://assets.nhle.com/logos/nhl/svg/BUF_light.svg' }
+      },
+      {
+        id: 401802570,
+        startTimeUTC: `${dateStr}T01:00:00Z`,
+        venue: 'Xcel Energy Center',
+        away: { abbrev: 'SJS', name: 'Sharks', place: 'San Jose', logo: 'https://assets.nhle.com/logos/nhl/svg/SJS_light.svg' },
+        home: { abbrev: 'MIN', name: 'Wild', place: 'Minnesota', logo: 'https://assets.nhle.com/logos/nhl/svg/MIN_light.svg' }
+      },
+      {
+        id: 401802571,
+        startTimeUTC: `${dateStr}T01:00:00Z`,
+        venue: 'Scotiabank Saddledome',
+        away: { abbrev: 'ANA', name: 'Ducks', place: 'Anaheim', logo: 'https://assets.nhle.com/logos/nhl/svg/ANA_light.svg' },
+        home: { abbrev: 'CGY', name: 'Flames', place: 'Calgary', logo: 'https://assets.nhle.com/logos/nhl/svg/CGY_light.svg' }
+      }
+    ];
+  }
   return [
     {
-      id: 401802569,
-      startTimeUTC: `${dateStr}T00:10:00Z`,
-      venue: 'KeyBank Center',
-      away: { abbrev: 'CBJ', name: 'Blue Jackets', place: 'Columbus', logo: 'https://assets.nhle.com/logos/nhl/svg/CBJ_light.svg' },
-      home: { abbrev: 'BUF', name: 'Sabres', place: 'Buffalo', logo: 'https://assets.nhle.com/logos/nhl/svg/BUF_light.svg' }
+      id: 401892706,
+      startTimeUTC: '2026-11-14T02:00:00Z',
+      venue: 'Rogers Arena',
+      away: { abbrev: 'NYR', name: 'Rangers', place: 'New York', logo: 'https://assets.nhle.com/logos/nhl/svg/NYR_light.svg' },
+      home: { abbrev: 'VAN', name: 'Canucks', place: 'Vancouver', logo: 'https://assets.nhle.com/logos/nhl/svg/VAN_light.svg' }
     },
     {
-      id: 401802570,
-      startTimeUTC: `${dateStr}T01:00:00Z`,
-      venue: 'Xcel Energy Center',
-      away: { abbrev: 'SJS', name: 'Sharks', place: 'San Jose', logo: 'https://assets.nhle.com/logos/nhl/svg/SJS_light.svg' },
-      home: { abbrev: 'MIN', name: 'Wild', place: 'Minnesota', logo: 'https://assets.nhle.com/logos/nhl/svg/MIN_light.svg' }
-    },
-    {
-      id: 401802571,
-      startTimeUTC: `${dateStr}T01:00:00Z`,
-      venue: 'Scotiabank Saddledome',
-      away: { abbrev: 'ANA', name: 'Ducks', place: 'Anaheim', logo: 'https://assets.nhle.com/logos/nhl/svg/ANA_light.svg' },
-      home: { abbrev: 'CGY', name: 'Flames', place: 'Calgary', logo: 'https://assets.nhle.com/logos/nhl/svg/CGY_light.svg' }
+      id: 401892707,
+      startTimeUTC: '2026-11-14T03:00:00Z',
+      venue: 'T-Mobile Arena',
+      away: { abbrev: 'NSH', name: 'Predators', place: 'Nashville', logo: 'https://assets.nhle.com/logos/nhl/svg/NSH_light.svg' },
+      home: { abbrev: 'VGK', name: 'Golden Knights', place: 'Vegas', logo: 'https://assets.nhle.com/logos/nhl/svg/VGK_light.svg' }
     }
   ];
 }
@@ -3988,6 +4214,14 @@ function formatGameTime(utcString) {
   }
 }
 
+const DEFAULT_NOV13_PICKS = {
+  Edward: { user_name: 'Edward', boy: 'Edward', game: 'NYR @ VAN', game_title: 'NYR Rangers @ VAN Canucks', bet_type: 'Player Prop', pick_text: 'Liam Ohgren — Over 0.5 Total Goals', odds: '+360', chirp: 'Kid is HOT, all sweedish tonight baby', locked: true },
+  Will: { user_name: 'Will', boy: 'Will', game: 'NYR @ VAN', game_title: 'NYR Rangers @ VAN Canucks', bet_type: 'Player Prop', pick_text: 'Brock Boeser — Over 0.5 Total Points', odds: '-135', chirp: 'Brock Hard!', locked: true },
+  Ben: { user_name: 'Ben', boy: 'Ben', game: 'NYR @ VAN', game_title: 'NYR Rangers @ VAN Canucks', bet_type: 'Player Prop', pick_text: 'J.T. Miller — Over 1.5 Shots on Goal', odds: '-140', chirp: 'JT is coming home baby', locked: true },
+  Jackson: { user_name: 'Jackson', boy: 'Jackson', game: 'NSH @ VGK', game_title: 'NSH Predators @ VGK Golden Knights', bet_type: 'Player Prop', pick_text: 'Adin Hill — Over 22.5 Total Saves', odds: '-120', chirp: 'fuk carter hart', locked: true },
+  Axel: { user_name: 'Axel', boy: 'Axel', game: 'NSH @ VGK', game_title: 'NSH Predators @ VGK Golden Knights', bet_type: 'Player Prop', pick_text: 'Victor Olofsson — Over 2.5 Shots on Goal', odds: '+125', chirp: 'Victor “Shot Factory” Olofsson', locked: true }
+};
+
 const DEFAULT_NOV06_PICKS = {
   Axel: { user_name: 'Axel', boy: 'Axel', game: 'CBJ @ BUF', game_title: 'CBJ Blue Jackets @ BUF Sabres', bet_type: 'Player Prop', pick_text: 'Kent Johnson — 1+ Points', odds: '-120', chirp: 'Fella’s on a 6 game point streak and had 1A last time he played Buffalo. Free money 🔏', locked: true },
   Jackson: { user_name: 'Jackson', boy: 'Jackson', game: 'SJS @ MIN', game_title: 'SJS Sharks @ MIN Wild', bet_type: 'Player Prop', pick_text: 'Matt Boldy — 3+ Shots on Goal', odds: '-135', chirp: 'Sharks defense is Swiss cheese', locked: true },
@@ -4008,7 +4242,7 @@ const DEFAULT_OCT30_PICKS = {
 
 const DEFAULT_OCT23_PICKS = {
   Edward: { user_name: 'Edward', boy: 'Edward', game: 'MTL @ CHI', game_title: 'MTL Canadiens @ CHI Blackhawks', betType: 'Player Prop', pick_text: 'Over 3.5 Shots on Goal', odds: '-145', chirp: "He’s 7/9 on this line through the season", locked: true },
-  Will: { user_name: 'Will', boy: 'Will', game: 'MTL @ CHI', game_title: 'MTL Canadiens @ CHI Blackhawks', betType: 'Player Prop', pick_text: 'Over 0.5 Total Points', odds: '-175', chirp: "Free money boys, goalie on a cold streak…", locked: true },
+  Will: { user_name: 'Will', boy: 'Will', game: 'MTL @ CHI', game_title: 'MTL Canadiens @ CHI Blackhawks', betType: 'Player Prop', pick_text: 'Over 0.5 Total Points', odds: '-175', chirp: "Free money guys, goalie on a cold streak…", locked: true },
   Ben: { user_name: 'Ben', boy: 'Ben', game: 'MTL @ CHI', game_title: 'MTL Canadiens @ CHI Blackhawks', betType: 'Player Prop', pick_text: 'Over 1.5 Total Shots On Goal', odds: '-130', chirp: "Hutson running the entire show from the point", locked: true },
   Jackson: { user_name: 'Jackson', boy: 'Jackson', game: 'TBL @ COL', game_title: 'TBL Lightning @ COL Avalanche', betType: 'Player Prop', pick_text: 'Over 3.5 Total Shots On Goal', odds: '-145', chirp: "Nate Dogg let 'em fly 🔥", locked: true },
   Alex: { user_name: 'Alex', boy: 'Alex', game: 'TBL @ COL', game_title: 'TBL Lightning @ COL Avalanche', betType: 'Player Prop', pick_text: 'Over 0.5 Total Goals', odds: '+170', chirp: "My Kuchy quakinnnn 💅😮‍💨", locked: true },
@@ -4081,14 +4315,24 @@ const DEFAULT_MASTER_SLIPS = {
     total_odds: '+1414',
     potential_payout: 454.41,
     notes: 'CASHED! Placed on FanDuel by Alex ($30 SGP+ @ +1414 -> $454.41 Payout • All 6/6 Legs Hit!)'
+  },
+  '2026-11-13': {
+    id: '2026-11-13',
+    week_date: '2026-11-13',
+    bettor_name: 'Edward',
+    status: 'placed',
+    stake: 25,
+    total_odds: '+5525',
+    potential_payout: 1406.25,
+    notes: 'Placed on Betway by Edward ($25 5-Fold BetBuilder+ @ +5525 -> $1,406.25 Return • Alex sat out Week 6)'
   }
 };
 
 function loadLocalData(dateStr) {
   state.masterSlip = DEFAULT_MASTER_SLIPS[dateStr] ? JSON.parse(JSON.stringify(DEFAULT_MASTER_SLIPS[dateStr])) : null;
 
-  const defaultStakeForDate = dateStr === '2026-10-02' ? 5 : (dateStr === '2026-10-16' ? 25 : 30);
-  const key = `bet_the_show_${dateStr}_v7`;
+  const defaultStakeForDate = dateStr === '2026-10-02' ? 5 : ((dateStr === '2026-10-16' || dateStr === '2026-11-13') ? 25 : 30);
+  const key = `bet_the_show_${dateStr}_v8`;
   const saved = localStorage.getItem(key);
   if (saved) {
     try {
@@ -4101,7 +4345,11 @@ function loadLocalData(dateStr) {
   }
 
   // Prepopulate if opening canonical weeks
-  if (dateStr === '2026-11-06') {
+  if (dateStr === '2026-11-13') {
+    state.legs = JSON.parse(JSON.stringify(DEFAULT_NOV13_PICKS));
+    state.stake = 25;
+    state.isPlaced = true;
+  } else if (dateStr === '2026-11-06') {
     state.legs = JSON.parse(JSON.stringify(DEFAULT_NOV06_PICKS));
     state.stake = 30;
     state.isPlaced = true;
@@ -4130,7 +4378,7 @@ function loadLocalData(dateStr) {
 }
 
 function saveLocalData(dateStr) {
-  const key = `bet_the_show_${dateStr}_v7`;
+  const key = `bet_the_show_${dateStr}_v8`;
   const payload = {
     date: dateStr,
     legs: state.legs,
@@ -4346,11 +4594,35 @@ function renderSquadLegs() {
                 <div class="boy-sub-role">
                   <span class="boy-stat-tag debut">N/A</span>
                   <span class="boy-stat-divider">•</span>
-                  <span class="boy-blurb-text">Not in group for Week ${preJoinWeek} (5-boy $${preJoinStake} ticket)</span>
+                  <span class="boy-blurb-text">Not in group for Week ${preJoinWeek} (5-guy $${preJoinStake} ticket)</span>
                 </div>
               </div>
             </div>
             <span class="leg-status-tag" style="background:var(--nhl-subcard); color:var(--text-secondary); border:1px solid var(--border-subtle);">N/A (Joined W3)</span>
+          </div>
+        </div>
+      `;
+    }
+
+    if (state.currentFridayStr === '2026-11-13' && boy.name === 'Alex' && !state.legs['Alex']) {
+      return `
+        <div class="leg-card-nhl empty" style="opacity: 0.65; border-style: dashed;">
+          <div class="leg-card-top">
+            <div class="boy-info-group">
+              <div class="boy-jersey" style="opacity: 0.4;">AL</div>
+              <div>
+                <div class="boy-title-line">
+                  <span class="boy-name-text">Alex</span>
+                  <span class="title-tag-pill slump">${getIcon('frost')} Sat Out Week 6</span>
+                </div>
+                <div class="boy-sub-role">
+                  <span class="boy-stat-tag miss">OUT</span>
+                  <span class="boy-stat-divider">•</span>
+                  <span class="boy-blurb-text">"Buckled in the sauna w/ Taylor Hall" • 5-guy $25 Betway slip</span>
+                </div>
+              </div>
+            </div>
+            <span class="leg-status-tag" style="background:var(--nhl-subcard); color:var(--text-secondary); border:1px solid var(--border-subtle);">SAT OUT (WK 6)</span>
           </div>
         </div>
       `;
@@ -4467,25 +4739,31 @@ function renderBettorBanner() {
   const diffWeeks = getFridayDiffWeeks(state.currentFriday);
   const weekNum = diffWeeks + 1;
   state.weekNumber = weekNum;
-  const expectedLegs = (state.currentFridayStr === '2026-10-02' || state.currentFridayStr === '2026-10-16') ? 5 : 6;
+  const isFiveLegWeek = state.currentFridayStr === '2026-10-02' || state.currentFridayStr === '2026-10-16' || state.currentFridayStr === '2026-11-13';
+  const expectedLegs = isFiveLegWeek ? 5 : 6;
 
   DOM.weekPill.textContent = `WEEK ${weekNum} OF THE REGULAR SEASON`;
   DOM.bettorName.textContent = bettor.name;
   DOM.bettorAvatar.textContent = bettor.initials;
   
   if (weekNum === 1) {
-    DOM.bettorDesc.innerHTML = `Inaugural Friday Puck Parlay! <strong>${bettor.name}</strong> placed the original 5-boy Bet365 ticket ($${state.stake} total wager).`;
+    DOM.bettorDesc.innerHTML = `Inaugural Friday Puck Parlay! <strong>${bettor.name}</strong> placed the original 5-guy Bet365 ticket ($${state.stake} total wager).`;
   } else if (weekNum === 2) {
     DOM.bettorDesc.innerHTML = `Week 1 was placed by Ben. For Week 2, <strong>${bettor.name}</strong> placed the 5-leg parlay ticket ($${state.stake} total wager).`;
+  } else if (state.currentFridayStr === '2026-11-13') {
+    DOM.bettorDesc.innerHTML = `<strong>${bettor.name}</strong> locked in tonight's <strong>5-leg $25.00 Betway BetBuilder+</strong> (@ +5525 → $1,406.25 return)! Alex sat out this week.`;
   } else {
-    DOM.bettorDesc.innerHTML = `It's <strong>${bettor.name}</strong>'s turn in the 6-week rotation to place this week's 6-leg ticket ($${state.stake} total wager) on his sportsbook account.`;
+    DOM.bettorDesc.innerHTML = `It's <strong>${bettor.name}</strong>'s turn in the 6-week rotation to place this week's ${expectedLegs}-leg ticket ($${state.stake} total wager) on his sportsbook account.`;
   }
 
   const legsCount = Object.keys(state.legs).length;
   DOM.slipProgressText.textContent = `${legsCount} / ${expectedLegs} LEGS`;
   DOM.slipProgressBar.style.width = `${Math.min(100, (legsCount / expectedLegs) * 100)}%`;
 
-  if (legsCount >= expectedLegs) {
+  if (state.isPlaced && legsCount >= expectedLegs) {
+    DOM.slipStatusMsg.innerHTML = `<span class="msg-icon">${getIcon('checkCircle')}</span> Locked in by ${bettor.name}! $${state.stake} ${expectedLegs}-leg ticket is live on the sportsbook!`;
+    DOM.slipStatusMsg.style.color = 'var(--b365-green)';
+  } else if (legsCount >= expectedLegs) {
     DOM.slipStatusMsg.innerHTML = `<span class="msg-icon">${getIcon('fire')}</span> All ${expectedLegs} legs locked in! ${bettor.name} is clear to submit the $${state.stake} ticket to the book!`;
     DOM.slipStatusMsg.style.color = 'var(--b365-green)';
   } else if (legsCount === 0) {
@@ -4500,8 +4778,19 @@ function renderBettorBanner() {
 }
 
 function updateCountdown() {
-  const target = new Date(state.currentFriday);
-  target.setHours(19, 0, 0, 0); // 7:00 PM ET
+  let target = null;
+  if (state.games && state.games.length > 0) {
+    const validTimes = state.games
+      .map(g => g.startTimeUTC ? new Date(g.startTimeUTC).getTime() : NaN)
+      .filter(t => !isNaN(t));
+    if (validTimes.length > 0) {
+      target = new Date(Math.min(...validTimes));
+    }
+  }
+  if (!target) {
+    target = new Date(state.currentFriday);
+    target.setHours(state.currentFridayStr === '2026-11-13' ? 21 : 19, 0, 0, 0);
+  }
   const diff = target - new Date();
 
   if (diff <= 0) {
@@ -4510,7 +4799,8 @@ function updateCountdown() {
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    DOM.puckDropCountdown.innerHTML = `<span class="msg-icon">${getIcon('clock')}</span> ${days}d ${hours}h ${mins}m until Friday puck drop`;
+    const timeStr = days > 0 ? `${days}d ${hours}h ${mins}m` : (hours > 0 ? `${hours}h ${mins}m` : `${mins}m`);
+    DOM.puckDropCountdown.innerHTML = `<span class="msg-icon">${getIcon('clock')}</span> ${timeStr} until Friday puck drop`;
   }
 }
 
@@ -4521,12 +4811,20 @@ function renderSportsbookTicket() {
   const hasValidMasterOdds = state.masterSlip && state.masterSlip.total_odds && state.masterSlip.total_odds !== '--';
   const displayOdds = hasValidMasterOdds
     ? state.masterSlip.total_odds
-    : (state.currentFridayStr === '2026-11-06' ? '+1414' : (state.currentFridayStr === '2026-10-30' ? '+2394' : totals.american));
+    : (state.currentFridayStr === '2026-11-13' ? '+5525' : (state.currentFridayStr === '2026-11-06' ? '+1414' : (state.currentFridayStr === '2026-10-30' ? '+2394' : totals.american)));
   const displayPayout = (state.masterSlip && state.masterSlip.potential_payout)
     ? parseFloat(state.masterSlip.potential_payout)
-    : (state.currentFridayStr === '2026-11-06' ? 454.41 : (state.currentFridayStr === '2026-10-30' ? 748.20 : totals.payout));
+    : (state.currentFridayStr === '2026-11-13' ? 1406.25 : (state.currentFridayStr === '2026-11-06' ? 454.41 : (state.currentFridayStr === '2026-10-30' ? 748.20 : totals.payout)));
   const displayProfit = displayPayout - state.stake;
   const displayDecimal = displayPayout / (state.stake || 1);
+
+  if (DOM.stakeInput && document.activeElement !== DOM.stakeInput) {
+    DOM.stakeInput.value = state.stake;
+  }
+  const barcodeTextEl = document.querySelector('.barcode-text');
+  if (barcodeTextEl) {
+    barcodeTextEl.textContent = `* BET THE SHOW POOL • WEEK ${state.weekNumber} • $${state.stake} TOTAL *`;
+  }
 
   DOM.totalAmericanOdds.textContent = displayOdds;
   DOM.totalDecimalOdds.textContent = `${displayDecimal.toFixed(2)}x`;
@@ -4535,9 +4833,12 @@ function renderSportsbookTicket() {
   DOM.ticketDateText.textContent = formatDateDisplay(state.currentFriday);
   DOM.ticketReferenceCode.textContent = `SLIP #BTS-${state.currentFridayStr.replace(/-/g, '')}-W${state.weekNumber}`;
 
-  const expectedTicketLegs = (state.currentFridayStr === '2026-10-02' || state.currentFridayStr === '2026-10-16') ? 5 : 6;
+  const expectedTicketLegs = (state.currentFridayStr === '2026-10-02' || state.currentFridayStr === '2026-10-16' || state.currentFridayStr === '2026-11-13') ? 5 : 6;
   if (state.masterSlip && state.masterSlip.status === 'won') {
     DOM.ticketStatusBadge.textContent = `TICKET CASHED (${expectedTicketLegs}/${expectedTicketLegs})`;
+    DOM.ticketStatusBadge.className = 'ticket-badge ready';
+  } else if (state.isPlaced && totals.count >= expectedTicketLegs) {
+    DOM.ticketStatusBadge.textContent = `BET PLACED (${expectedTicketLegs}/${expectedTicketLegs})`;
     DOM.ticketStatusBadge.className = 'ticket-badge ready';
   } else if (totals.count >= expectedTicketLegs) {
     DOM.ticketStatusBadge.textContent = `SLIP READY (${expectedTicketLegs}/${expectedTicketLegs})`;
@@ -4555,6 +4856,22 @@ function renderSportsbookTicket() {
           <span class="t-boy-name">${boy.name}</span>
           <span class="t-pick-desc" title="${escapeHTML(leg.pick_text)}">${escapeHTML(leg.pick_text)}</span>
           <span class="t-odds">${leg.odds}</span>
+        </div>
+      `;
+    } else if ((state.currentFridayStr === '2026-10-02' || state.currentFridayStr === '2026-10-16') && boy.name === 'Edward') {
+      return `
+        <div class="ticket-leg-row" style="opacity: 0.4;">
+          <span class="t-boy-name">${boy.name}</span>
+          <span class="t-pick-desc">Joined Week 3 (5-leg slip)</span>
+          <span class="t-odds">N/A</span>
+        </div>
+      `;
+    } else if (state.currentFridayStr === '2026-11-13' && boy.name === 'Alex') {
+      return `
+        <div class="ticket-leg-row" style="opacity: 0.45;">
+          <span class="t-boy-name">${boy.name}</span>
+          <span class="t-pick-desc">Sat out Week 6 (5-leg $25 slip)</span>
+          <span class="t-odds">OUT</span>
         </div>
       `;
     } else {
@@ -4697,41 +5014,49 @@ function copySlipForSportsbook() {
   const legsList = SQUAD.map(b => state.legs[b.name]).filter(Boolean);
   const totals = calculateParlayTotals(legsList, state.stake);
   const dateFormatted = formatDateDisplay(state.currentFriday);
+  const expectedLegs = (state.currentFridayStr === '2026-10-02' || state.currentFridayStr === '2026-10-16' || state.currentFridayStr === '2026-11-13') ? 5 : 6;
+  const finalOdds = (state.masterSlip && state.masterSlip.total_odds) ? state.masterSlip.total_odds : totals.american;
+  const finalPayout = (state.masterSlip && state.masterSlip.potential_payout) ? parseFloat(state.masterSlip.potential_payout) : totals.payout;
+  const finalDecimal = finalPayout > 0 ? (finalPayout / (state.stake || 1)) : totals.decimal;
+  const finalProfit = finalPayout > 0 ? (finalPayout - state.stake) : totals.profit;
 
-  let text = `[BET THE SHOW] FRIDAY NHL 6-LEGGER (${dateFormatted})\n`;
-  text += `Bettor On Deck: ${bettor.name} ($${state.stake} Pool Stake • $5/Boy)\n`;
-  text += `${totals.count}/6 Legs Locked In:\n\n`;
+  let text = `[BET THE SHOW] FRIDAY NHL ${expectedLegs}-LEGGER (${dateFormatted})\n`;
+  text += `Bettor On Deck: ${bettor.name} ($${state.stake} Pool Stake • $5/Guy)\n`;
+  text += `${totals.count}/${expectedLegs} Legs Locked In:\n\n`;
 
-  SQUAD.forEach((boy, idx) => {
+  let legIdx = 1;
+  SQUAD.forEach((boy) => {
     const leg = state.legs[boy.name];
     if (leg && leg.odds) {
-      text += `${idx + 1}. ${boy.name}: ${leg.pick_text} (${leg.odds})\n`;
+      text += `${legIdx++}. ${boy.name}: ${leg.pick_text} (${leg.odds})\n`;
       if (leg.chirp) text += `   • "${leg.chirp}"\n`;
-    } else {
-      text += `${idx + 1}. ${boy.name}: [WAITING ON PICK]\n`;
+    } else if (state.currentFridayStr === '2026-11-13' && boy.name === 'Alex') {
+      text += `— ${boy.name}: [SAT OUT WEEK 6]\n`;
+    } else if (!((state.currentFridayStr === '2026-10-02' || state.currentFridayStr === '2026-10-16') && boy.name === 'Edward')) {
+      text += `${legIdx++}. ${boy.name}: [WAITING ON PICK]\n`;
     }
   });
 
   text += `\n-------------------------------\n`;
-  text += `Total Combined Odds: ${totals.american} (${totals.decimal.toFixed(2)}x)\n`;
-  text += `Potential Payout: $${totals.payout.toFixed(2)} (+$${totals.profit.toFixed(2)} profit)\n`;
+  text += `Total Combined Odds: ${finalOdds} (${finalDecimal.toFixed(2)}x)\n`;
+  text += `Potential Payout: $${finalPayout.toFixed(2)} (+$${finalProfit.toFixed(2)} profit)\n`;
   text += `Live Slip: https://mukpostproduction-debug.github.io/friday-puck-parlay/\n`;
 
   navigator.clipboard.writeText(text).then(() => {
     playSound('triumph');
     if (window.confetti) confetti({ particleCount: 80, spread: 60, origin: { y: 0.85 } });
-    showToast('6-Leg Slip copied! Ready to paste into sportsbook or chat', 'slip');
+    showToast(`${expectedLegs}-Leg Slip copied! Ready to paste into sportsbook or chat`, 'slip');
   });
 }
 
-// CHIRP THE BOYS
+// CHIRP THE GUYS
 function generateGroupChirp() {
   const bettor = getBettorForFriday(state.currentFriday);
   const missing = SQUAD.filter(b => !state.legs[b.name]);
 
   let msg = '';
   if (missing.length === 0) {
-    msg = `[BET THE SHOW] ALL 6 LEGS ARE LOCKED IN! @${bettor.name} is on deck to place the $30 ticket on his sportsbook right now! Let's get that bag boys.`;
+    msg = `[BET THE SHOW] ALL 6 LEGS ARE LOCKED IN! @${bettor.name} is on deck to place the $30 ticket on his sportsbook right now! Let's get that bag guys.`;
   } else {
     const names = missing.map(b => `@${b.name}`).join(', ');
     const insults = [
@@ -4844,7 +5169,8 @@ function parseSportsbookOcrText(text) {
 
   // 1. Detect Sportsbook
   const low = text.toLowerCase();
-  if (low.includes('bet99')) result.book = 'BET99';
+  if (low.includes('betway')) result.book = 'Betway';
+  else if (low.includes('bet99')) result.book = 'BET99';
   else if (low.includes('fanduel')) result.book = 'FanDuel';
   else if (low.includes('betmgm')) result.book = 'BetMGM';
   else if (low.includes('bet365')) result.book = 'Bet365';

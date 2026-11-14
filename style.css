@@ -2788,6 +2788,103 @@ body {
   padding: 18px 20px;
 }
 
+/* History Week Toggle Bar */
+.history-week-toggle-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 2px 14px 2px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--border-subtle);
+  scrollbar-width: thin;
+}
+
+.history-week-toggle-bar::-webkit-scrollbar {
+  height: 4px;
+}
+
+.history-week-toggle-bar::-webkit-scrollbar-thumb {
+  background: var(--border-medium);
+  border-radius: 4px;
+}
+
+.h-toggle-scroll {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.h-week-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: var(--nhl-subcard);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: var(--font-sports);
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+}
+
+.h-week-toggle-btn:hover {
+  background: #ffffff;
+  border-color: var(--nhl-black);
+  color: var(--text-main);
+  transform: translateY(-1px);
+}
+
+.h-week-toggle-btn.active {
+  background: var(--nhl-black);
+  border-color: var(--nhl-black);
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(17, 20, 24, 0.15);
+}
+
+.h-week-toggle-btn.is-win {
+  border-color: var(--green-win-border);
+}
+
+.h-week-toggle-btn.is-win.active {
+  background: var(--green-win);
+  border-color: var(--green-win);
+  color: #ffffff;
+  box-shadow: 0 3px 10px rgba(13, 128, 80, 0.25);
+}
+
+.h-toggle-tag {
+  font-family: var(--font-mono);
+  font-size: 0.70rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(17, 20, 24, 0.06);
+  color: inherit;
+  transition: background 0.15s ease;
+}
+
+.h-week-toggle-btn.active .h-toggle-tag {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+.h-week-toggle-btn.is-win .h-toggle-tag {
+  background: var(--green-win-light);
+  color: var(--green-win);
+}
+
+.h-week-toggle-btn.is-win.active .h-toggle-tag {
+  background: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
 .history-weeks-list {
   display: flex;
   flex-direction: column;
@@ -2799,6 +2896,13 @@ body {
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   padding: 16px;
+  transition: border-color 0.2s ease;
+}
+
+.history-week-card.is-winner {
+  background: #ffffff;
+  border: 1.5px solid var(--green-win-border);
+  box-shadow: 0 4px 16px rgba(13, 128, 80, 0.08);
 }
 
 .history-week-header {
