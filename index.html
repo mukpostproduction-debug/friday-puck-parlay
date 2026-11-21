@@ -630,6 +630,54 @@
   </div>
 
   <!-- ===================================================================== -->
+  <!-- MODAL: SET E-TRANSFER EMAIL / PHONE -->
+  <!-- ===================================================================== -->
+  <div class="nhl-modal-backdrop" id="etransferModalBackdrop">
+    <div class="nhl-modal-card b365-card" style="max-width:440px;">
+      <div class="modal-top">
+        <div class="modal-title-group">
+          <span class="modal-tag">PAYOUT E-TRANSFER INFO</span>
+          <h3 class="modal-title" id="etransferModalTitle">Set E-Transfer Destination</h3>
+        </div>
+        <button id="closeEtransferModalBtn" class="modal-close" aria-label="Close modal">&times;</button>
+      </div>
+
+      <form id="etransferForm" class="modal-form">
+        <div class="form-group">
+          <label class="form-label">SQUAD MEMBER</label>
+          <div class="boys-selector-grid" id="etransferBoysPicker"></div>
+          <input type="hidden" id="etransferBoyInput" required />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">SEND E-TRANSFER TO</label>
+          <div class="bet-types-row" id="etransferMethodChips">
+            <button type="button" class="bet-type-btn active" data-et-method="email">Email Address</button>
+            <button type="button" class="bet-type-btn" data-et-method="phone">Phone Number</button>
+          </div>
+          <input type="hidden" id="etransferMethodInput" value="email" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="etransferValueInput" id="etransferValueLabel">EMAIL ADDRESS</label>
+          <input type="email" id="etransferValueInput" class="nhl-input" placeholder="e.g. name@gmail.com" required />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="etransferNoteInput">NOTE <span class="optional-note">(Optional — e.g. Auto-deposit)</span></label>
+          <input type="text" id="etransferNoteInput" class="nhl-input" placeholder="Auto-deposit enabled" maxlength="60" />
+        </div>
+
+        <div class="modal-bottom">
+          <button type="button" id="clearEtransferBtn" class="nhl-btn outline" style="margin-right:auto; display:none;">Remove</button>
+          <button type="button" id="cancelEtransferModalBtn" class="nhl-btn outline">Cancel</button>
+          <button type="submit" class="nhl-btn primary">Save E-Transfer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
   <!-- MODAL 2: HOW TO INSTALL AS IPHONE WEB APP -->
   <!-- ===================================================================== -->
   <div class="nhl-modal-backdrop" id="installModalBackdrop">

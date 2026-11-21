@@ -2276,6 +2276,126 @@ window.togglePayoutStatus = async function(dateStr, boyName, weekNum, shareAmoun
   await savePayoutLogToSupabase();
 };
 
+function getEtransferContact(boyName) {
+  return (state.payoutLog && state.payoutLog._contacts && state.payoutLog._contacts[boyName]) || null;
+}
+
+window.copyBoyEtransfer = function(boyName, shareAmount) {
+  const contact = getEtransferContact(boyName);
+  if (!contact || !contact.value) {
+    openEtransferModal(boyName);
+    return;
+  }
+  const val = contact.value.trim();
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(val).then(() => {
+      const amtTag = shareAmount ? ` ($${Number(shareAmount).toFixed(2)})` : '';
+      showToast(`Copied ${boyName}'s E-T: ${val}${amtTag}`, 'checkCircle');
+      playSound('click');
+    }).catch(() => {
+      showToast('Copy failed — check clipboard permissions', 'alert');
+    });
+  }
+};
+
+window.copyAllUnpaidEtransfers = function(dateStr, weekNum, bettorName, perBoyShare) {
+  const weekLog = (state.payoutLog && state.payoutLog[dateStr]) || {};
+  const shareStr = Number(perBoyShare).toFixed(2);
+  const unpaidBoys = SQUAD.filter(b => b.name !== bettorName && !(weekLog[b.name]?.paid));
+  if (unpaidBoys.length === 0) {
+    showToast(`All guys are already marked PAID for Week ${weekNum}!`, 'checkCircle');
+    return;
+  }
+  const lines = [
+    `💸 Week ${weekNum} E-Transfers to Send ($${shareStr} each):`,
+    ``
+  ];
+  unpaidBoys.forEach(b => {
+    const c = getEtransferContact(b.name);
+    if (c && c.value) {
+      const tag = c.method === 'phone' ? 'Phone' : 'Email';
+      const notePart = c.note ? ` (${c.note})` : '';
+      lines.push(`• ${b.name} — $${shareStr} → ${c.value} [${tag}]${notePart}`);
+    } else {
+      lines.push(`• ${b.name} — $${shareStr} → [No E-Transfer info added yet]`);
+    }
+  });
+  const text = lines.join('\n');
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => {
+      showToast(`Copied ${unpaidBoys.length} unpaid E-Transfer${unpaidBoys.length === 1 ? '' : 's'}!`, 'checkCircle');
+      playSound('click');
+    }).catch(() => {
+      showToast('Copy failed — check clipboard permissions', 'alert');
+    });
+  }
+};
+
+function setEtransferMethodUI(method) {
+  const m = method === 'phone' ? 'phone' : 'email';
+  const methodInput = document.getElementById('etransferMethodInput');
+  const valInput = document.getElementById('etransferValueInput');
+  const valLabel = document.getElementById('etransferValueLabel');
+  if (methodInput) methodInput.value = m;
+  document.querySelectorAll('#etransferMethodChips [data-et-method]').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-et-method') === m);
+  });
+  if (valLabel) valLabel.textContent = m === 'phone' ? 'PHONE NUMBER' : 'EMAIL ADDRESS';
+  if (valInput) {
+    valInput.type = m === 'phone' ? 'tel' : 'email';
+    valInput.placeholder = m === 'phone' ? 'e.g. 416-555-0199' : 'e.g. name@gmail.com';
+  }
+}
+
+function populateEtransferBoyFields(boyName) {
+  const boyInput = document.getElementById('etransferBoyInput');
+  const titleEl = document.getElementById('etransferModalTitle');
+  const valInput = document.getElementById('etransferValueInput');
+  const noteInput = document.getElementById('etransferNoteInput');
+  const clearBtn = document.getElementById('clearEtransferBtn');
+
+  if (boyInput) boyInput.value = boyName;
+  if (titleEl) titleEl.textContent = `E-Transfer Info — ${boyName}`;
+  document.querySelectorAll('#etransferBoysPicker .boy-choice-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-et-boy') === boyName);
+  });
+
+  const existing = getEtransferContact(boyName);
+  setEtransferMethodUI(existing?.method || 'email');
+  if (valInput) valInput.value = existing?.value || '';
+  if (noteInput) noteInput.value = existing?.note || '';
+  if (clearBtn) clearBtn.style.display = existing?.value ? 'inline-flex' : 'none';
+}
+
+window.openEtransferModal = function(boyName) {
+  const backdrop = document.getElementById('etransferModalBackdrop');
+  const picker = document.getElementById('etransferBoysPicker');
+  if (!backdrop) return;
+  const targetBoy = boyName || SQUAD[0].name;
+
+  if (picker) {
+    picker.innerHTML = SQUAD.map(b => {
+      const hasContact = !!getEtransferContact(b.name)?.value;
+      return `<button type="button" class="boy-choice-btn ${b.name === targetBoy ? 'active' : ''}" data-et-boy="${b.name}">${b.name}${hasContact ? ' ✓' : ''}</button>`;
+    }).join('');
+    picker.querySelectorAll('.boy-choice-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        populateEtransferBoyFields(btn.getAttribute('data-et-boy'));
+      });
+    });
+  }
+
+  populateEtransferBoyFields(targetBoy);
+  backdrop.classList.add('open');
+  const valInput = document.getElementById('etransferValueInput');
+  if (valInput) setTimeout(() => valInput.focus(), 60);
+};
+
+window.closeEtransferModal = function() {
+  const backdrop = document.getElementById('etransferModalBackdrop');
+  if (backdrop) backdrop.classList.remove('open');
+};
+
 window.copyPayoutStatusSummary = function(dateStr, weekNum, bettorName, payout, perBoyShare) {
   const weekLog = (state.payoutLog && state.payoutLog[dateStr]) || {};
   const shareStr = Number(perBoyShare).toFixed(2);
@@ -3103,19 +3223,44 @@ function renderStatsView() {
             subText = `$${shareStr} • ${dateTag}`;
           }
 
+          const contact = getEtransferContact(boy.name);
+          const hasContact = !!(contact && contact.value);
+          const contactTag = contact?.method === 'phone' ? 'PHONE' : 'EMAIL';
+
           return `
             <div class="payout-boy-row ${isBettor ? 'self' : (isPaid ? 'paid' : 'unpaid')}">
-              <div class="payout-boy-left">
-                <div class="payout-boy-avatar">${boy.initials}</div>
-                <div class="payout-boy-meta">
-                  <span class="payout-boy-name">${boy.name}${isBettor ? ' (Bettor)' : ''}</span>
-                  <span class="payout-boy-sub">${subText}</span>
+              <div class="payout-boy-top">
+                <div class="payout-boy-left">
+                  <div class="payout-boy-avatar">${boy.initials}</div>
+                  <div class="payout-boy-meta">
+                    <span class="payout-boy-name">${boy.name}${isBettor ? ' (Bettor)' : ''}</span>
+                    <span class="payout-boy-sub">${subText}</span>
+                  </div>
                 </div>
+                ${isBettor
+                  ? `<span class="payout-toggle-btn is-self">KEPT ✓</span>`
+                  : `<button type="button" class="payout-toggle-btn ${isPaid ? 'is-paid' : 'mark-paid'}" onclick="togglePayoutStatus('${win.dateStr}', '${boy.name}', ${win.weekNum}, ${win.perBoyShare})" title="Tap to toggle ${boy.name}'s payout status">${isPaid ? '✓ PAID' : 'MARK PAID'}</button>`
+                }
               </div>
-              ${isBettor
-                ? `<span class="payout-toggle-btn is-self">KEPT ✓</span>`
-                : `<button type="button" class="payout-toggle-btn ${isPaid ? 'is-paid' : 'mark-paid'}" onclick="togglePayoutStatus('${win.dateStr}', '${boy.name}', ${win.weekNum}, ${win.perBoyShare})" title="Tap to toggle ${boy.name}'s payout status">${isPaid ? '✓ PAID' : 'MARK PAID'}</button>`
-              }
+              <div class="payout-et-bar">
+                ${hasContact
+                  ? `<div class="payout-et-dest" onclick="copyBoyEtransfer('${boy.name}', ${win.perBoyShare})" title="Tap to copy ${boy.name}'s E-Transfer destination">
+                      <span class="payout-et-tag">${contactTag}</span>
+                      <span class="payout-et-dest-text">${escapeHTML(contact.value)}</span>
+                    </div>
+                    <div class="payout-et-actions">
+                      <button type="button" class="payout-et-btn" onclick="copyBoyEtransfer('${boy.name}', ${win.perBoyShare})">Copy</button>
+                      <button type="button" class="payout-et-btn edit" onclick="openEtransferModal('${boy.name}')" title="Edit ${boy.name}'s E-Transfer info">Edit</button>
+                    </div>`
+                  : `<div class="payout-et-dest missing" onclick="openEtransferModal('${boy.name}')">
+                      <span class="payout-et-dest-text">No E-Transfer email/phone yet</span>
+                    </div>
+                    <div class="payout-et-actions">
+                      <button type="button" class="payout-et-btn add" onclick="openEtransferModal('${boy.name}')">+ Add E-T</button>
+                    </div>`
+                }
+              </div>
+              ${hasContact && contact.note ? `<div class="payout-et-note">${escapeHTML(contact.note)}</div>` : ''}
             </div>
           `;
         }).join('');
@@ -3135,9 +3280,11 @@ function renderStatsView() {
                   <span>PAYOUT &amp; E-TRANSFER LOG — WEEK ${win.weekNum}</span>
                   <span class="payout-status-pill ${allSettled ? 'settled' : ''}">${allSettled ? `ALL ${totalParticipants}/${totalParticipants} SETTLED ✓` : `${settledCount}/${totalParticipants} SETTLED • $${remainingOwed} OWED`}</span>
                 </div>
-                <div class="payout-week-sub">Tap any guy to toggle Paid / Unpaid — syncs live across everyone's phone</div>
+                <div class="payout-week-sub">Add your E-Transfer email or phone • Tap Copy to send • Tap Mark Paid once received</div>
               </div>
               <div class="payout-week-actions">
+                <button type="button" class="payout-copy-btn" onclick="openEtransferModal()">+ Set E-T Info</button>
+                <button type="button" class="payout-copy-btn" onclick="copyAllUnpaidEtransfers('${win.dateStr}', ${win.weekNum}, '${win.bettor}', ${win.perBoyShare})">Copy Unpaid E-Ts</button>
                 <button type="button" class="payout-copy-btn" onclick="copyPayoutStatusSummary('${win.dateStr}', ${win.weekNum}, '${win.bettor}', ${win.payout}, ${win.perBoyShare})">Copy Log</button>
               </div>
             </div>
@@ -7671,6 +7818,67 @@ function setupEvents() {
   DOM.legModalBackdrop.addEventListener('click', e => {
     if (e.target === DOM.legModalBackdrop) closeLegModal();
   });
+
+  // E-Transfer Contact Modal events
+  const etBackdrop = document.getElementById('etransferModalBackdrop');
+  const etCloseBtn = document.getElementById('closeEtransferModalBtn');
+  const etCancelBtn = document.getElementById('cancelEtransferModalBtn');
+  const etClearBtn = document.getElementById('clearEtransferBtn');
+  const etForm = document.getElementById('etransferForm');
+
+  if (etCloseBtn) etCloseBtn.addEventListener('click', closeEtransferModal);
+  if (etCancelBtn) etCancelBtn.addEventListener('click', closeEtransferModal);
+  if (etBackdrop) {
+    etBackdrop.addEventListener('click', e => {
+      if (e.target === etBackdrop) closeEtransferModal();
+    });
+  }
+  document.querySelectorAll('#etransferMethodChips [data-et-method]').forEach(btn => {
+    btn.addEventListener('click', () => setEtransferMethodUI(btn.getAttribute('data-et-method')));
+  });
+  if (etClearBtn) {
+    etClearBtn.addEventListener('click', async () => {
+      const boyName = document.getElementById('etransferBoyInput')?.value;
+      if (!boyName) return;
+      if (state.payoutLog && state.payoutLog._contacts) {
+        delete state.payoutLog._contacts[boyName];
+      }
+      saveLocalPayoutLog();
+      closeEtransferModal();
+      renderStatsView();
+      showToast(`Removed ${boyName}'s E-Transfer info`, 'puck');
+      await savePayoutLogToSupabase();
+    });
+  }
+  if (etForm) {
+    etForm.addEventListener('submit', async e => {
+      e.preventDefault();
+      const boyName = document.getElementById('etransferBoyInput')?.value;
+      const method = document.getElementById('etransferMethodInput')?.value || 'email';
+      const value = (document.getElementById('etransferValueInput')?.value || '').trim();
+      const note = (document.getElementById('etransferNoteInput')?.value || '').trim();
+      if (!boyName || !value) {
+        showToast('Please enter an email or phone number', 'alert');
+        return;
+      }
+      if (!state.payoutLog || typeof state.payoutLog !== 'object') state.payoutLog = {};
+      if (!state.payoutLog._contacts || typeof state.payoutLog._contacts !== 'object') {
+        state.payoutLog._contacts = {};
+      }
+      state.payoutLog._contacts[boyName] = {
+        method,
+        value,
+        note,
+        updatedAt: new Date().toISOString()
+      };
+      saveLocalPayoutLog();
+      closeEtransferModal();
+      playSound('lock');
+      renderStatsView();
+      showToast(`Saved ${boyName}'s E-Transfer (${method === 'phone' ? 'Phone' : 'Email'})!`, 'checkCircle');
+      await savePayoutLogToSupabase();
+    });
+  }
 
   // Supabase sync modal
   DOM.syncStatusBtn.addEventListener('click', () => {
