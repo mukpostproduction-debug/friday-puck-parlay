@@ -98,6 +98,7 @@ const state = {
   trackerData: [],
   // Stats & Leaderboard historical data
   statsHistory: [],
+  payoutLog: {},              // Map of winning week dateStr -> { boyName: { paid: bool, paidAt: isoStr } }
   selectedHistoryWeek: 6,     // Default to latest settled week (Week 6) for single-week view
   // Week 7 Special Thursday vs. Saturday Vote State
   week7Vote: {
@@ -2185,6 +2186,130 @@ function loadAragonDemoSlate() {
 // 7. SQUAD STATS & LEADERBOARD HISTORICAL ENGINE
 // =============================================================================
 const STATS_STORAGE_KEY = "bts_squad_stats_history_v12";
+const PAYOUT_LOG_STORAGE_KEY = "bts_payout_settlement_log_v1";
+const PAYOUT_LOG_SUPABASE_ID = "payout_log_v1";
+
+function initPayoutLog() {
+  try {
+    const raw = localStorage.getItem(PAYOUT_LOG_STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object') {
+        state.payoutLog = parsed;
+        return;
+      }
+    }
+  } catch (e) {}
+  state.payoutLog = {};
+}
+
+function saveLocalPayoutLog() {
+  try {
+    localStorage.setItem(PAYOUT_LOG_STORAGE_KEY, JSON.stringify(state.payoutLog || {}));
+  } catch (e) {}
+}
+
+async function fetchPayoutLogFromSupabase() {
+  if (!state.supabase) return;
+  try {
+    const { data, error } = await state.supabase
+      .from('friday_parlays')
+      .select('notes')
+      .eq('id', PAYOUT_LOG_SUPABASE_ID)
+      .maybeSingle();
+
+    if (!error && data && data.notes) {
+      const parsed = JSON.parse(data.notes);
+      if (parsed && typeof parsed === 'object') {
+        state.payoutLog = parsed;
+        saveLocalPayoutLog();
+        if (state.currentView === 'statsView') renderStatsView();
+      }
+    }
+  } catch (e) {
+    console.warn('Could not fetch payout log from Supabase:', e);
+  }
+}
+
+async function savePayoutLogToSupabase() {
+  if (!state.supabase) return;
+  try {
+    await state.supabase
+      .from('friday_parlays')
+      .upsert({
+        id: PAYOUT_LOG_SUPABASE_ID,
+        week_date: '2026-10-01',
+        bettor_name: 'Squad',
+        status: 'payout_log',
+        stake: 0,
+        total_odds: '--',
+        potential_payout: 0,
+        notes: JSON.stringify(state.payoutLog || {}),
+        updated_at: new Date().toISOString()
+      });
+  } catch (e) {
+    console.warn('Could not sync payout log to Supabase:', e);
+  }
+}
+
+window.togglePayoutStatus = async function(dateStr, boyName, weekNum, shareAmount) {
+  if (!dateStr || !boyName) return;
+  if (!state.payoutLog || typeof state.payoutLog !== 'object') state.payoutLog = {};
+  if (!state.payoutLog[dateStr] || typeof state.payoutLog[dateStr] !== 'object') {
+    state.payoutLog[dateStr] = {};
+  }
+  const current = state.payoutLog[dateStr][boyName];
+  const nextPaid = !(current && current.paid);
+  state.payoutLog[dateStr][boyName] = {
+    paid: nextPaid,
+    paidAt: nextPaid ? new Date().toISOString() : null
+  };
+  saveLocalPayoutLog();
+  playSound(nextPaid ? 'lock' : 'click');
+  renderStatsView();
+  showToast(
+    nextPaid
+      ? `Marked ${boyName} PAID ($${Number(shareAmount).toFixed(2)}) for Week ${weekNum}!`
+      : `Marked ${boyName} UNPAID for Week ${weekNum}`,
+    nextPaid ? 'checkCircle' : 'clock'
+  );
+  await savePayoutLogToSupabase();
+};
+
+window.copyPayoutStatusSummary = function(dateStr, weekNum, bettorName, payout, perBoyShare) {
+  const weekLog = (state.payoutLog && state.payoutLog[dateStr]) || {};
+  const shareStr = Number(perBoyShare).toFixed(2);
+  const lines = [
+    `💸 Week ${weekNum} Payout Log ($${Number(payout).toFixed(2)} ÷ 6 = $${shareStr}/guy • Bettor: ${bettorName})`,
+    ``
+  ];
+  let unpaidList = [];
+  SQUAD.forEach(b => {
+    if (b.name === bettorName) {
+      lines.push(`✅ ${b.name}: $${shareStr} (Kept own share)`);
+    } else if (weekLog[b.name]?.paid) {
+      lines.push(`✅ ${b.name}: $${shareStr} (PAID)`);
+    } else {
+      lines.push(`⏳ ${b.name}: $${shareStr} (UNPAID)`);
+      unpaidList.push(b.name);
+    }
+  });
+  lines.push(``);
+  if (unpaidList.length === 0) {
+    lines.push(`🏆 All 6/6 guys settled up!`);
+  } else {
+    const owedAmt = (unpaidList.length * Number(perBoyShare)).toFixed(2);
+    lines.push(`Still owed by ${bettorName}: $${owedAmt} (${unpaidList.join(', ')})`);
+  }
+  const text = lines.join('\n');
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => {
+      showToast(`Copied Week ${weekNum} payout log to clipboard!`, 'checkCircle');
+    }).catch(() => {
+      showToast('Copy failed — check clipboard permissions', 'alert');
+    });
+  }
+};
 
 const DEFAULT_STATS_HISTORY = [
   {
@@ -2942,6 +3067,96 @@ function renderStatsView() {
     } else {
       bankrollSettlementNote.style.display = 'none';
       bankrollSettlementNote.innerHTML = '';
+    }
+  }
+
+  // Payout & E-Transfer Settlement Log (synced via Supabase)
+  const payoutLedgerWrap = document.getElementById('payoutLedgerWrap');
+  if (payoutLedgerWrap) {
+    if (data.winningWeeksSummary && data.winningWeeksSummary.length > 0) {
+      payoutLedgerWrap.style.display = 'flex';
+      payoutLedgerWrap.innerHTML = data.winningWeeksSummary.map(win => {
+        const weekLog = (state.payoutLog && state.payoutLog[win.dateStr]) || {};
+        const shareStr = win.perBoyShare.toFixed(2);
+        const participants = SQUAD.filter(b => b.name === win.bettor || win.otherBoys.includes(b.name));
+        let settledCount = 0;
+        let unpaidCount = 0;
+
+        const rowsHtml = participants.map(boy => {
+          const isBettor = boy.name === win.bettor;
+          const entry = weekLog[boy.name];
+          const isPaid = isBettor || !!(entry && entry.paid);
+          if (isPaid) settledCount++;
+          else unpaidCount++;
+
+          let subText = `$${shareStr} owed by ${win.bettor}`;
+          if (isBettor) {
+            subText = `$${shareStr} • Kept share`;
+          } else if (isPaid) {
+            let dateTag = 'Paid';
+            if (entry?.paidAt) {
+              try {
+                const dt = new Date(entry.paidAt);
+                dateTag = `Paid ${dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+              } catch (e) {}
+            }
+            subText = `$${shareStr} • ${dateTag}`;
+          }
+
+          return `
+            <div class="payout-boy-row ${isBettor ? 'self' : (isPaid ? 'paid' : 'unpaid')}">
+              <div class="payout-boy-left">
+                <div class="payout-boy-avatar">${boy.initials}</div>
+                <div class="payout-boy-meta">
+                  <span class="payout-boy-name">${boy.name}${isBettor ? ' (Bettor)' : ''}</span>
+                  <span class="payout-boy-sub">${subText}</span>
+                </div>
+              </div>
+              ${isBettor
+                ? `<span class="payout-toggle-btn is-self">KEPT ✓</span>`
+                : `<button type="button" class="payout-toggle-btn ${isPaid ? 'is-paid' : 'mark-paid'}" onclick="togglePayoutStatus('${win.dateStr}', '${boy.name}', ${win.weekNum}, ${win.perBoyShare})" title="Tap to toggle ${boy.name}'s payout status">${isPaid ? '✓ PAID' : 'MARK PAID'}</button>`
+              }
+            </div>
+          `;
+        }).join('');
+
+        const totalParticipants = participants.length || 6;
+        const pct = Math.round((settledCount / totalParticipants) * 100);
+        const allSettled = unpaidCount === 0;
+        const remainingOwed = (unpaidCount * win.perBoyShare).toFixed(2);
+        const paidOutOthers = Math.max(0, settledCount - 1);
+        const totalOthers = Math.max(0, totalParticipants - 1);
+
+        return `
+          <div class="payout-week-card ${allSettled ? 'all-settled' : ''}">
+            <div class="payout-week-top">
+              <div>
+                <div class="payout-week-title">
+                  <span>PAYOUT &amp; E-TRANSFER LOG — WEEK ${win.weekNum}</span>
+                  <span class="payout-status-pill ${allSettled ? 'settled' : ''}">${allSettled ? `ALL ${totalParticipants}/${totalParticipants} SETTLED ✓` : `${settledCount}/${totalParticipants} SETTLED • $${remainingOwed} OWED`}</span>
+                </div>
+                <div class="payout-week-sub">Tap any guy to toggle Paid / Unpaid — syncs live across everyone's phone</div>
+              </div>
+              <div class="payout-week-actions">
+                <button type="button" class="payout-copy-btn" onclick="copyPayoutStatusSummary('${win.dateStr}', ${win.weekNum}, '${win.bettor}', ${win.payout}, ${win.perBoyShare})">Copy Log</button>
+              </div>
+            </div>
+            <div class="payout-progress-track">
+              <div class="payout-progress-fill ${allSettled ? 'settled' : ''}" style="width: ${pct}%"></div>
+            </div>
+            <div class="payout-boys-grid">
+              ${rowsHtml}
+            </div>
+            <div class="payout-week-footer">
+              <span><strong>${win.bettor}</strong> e-transfers sent: <strong>${paidOutOthers} of ${totalOthers}</strong></span>
+              <span>${allSettled ? `<strong style="color:var(--green-win);">All $${win.payout.toFixed(2)} accounted for ✓</strong>` : `Still owed by ${win.bettor}: <strong style="color:#fbbf24;">$${remainingOwed}</strong>`}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    } else {
+      payoutLedgerWrap.style.display = 'none';
+      payoutLedgerWrap.innerHTML = '';
     }
   }
 
@@ -5928,6 +6143,7 @@ function initSupabase() {
       DOM.syncStatusText.textContent = 'Cloud Live';
       setupSupabaseRealtime();
       fetchWeek7VotesFromSupabase();
+      fetchPayoutLogFromSupabase();
       if (!isViewingWeek7Vote()) {
         fetchSupabaseParlay(state.currentFridayStr);
       }
@@ -6044,6 +6260,17 @@ function setupSupabaseRealtime() {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'friday_parlays' }, payload => {
         const row = payload.new || payload.old;
         if (!row) return;
+        if (row.id === PAYOUT_LOG_SUPABASE_ID && payload.new && payload.new.notes) {
+          try {
+            const parsed = JSON.parse(payload.new.notes);
+            if (parsed && typeof parsed === 'object') {
+              state.payoutLog = parsed;
+              saveLocalPayoutLog();
+              if (state.currentView === 'statsView') renderStatsView();
+            }
+          } catch (e) {}
+          return;
+        }
         if (row.id === WEEK7_FRIDAY_ANCHOR && payload.new) {
           const lockInfo = parseWeek7LockRow(payload.new);
           if (lockInfo?.unlocked) {
@@ -7480,6 +7707,7 @@ window.addEventListener('DOMContentLoaded', () => {
   loadLocalData(state.currentFridayStr);
   initTrackerData();
   initStatsHistory();
+  initPayoutLog();
   setupEvents();
   renderAll();
   initSupabase();
