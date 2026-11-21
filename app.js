@@ -2759,6 +2759,9 @@ function computeSquadAnalytics() {
       ticketsPlacedCount: 0,
       ticketsPlacedWeeks: [],
       placedAmount: 0,
+      expectedPlacedAmount: 0,
+      stakeShortfall: 0,
+      shortfallBreakdown: [],
       earningsShare: 0,
       winningSharesCount: 0,
       netPoolPL: 0,
@@ -2775,8 +2778,16 @@ function computeSquadAnalytics() {
     const weekStake = Number(w.stake || 30);
 
     if (isSettledWeek && w.bettor && playerStats[w.bettor]) {
+      const legsCountForWeek = (w.legs && w.legs.length > 0) ? w.legs.length : SQUAD.length;
+      const expectedWeekStake = legsCountForWeek * 5;
+      const diffShort = Math.max(0, expectedWeekStake - weekStake);
       playerStats[w.bettor].ticketsPlacedCount += 1;
       playerStats[w.bettor].placedAmount += weekStake;
+      playerStats[w.bettor].expectedPlacedAmount += expectedWeekStake;
+      if (diffShort > 0) {
+        playerStats[w.bettor].stakeShortfall += diffShort;
+        playerStats[w.bettor].shortfallBreakdown.push(`W${w.weekNum}: $${weekStake}/$${expectedWeekStake} (-$${diffShort})`);
+      }
       playerStats[w.bettor].ticketsPlacedWeeks.push(`W${w.weekNum} ($${weekStake})`);
     }
 
@@ -2858,6 +2869,26 @@ function computeSquadAnalytics() {
   const bettorThisWeek = getBettorForFriday(targetFri);
   const currentWeekNum = getFridayDiffWeeks(targetFri) + 1;
   const settledWeeksCount = sortedWeeks.filter(w => w.result === 'win' || w.result === 'loss').length;
+
+  // Include live placed Week 7 (2026-11-21) bettor stake in bankroll & shortfall audit if not yet settled
+  const week7InHistory = sortedWeeks.some(w => w.dateStr === '2026-11-21' && (w.result === 'win' || w.result === 'loss'));
+  if (!week7InHistory && DEFAULT_MASTER_SLIPS['2026-11-21'] && DEFAULT_MASTER_SLIPS['2026-11-21'].status === 'placed') {
+    const w7 = DEFAULT_MASTER_SLIPS['2026-11-21'];
+    const w7Bettor = w7.bettor_name || 'Ben';
+    const w7Stake = Number(w7.stake || 25);
+    const w7Expected = 30; // 6 legs x $5/guy
+    const w7Short = Math.max(0, w7Expected - w7Stake);
+    if (playerStats[w7Bettor]) {
+      playerStats[w7Bettor].ticketsPlacedCount += 1;
+      playerStats[w7Bettor].placedAmount += w7Stake;
+      playerStats[w7Bettor].expectedPlacedAmount += w7Expected;
+      if (w7Short > 0) {
+        playerStats[w7Bettor].stakeShortfall += w7Short;
+        playerStats[w7Bettor].shortfallBreakdown.push(`W7: $${w7Stake}/$${w7Expected} (-$${w7Short}, $${(w7Stake / 6).toFixed(2)}/guy)`);
+      }
+      playerStats[w7Bettor].ticketsPlacedWeeks.push(`W7 ($${w7Stake} • Live)`);
+    }
+  }
 
   // Calculate percentages, averages, and individual net bankroll profit
   const list = Object.values(playerStats).map(p => {
@@ -2989,8 +3020,11 @@ function computeSquadAnalytics() {
   const parlayWinRate = totalParlays > 0 ? ((wonParlays / totalParlays) * 100).toFixed(1) : "0.0";
   const parlayRecordStr = `${wonParlays} / ${totalParlays} Parlays`;
 
-  // Pick totals & Pool Bankroll P/L (settled weeks only)
-  let totalWagered = settledWeeks.reduce((acc, w) => acc + (w.stake || 25), 0);
+  // Pick totals & Pool Bankroll P/L (settled weeks + active live placed Week 7 stake)
+  const liveW7Stake = (!week7InHistory && DEFAULT_MASTER_SLIPS['2026-11-21']?.status === 'placed')
+    ? Number(DEFAULT_MASTER_SLIPS['2026-11-21'].stake || 25)
+    : 0;
+  let totalWagered = settledWeeks.reduce((acc, w) => acc + (w.stake || 25), 0) + liveW7Stake;
   if (totalWagered === 0) totalWagered = 25;
   const totalWon = settledWeeks.reduce((acc, w) => {
     if (w.result !== 'win') return acc;
@@ -3138,17 +3172,17 @@ function renderStatsView() {
       const placedStr = p.placedAmount > 0 ? `-$${p.placedAmount.toFixed(2)}` : '$0.00';
       const earnedStr = p.earningsShare > 0 ? `+$${p.earningsShare.toFixed(2)}` : '$0.00';
       const turnTagText = p.ticketsPlacedCount > 0
-        ? `Placed ${p.ticketsPlacedWeeks.join(', ')} • Next WK ${p.nextTurnWeekNum}`
+        ? `Placed ${p.ticketsPlacedWeeks.join(', ')}${p.stakeShortfall > 0 ? ` • -$${p.stakeShortfall} SHORT` : ' • Full $5/guy ✓'}`
         : `$0 Placed Yet • On Deck WK ${p.nextTurnWeekNum}`;
 
       return `
-        <div class="bankroll-player-card ${isPositive ? 'positive' : 'negative'}" onclick="openPlayerProfile('${p.name}')" title="Tap to inspect ${p.name}'s full bankroll & pick history">
+        <div class="bankroll-player-card ${isPositive ? 'positive' : 'negative'} ${p.stakeShortfall > 0 ? 'has-shortfall' : ''}" onclick="openPlayerProfile('${p.name}')" title="Tap to inspect ${p.name}'s full bankroll & pick history">
           <div class="bpc-top">
             <div class="bpc-person">
               <div class="bpc-avatar">${p.initials}</div>
               <div class="bpc-name-wrap">
                 <span class="bpc-name">${p.name}</span>
-                <span class="bpc-turn-tag ${p.ticketsPlacedCount === 0 ? 'pending-turn' : ''}">${turnTagText}</span>
+                <span class="bpc-turn-tag ${p.stakeShortfall > 0 ? 'shortfall-warn' : (p.ticketsPlacedCount === 0 ? 'pending-turn' : '')}">${turnTagText}</span>
               </div>
             </div>
             <span class="bpc-net-pill ${isPositive ? 'green' : 'red'}">${netStr}</span>
@@ -3174,16 +3208,32 @@ function renderStatsView() {
   }
 
   if (bankrollSettlementNote) {
+    const shortfallPlayers = data.players.filter(p => p.stakeShortfall > 0);
+    const lines = [];
     if (data.winningWeeksSummary && data.winningWeeksSummary.length > 0) {
-      bankrollSettlementNote.style.display = 'block';
-      bankrollSettlementNote.innerHTML = data.winningWeeksSummary.map(win => {
+      data.winningWeeksSummary.forEach(win => {
         const shareStr = win.perBoyShare.toFixed(2);
         const bettorNetOnWeek = (win.perBoyShare - win.stake).toFixed(2);
         const othersStr = win.otherBoys.length > 1
           ? `${win.otherBoys.slice(0, -1).join(', ')} & ${win.otherBoys[win.otherBoys.length - 1]}`
           : (win.otherBoys[0] || 'the squad');
-        return `<strong>💸 Week ${win.weekNum} Cashout Split ($${win.payout.toFixed(2)} ÷ ${win.splitCount} guys = $${shareStr} each):</strong> <strong>${win.bettor}</strong> placed the $${win.stake.toFixed(2)} ticket, keeps his <strong>$${shareStr}</strong> share (<strong>+$${bettorNetOnWeek}</strong> net on W${win.weekNum}), and sends <strong>$${shareStr}</strong> each to ${othersStr}.`;
-      }).join('<br/>');
+        lines.push(`<strong>💸 Week ${win.weekNum} Cashout Split ($${win.payout.toFixed(2)} ÷ ${win.splitCount} guys = $${shareStr} each):</strong> <strong>${win.bettor}</strong> placed the $${win.stake.toFixed(2)} ticket, keeps his <strong>$${shareStr}</strong> share (<strong>+$${bettorNetOnWeek}</strong> net on W${win.weekNum}), and sends <strong>$${shareStr}</strong> each to ${othersStr}.`);
+      });
+    }
+    if (shortfallPlayers.length > 0) {
+      shortfallPlayers.forEach(sp => {
+        const otherCount = SQUAD.length - 1;
+        const perOtherCredit = (sp.stakeShortfall / otherCount).toFixed(2);
+        const w5Win = (data.winningWeeksSummary || []).find(w => w.weekNum === 5);
+        const trueUpHint = w5Win
+          ? ` • <strong>Payout True-Up Option:</strong> Deducting $${sp.stakeShortfall.toFixed(2)} from ${sp.name}'s W5 share gives <strong>${sp.name} $${(w5Win.perBoyShare - sp.stakeShortfall).toFixed(2)}</strong> and <strong>$${(w5Win.perBoyShare + (sp.stakeShortfall / otherCount)).toFixed(2)}</strong> (+$${perOtherCredit}) to each of the other ${otherCount} guys.`
+          : '';
+        lines.push(`<div class="equity-audit-alert"><strong>⚖️ Bettor Pool Equity Alert — ${sp.name} (-$${sp.stakeShortfall.toFixed(2)} short):</strong> ${sp.name} has staked <strong>$${sp.placedAmount.toFixed(2)}</strong> vs <strong>$${sp.expectedPlacedAmount.toFixed(2)}</strong> standard $5/guy pool (${sp.shortfallBreakdown.join(' • ')}). Everyone else paid 100% of their $5/guy pool on their turn.${trueUpHint}</div>`);
+      });
+    }
+    if (lines.length > 0) {
+      bankrollSettlementNote.style.display = 'block';
+      bankrollSettlementNote.innerHTML = lines.join('');
     } else {
       bankrollSettlementNote.style.display = 'none';
       bankrollSettlementNote.innerHTML = '';
@@ -6717,7 +6767,7 @@ function renderBettorBanner() {
   } else if (weekNum === 2) {
     DOM.bettorDesc.innerHTML = `Week 1 was placed by Ben. For Week 2, <strong>${bettor.name}</strong> placed the 5-leg parlay ticket ($${state.stake} total wager).`;
   } else if (state.currentFridayStr === '2026-11-21') {
-    DOM.bettorDesc.innerHTML = `Special <strong>Saturday NHL Edition</strong>! <strong>${bettor.name}</strong> locked in a <strong>$25 FanDuel SGP+ split</strong> ($20 @ +2105 → $441.06 + $5 w/ 50% Boost @ +3158 → $162.93 = <strong>$603.99 payout</strong> • +2316 effective).`;
+    DOM.bettorDesc.innerHTML = `Special <strong>Saturday NHL Edition</strong>! <strong>${bettor.name}</strong> bet <strong>$25.00 total ($4.17/guy — $5 short of $30!)</strong> via a FanDuel SGP+ split ($20 @ +2105 → $441.06 + $5 w/ 50% Boost @ +3158 → $162.93 = <strong>$603.99 payout</strong> • +2316 effective).`;
   } else if (state.currentFridayStr === '2026-11-13') {
     DOM.bettorDesc.innerHTML = `<strong>${bettor.name}</strong> placed Week 6's <strong>5-leg $25.00 Betway BetBuilder+</strong> (@ +5525 → $1,406.25) — 4 of 5 hit (Will, Ben, Jackson & Axel cashed; Edward sold on Liam Ohgren 0G!).`;
   } else if (inSplitWeek7) {
@@ -6805,7 +6855,8 @@ function renderSportsbookTicket() {
   }
   const barcodeTextEl = document.querySelector('.barcode-text');
   if (barcodeTextEl) {
-    barcodeTextEl.textContent = `* BET THE SHOW POOL • WEEK ${state.weekNumber} • $${state.stake} TOTAL *`;
+    const perGuyNote = state.currentFridayStr === '2026-11-21' ? ` • $4.17/GUY` : '';
+    barcodeTextEl.textContent = `* BET THE SHOW POOL • WEEK ${state.weekNumber} • $${state.stake} TOTAL${perGuyNote} *`;
   }
 
   DOM.totalAmericanOdds.textContent = displayOdds;
