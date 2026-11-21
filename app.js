@@ -14,7 +14,7 @@
 // Week 4: Friday, Oct 30, 2026 (Will placed $30 6-leg ticket)
 // Week 5: Friday, Nov 6, 2026 (Alex placed $30 6-leg ticket — CASHED $454.41!)
 // Week 6: Friday, Nov 13, 2026 (Edward placed $25 5-leg Betway ticket @ +5525 -> 4/5 hit, Edward sold on Ohgren!)
-// Week 7: Special Non-Friday NHL Week (0 games Fri Nov 20 -> Squad votes Thu Nov 19 vs Sat Nov 21 until Wed Nov 18 @ 8 PM ET; Ben on deck!)
+// Week 7: Special Saturday NHL Edition (Sat Nov 21, 2026 — Ben placed $25 FanDuel split: $20 @ +2105 -> $441.06 + $5 50% Boost @ +3158 -> $162.93 = $603.99!)
 // 6-week cycle: Ben -> Axel -> Jackson -> Will -> Alex -> Edward (repeats)
 const SQUAD = [
   { id: 'ben', name: 'Ben', initials: 'BE', color: '#ec4899', defaultRole: 'Week 1 & 7 Bettor' },
@@ -106,7 +106,7 @@ const state = {
     slateFilter: 'both',      // 'both' | '2026-11-19' | '2026-11-21'
     thuGames: [],             // Thursday Nov 19 games (12)
     satGames: [],             // Saturday Nov 21 games (14)
-    lockedDate: null,         // Explicit locked winner ('2026-11-19' | '2026-11-21') from Supabase/local
+    lockedDate: WEEK7_SAT_DATE, // Official Week 7 winner: Saturday Only (Nov 21, 2026) — Ben's FanDuel slip placed!
     supabaseLoaded: false
   }
 };
@@ -1354,6 +1354,174 @@ const DEFAULT_NOV13_SLATE = [
   }
 ];
 
+const DEFAULT_NOV21_SLATE = [
+  {
+    gameId: "NYI_DET",
+    title: "SAME GAME PARLAY",
+    odds: "+148",
+    awayTeam: "NYI",
+    awayName: "NYI Islanders",
+    homeTeam: "DET",
+    homeName: "DET Red Wings",
+    awayScore: 0,
+    homeScore: 0,
+    awaySog: 0,
+    homeSog: 0,
+    gameStatus: "pre",
+    statusDetail: "7:00 PM ET",
+    startTime: "Sat Nov 21 • 7:00 PM ET",
+    gameStateText: "7:00 PM ET",
+    legs: [
+      {
+        id: "debrincat_pts_nov21",
+        boyName: "Axel",
+        playerName: "Alex DeBrincat",
+        team: "DET",
+        odds: "-222",
+        marketLabel: "1+ Points (SGP +148)",
+        statType: "points",
+        target: 1,
+        apiStat: 0,
+        manualDelta: 0,
+        subDetail: "0G, 0A • 0 SOG"
+      },
+      {
+        id: "schaefer_sog_nov21",
+        boyName: "Will",
+        playerName: "Matthew Schaefer",
+        team: "NYI",
+        odds: "-150",
+        marketLabel: "3+ Shots on Goal (SGP +148)",
+        statType: "shots",
+        target: 3,
+        apiStat: 0,
+        manualDelta: 0,
+        subDetail: "0G, 0A • 0 SOG"
+      }
+    ]
+  },
+  {
+    gameId: "CBJ_TOR",
+    title: "MONEYLINE",
+    odds: "-122",
+    awayTeam: "CBJ",
+    awayName: "CBJ Blue Jackets",
+    homeTeam: "TOR",
+    homeName: "TOR Maple Leafs",
+    awayScore: 0,
+    homeScore: 0,
+    awaySog: 0,
+    homeSog: 0,
+    gameStatus: "pre",
+    statusDetail: "7:00 PM ET",
+    startTime: "Sat Nov 21 • 7:00 PM ET",
+    gameStateText: "7:00 PM ET",
+    legs: [
+      {
+        id: "leafs_ml_nov21",
+        boyName: "Jackson",
+        playerName: "Toronto Maple Leafs ML",
+        team: "TOR",
+        teamAbbr: "TOR",
+        isTeamBet: true,
+        spread: -0.5,
+        teamBetCovering: false,
+        teamBetHit: false,
+        margin: 0,
+        odds: "-122",
+        marketLabel: "Moneyline (-122)",
+        statType: "moneyline",
+        target: 1,
+        apiStat: 0,
+        manualDelta: 0,
+        subDetail: "TOR 0 - CBJ 0 • Awaiting Puck Drop"
+      }
+    ]
+  },
+  {
+    gameId: "WSH_BOS",
+    title: "TOTAL GOALS",
+    odds: "-106",
+    awayTeam: "WSH",
+    awayName: "WSH Capitals",
+    homeTeam: "BOS",
+    homeName: "BOS Bruins",
+    awayScore: 0,
+    homeScore: 0,
+    awaySog: 0,
+    homeSog: 0,
+    gameStatus: "pre",
+    statusDetail: "7:00 PM ET",
+    startTime: "Sat Nov 21 • 7:00 PM ET",
+    gameStateText: "7:00 PM ET",
+    legs: [
+      {
+        id: "wsh_bos_u65_nov21",
+        boyName: "Alex",
+        playerName: "WSH @ BOS Under 6.5",
+        team: "BOS",
+        isTeamBet: true,
+        line: 6.5,
+        teamBetCovering: true,
+        teamBetHit: false,
+        teamBetBusted: false,
+        odds: "-106",
+        marketLabel: "Under 6.5 Total Goals (-106)",
+        statType: "total_under",
+        target: 6.5,
+        apiStat: 0,
+        manualDelta: 0,
+        subDetail: "0 Total Goals • Need ≤ 6 Goals"
+      }
+    ]
+  },
+  {
+    gameId: "ANA_UTA",
+    title: "SAME GAME PARLAY",
+    odds: "+151",
+    awayTeam: "ANA",
+    awayName: "ANA Ducks",
+    homeTeam: "UTA",
+    homeName: "UTA Mammoth",
+    awayScore: 0,
+    homeScore: 0,
+    awaySog: 0,
+    homeSog: 0,
+    gameStatus: "pre",
+    statusDetail: "9:00 PM ET",
+    startTime: "Sat Nov 21 • 9:00 PM ET",
+    gameStateText: "9:00 PM ET",
+    legs: [
+      {
+        id: "lacombe_pts_nov21",
+        boyName: "Ben",
+        playerName: "Jackson LaCombe",
+        team: "ANA",
+        odds: "-172",
+        marketLabel: "1+ Points (SGP +151)",
+        statType: "points",
+        target: 1,
+        apiStat: 0,
+        manualDelta: 0,
+        subDetail: "0G, 0A • 0 SOG"
+      },
+      {
+        id: "gauthier_sog_nov21",
+        boyName: "Edward",
+        playerName: "Cutter Gauthier",
+        team: "ANA",
+        odds: "-125",
+        marketLabel: "4+ Shots on Goal (SGP +151)",
+        statType: "shots",
+        target: 4,
+        apiStat: 0,
+        manualDelta: 0,
+        subDetail: "0G, 0A • 0 SOG"
+      }
+    ]
+  }
+];
+
 function getSlateForDate(dateStr) {
   if (dateStr === '2026-10-02') {
     return JSON.parse(JSON.stringify(DEFAULT_OCT02_SLATE));
@@ -1373,8 +1541,20 @@ function getSlateForDate(dateStr) {
   if (dateStr === '2026-11-13') {
     return JSON.parse(JSON.stringify(DEFAULT_NOV13_SLATE));
   }
+  if (dateStr === '2026-11-21') {
+    return JSON.parse(JSON.stringify(DEFAULT_NOV21_SLATE));
+  }
   return [];
 }
+
+const KNOWN_NOV21_PLAYERS = {
+  Axel: { name: 'Alex DeBrincat', target: 1, type: 'points', odds: '-222', label: '1+ Points (SGP +148)' },
+  Will: { name: 'Matthew Schaefer', target: 3, type: 'shots', odds: '-150', label: '3+ Shots on Goal (SGP +148)' },
+  Ben: { name: 'Jackson LaCombe', target: 1, type: 'points', odds: '-172', label: '1+ Points (SGP +151)' },
+  Edward: { name: 'Cutter Gauthier', target: 4, type: 'shots', odds: '-125', label: '4+ Shots on Goal (SGP +151)' },
+  Jackson: { name: 'Toronto Maple Leafs ML', target: 1, type: 'moneyline', odds: '-122', label: 'Moneyline (-122)', isTeamBet: true, teamAbbr: 'TOR', spread: -0.5 },
+  Alex: { name: 'WSH @ BOS Under 6.5', target: 6.5, type: 'total_under', odds: '-106', label: 'Under 6.5 Total Goals (-106)', isTeamBet: true, line: 6.5 }
+};
 
 const KNOWN_NOV13_PLAYERS = {
   Edward: { name: 'Liam Ohgren', target: 1, type: 'goals', odds: '+360', label: 'Over 0.5 Total Goals (+360)' },
@@ -1415,6 +1595,8 @@ function getUnitLabelForStat(statType) {
   switch (statType) {
     case 'puckline': return 'PL';
     case 'moneyline': return 'ML';
+    case 'total_under': return 'U';
+    case 'total_over': return 'O';
     case 'saves': return 'SAVES';
     case 'shots': return 'SOG';
     case 'goals': return 'GOALS';
@@ -1462,6 +1644,9 @@ const NHL_TEAM_CATALOG = [
 
 const PLAYER_NICKNAME_ALIASES = {
   'cutter': 'Cutter Gauthier',
+  'cutter g': 'Cutter Gauthier',
+  'schaefer': 'Matthew Schaefer',
+  'lacombe': 'Jackson LaCombe',
   'slaf': 'Juraj Slafkovsky',
   'slafkovsky': 'Juraj Slafkovsky',
   'mack': 'Nathan MacKinnon',
@@ -1503,6 +1688,53 @@ function parsePickIntoLeg(boyName, pickObj) {
   const pickText = (pickObj.pick_text || '').trim();
   const oddsStr = (pickObj.odds || '').trim();
   const betTypeRaw = (pickObj.bet_type || pickObj.betType || '').toLowerCase();
+
+  // Official Nov 21 canonical mapping (FanDuel 6-Leg SGP+ Split: $20 @ +2105 + $5 50% Boost @ +3158 = $603.99)
+  if (state.currentFridayStr === '2026-11-21' && KNOWN_NOV21_PLAYERS[boyName]) {
+    const known = KNOWN_NOV21_PLAYERS[boyName];
+    if (known.type === 'total_under' || known.type === 'total_over') {
+      return {
+        id: `${boyName.toLowerCase()}_${known.type}_nov21`,
+        boyName: boyName,
+        playerName: known.name,
+        isTeamBet: true,
+        line: known.line,
+        odds: oddsStr || known.odds,
+        marketLabel: known.label,
+        statType: known.type,
+        target: known.target,
+        apiStat: 0,
+        subDetail: `0 Total Goals • Need ≤ ${Math.floor(known.line)} Goals`
+      };
+    }
+    if (known.isTeamBet) {
+      return {
+        id: `${boyName.toLowerCase()}_${known.type}_nov21`,
+        boyName: boyName,
+        playerName: known.name,
+        teamAbbr: known.teamAbbr,
+        isTeamBet: true,
+        spread: known.spread,
+        odds: oddsStr || known.odds,
+        marketLabel: known.label,
+        statType: known.type,
+        target: known.target,
+        apiStat: 0,
+        subDetail: '0 - 0 • Awaiting Puck Drop'
+      };
+    }
+    return {
+      id: `${boyName.toLowerCase()}_${known.type}_nov21`,
+      boyName: boyName,
+      playerName: known.name,
+      odds: oddsStr || known.odds,
+      marketLabel: known.label,
+      statType: known.type,
+      target: known.target,
+      apiStat: 0,
+      subDetail: '0G, 0A • 0 SOG'
+    };
+  }
 
   // Official Nov 13 canonical mapping (Betway 5-Fold BetBuilder+ @ +5525)
   if (state.currentFridayStr === '2026-11-13' && KNOWN_NOV13_PLAYERS[boyName]) {
@@ -1591,6 +1823,31 @@ function parsePickIntoLeg(boyName, pickObj) {
         target: known.target,
         apiStat: 0,
         subDetail: known.type === 'shots' ? '0 SOG • 0G, 0A' : (known.type === 'goals' ? '0G • 0A, 0 SOG' : '0G, 0A • 0 SOG')
+      };
+    }
+  }
+
+  // Detect Game Total Over/Under Goals (e.g. "Under 6.5 goals", "Over 5.5 Total Goals")
+  const gameTotalMatch = pickText.match(/^(?:[A-Z]{2,3}\s*@\s*[A-Z]{2,3}\s+)?(under|over)\s+(\d+(?:\.\d+)?)\s*(?:total\s*)?(?:goals?)?$/i);
+  if (gameTotalMatch || (betTypeRaw === 'total' && /\b(under|over)\s+(\d+(?:\.\d+)?)\s*(?:total\s*)?goals?\b/i.test(pickText) && !/\b(points?|pts|shots?|sog|assists?|saves?|blocks?|hits?)\b/i.test(pickText))) {
+    const m = gameTotalMatch || pickText.match(/\b(under|over)\s+(\d+(?:\.\d+)?)/i);
+    if (m) {
+      const dir = m[1].toLowerCase();
+      const lineVal = parseFloat(m[2]);
+      const isUnder = dir === 'under';
+      const labelDir = isUnder ? 'Under' : 'Over';
+      return {
+        id: `${boyName.toLowerCase()}_total_${dir}_${Date.now() % 10000}`,
+        boyName: boyName,
+        playerName: `${labelDir} ${lineVal} Total Goals`,
+        isTeamBet: true,
+        line: lineVal,
+        odds: oddsStr,
+        marketLabel: `${labelDir} ${lineVal} Total Goals${oddsStr ? ` (${oddsStr})` : ''}`,
+        statType: isUnder ? 'total_under' : 'total_over',
+        target: lineVal,
+        apiStat: 0,
+        subDetail: isUnder ? `0 Total Goals • Need ≤ ${Math.floor(lineVal)} Goals` : `0 Total Goals • Need ${Math.floor(lineVal) + 1}+ Goals`
       };
     }
   }
@@ -1789,6 +2046,7 @@ function syncTrackerFromRealPicks() {
         subDetail: l.subDetail,
         teamBetHit: l.teamBetHit,
         teamBetCovering: l.teamBetCovering,
+        teamBetBusted: l.teamBetBusted,
         margin: l.margin
       };
     });
@@ -1798,7 +2056,8 @@ function syncTrackerFromRealPicks() {
   const isKnownWeek = state.currentFridayStr === '2026-10-23' ||
                       state.currentFridayStr === '2026-10-30' ||
                       state.currentFridayStr === '2026-11-06' ||
-                      state.currentFridayStr === '2026-11-13';
+                      state.currentFridayStr === '2026-11-13' ||
+                      state.currentFridayStr === '2026-11-21';
   if (!isKnownWeek) {
     const groupedGames = {};
     SQUAD.forEach(boy => {
@@ -1866,12 +2125,14 @@ function syncTrackerFromRealPicks() {
           leg.isTeamBet = true;
           leg.teamAbbr = parsed.teamAbbr || leg.teamAbbr;
           leg.spread = parsed.spread ?? leg.spread;
+          if (parsed.line !== undefined) leg.line = parsed.line;
         }
         const prev = prevLegsMap[leg.boyName];
         leg.apiStat = (prev && prev.apiStat !== undefined) ? prev.apiStat : (leg.apiStat || 0);
         leg.subDetail = (prev && prev.subDetail) ? prev.subDetail : (leg.subDetail || parsed.subDetail);
         if (prev && prev.teamBetHit !== undefined) leg.teamBetHit = prev.teamBetHit;
         if (prev && prev.teamBetCovering !== undefined) leg.teamBetCovering = prev.teamBetCovering;
+        if (prev && prev.teamBetBusted !== undefined) leg.teamBetBusted = prev.teamBetBusted;
         if (prev && prev.margin !== undefined) leg.margin = prev.margin;
       }
     });
@@ -1882,7 +2143,7 @@ function syncTrackerFromRealPicks() {
 }
 
 // Initialize Tracker Data from LocalStorage or Default (Purely NHL API Data-Driven)
-const TRACKER_STORAGE_KEY = "b365_sgp_tracker_data_v9";
+const TRACKER_STORAGE_KEY = "b365_sgp_tracker_data_v10";
 
 function initTrackerData() {
   const currentKey = `${TRACKER_STORAGE_KEY}_${state.currentFridayStr}`;
@@ -3266,29 +3527,74 @@ function doesPlayerNameMatch(legPlayerName, boxscoreFullName) {
   return legFirst === boxFirst;
 }
 
+function isGameLevelLeg(leg) {
+  return !!(leg && (leg.isTeamBet || leg.statType === 'puckline' || leg.statType === 'moneyline' || leg.statType === 'total_under' || leg.statType === 'total_over'));
+}
+
 function evaluateTeamBetLeg(leg, gameObj) {
-  if (!leg || !(leg.isTeamBet || leg.statType === 'puckline' || leg.statType === 'moneyline')) {
+  if (!isGameLevelLeg(leg)) {
     return false;
   }
+
+  const isFinal = gameObj.gameStatus === 'final' || /final/i.test(gameObj.gameStateText || '');
+  const isStarted = gameObj.gameStatus === 'live' || isFinal;
+  const aScore = gameObj.awayScore ?? 0;
+  const hScore = gameObj.homeScore ?? 0;
+  const aSog = gameObj.awaySog ?? 0;
+  const hSog = gameObj.homeSog ?? 0;
+
+  // Game Total Over/Under Goals (e.g. Under 6.5 Total Goals)
+  if (leg.statType === 'total_under' || leg.statType === 'total_over') {
+    const line = typeof leg.line === 'number' ? leg.line : (parseFloat(leg.target) || 6.5);
+    const totalGoals = aScore + hScore;
+    const isUnder = leg.statType === 'total_under';
+    leg.line = line;
+    leg.apiStat = totalGoals;
+
+    if (!isStarted) {
+      leg.teamBetHit = false;
+      leg.teamBetCovering = isUnder;
+      leg.teamBetBusted = false;
+      leg.subDetail = isUnder
+        ? `0 Total Goals • Need ≤ ${Math.floor(line)} Goals`
+        : `0 Total Goals • Need ${Math.floor(line) + 1}+ Goals`;
+      return false;
+    }
+
+    if (isUnder) {
+      const underSafe = totalGoals < line;
+      leg.teamBetCovering = underSafe;
+      leg.teamBetHit = isFinal && underSafe;
+      leg.teamBetBusted = !underSafe;
+      const roomLeft = Math.max(0, Math.floor(line) - totalGoals);
+      leg.subDetail = `${gameObj.awayTeam} ${aScore} - ${gameObj.homeTeam} ${hScore} • ${totalGoals} Total Goals (${underSafe ? (isFinal ? 'UNDER CASHED' : `${roomLeft} goal${roomLeft === 1 ? '' : 's'} cushion`) : `OVER ${line} • BUSTED`})`;
+    } else {
+      const overHit = totalGoals > line;
+      leg.teamBetCovering = overHit;
+      leg.teamBetHit = overHit;
+      leg.teamBetBusted = isFinal && !overHit;
+      const needed = Math.max(0, Math.floor(line) + 1 - totalGoals);
+      leg.subDetail = `${gameObj.awayTeam} ${aScore} - ${gameObj.homeTeam} ${hScore} • ${totalGoals} Total Goals (${overHit ? 'OVER CASHED' : `Need ${needed} more`})`;
+    }
+    return true;
+  }
+
   const resolvedTeam = leg.teamAbbr || resolveTeamFromPickText(leg.playerName)?.abbr || gameObj.homeTeam;
   const teamAbbr = normalizeTeamAbbr(resolvedTeam);
   const isHome = teamAbbr === normalizeTeamAbbr(gameObj.homeTeam);
   const oppAbbr = isHome ? normalizeTeamAbbr(gameObj.awayTeam) : normalizeTeamAbbr(gameObj.homeTeam);
 
-  const isFinal = gameObj.gameStatus === 'final' || /final/i.test(gameObj.gameStateText || '');
-  const isStarted = gameObj.gameStatus === 'live' || isFinal;
   if (!isStarted) {
     leg.teamBetHit = false;
     leg.teamBetCovering = false;
+    leg.teamBetBusted = false;
     return false;
   }
 
-  const aScore = gameObj.awayScore ?? 0;
-  const hScore = gameObj.homeScore ?? 0;
   const teamScore = isHome ? hScore : aScore;
   const oppScore = isHome ? aScore : hScore;
-  const teamSog = isHome ? (gameObj.homeSog ?? 0) : (gameObj.awaySog ?? 0);
-  const oppSog = isHome ? (gameObj.awaySog ?? 0) : (gameObj.homeSog ?? 0);
+  const teamSog = isHome ? hSog : aSog;
+  const oppSog = isHome ? aSog : hSog;
 
   const margin = teamScore - oppScore;
   const spread = typeof leg.spread === 'number'
@@ -3300,6 +3606,7 @@ function evaluateTeamBetLeg(leg, gameObj) {
   leg.margin = margin;
   leg.teamBetCovering = covering;
   leg.teamBetHit = isFinal && covering;
+  leg.teamBetBusted = isFinal && !covering;
   leg.apiStat = leg.teamBetHit ? (leg.target || 2) : (covering ? (leg.target || 2) : Math.max(0, margin));
 
   const marginDesc = isFinal
@@ -3334,14 +3641,14 @@ function renderTracker() {
     let allGameLegsHit = true;
     game.legs.forEach(l => {
       totalLegs++;
-      const isTeamLeg = !!(l.isTeamBet || l.statType === 'puckline' || l.statType === 'moneyline');
+      const isTeamLeg = isGameLevelLeg(l);
       if (isTeamLeg) evaluateTeamBetLeg(l, game);
 
       const legHit = isTeamLeg ? !!l.teamBetHit : (Math.max(0, l.apiStat || 0) >= l.target);
       if (legHit) hitLegs++;
       else {
         allGameLegsHit = false;
-        if (isGameFinal) missedFinalLegs++;
+        if (isGameFinal || l.teamBetBusted) missedFinalLegs++;
       }
     });
 
@@ -3367,7 +3674,7 @@ function renderTracker() {
         <div class="tracker-game-tag">
           <span class="live-dot-mini" style="background:${allGameLegsHit ? '#00ff87' : (isGameLive ? '#ef4444' : (isGameFinal ? '#ef4444' : '#6b7280'))};"></span>
           <span>${isSingleLegBlock ? 'PARLAY <span class="b365-green">SELECTION</span>' : 'SAME GAME <span class="b365-green">PARLAY</span>'}</span>
-          <span class="tracker-game-mult">${game.odds}${String(game.odds).endsWith('x') || game.odds === 'SGP' || game.odds === '1 LEG' ? '' : 'x'}</span>
+          <span class="tracker-game-mult">${game.odds}${String(game.odds).endsWith('x') || String(game.odds).startsWith('+') || String(game.odds).startsWith('-') || game.odds === 'SGP' || game.odds === '1 LEG' ? '' : 'x'}</span>
         </div>
         <span class="tracker-game-state-badge">
           ${game.awayTeam} @ ${game.homeTeam}
@@ -3399,8 +3706,62 @@ function renderTracker() {
 
       <div class="tracker-legs-wrap">
         ${game.legs.map(leg => {
-          const isTeamLeg = !!(leg.isTeamBet || leg.statType === 'puckline' || leg.statType === 'moneyline');
+          const isTeamLeg = isGameLevelLeg(leg);
           const unitLabel = getUnitLabelForStat(leg.statType);
+
+          if (leg.statType === 'total_under' || leg.statType === 'total_over') {
+            const isUnder = leg.statType === 'total_under';
+            const line = typeof leg.line === 'number' ? leg.line : (parseFloat(leg.target) || 6.5);
+            const totalGoals = Math.max(0, leg.apiStat || 0);
+            const isHit = !!leg.teamBetHit;
+            const isMissed = !!leg.teamBetBusted || (!isHit && isGameFinal);
+            const isCoveringLive = !isHit && !isMissed && isGameLive && !!leg.teamBetCovering;
+            const pct = isMissed
+              ? 100
+              : (isHit ? 100 : Math.min(100, Math.round((totalGoals / (Math.floor(line) + 1)) * 100)));
+            const roomLeft = Math.max(0, Math.floor(line) - totalGoals);
+            const statusText = isHit
+              ? "✓ LEG HIT"
+              : (isMissed
+                  ? `✗ OVER ${line} (MISSED)`
+                  : (isUnder
+                      ? (isGameLive ? `UNDER LIVE (${roomLeft} CUSHION)` : `NEED ≤ ${Math.floor(line)} GOALS`)
+                      : (isGameLive ? `NEED ${Math.max(1, Math.floor(line) + 1 - totalGoals)} MORE` : `NEED ${Math.floor(line) + 1}+ GOALS`)));
+            const statusClass = isHit ? "hit" : (isMissed ? "miss" : (isCoveringLive || totalGoals > 0 ? "in-progress" : ""));
+
+            return `
+              <div class="tracker-leg-card ${isHit ? 'hit' : (isMissed ? 'miss' : '')}">
+                <div class="tracker-leg-tier1">
+                  <div class="tracker-leg-person">
+                    <div class="tracker-hit-indicator">${isMissed ? getIcon('cross') : getIcon('check')}</div>
+                    <span class="tracker-player-title">${leg.playerName}</span>
+                  </div>
+                  <div class="tracker-stat-box ${isHit ? 'hit' : (isMissed ? 'miss' : '')}">
+                    <span class="tracker-current-num">${totalGoals}</span>
+                    <span class="tracker-target-num">/ ${line} ${isUnder ? 'U' : 'O'}</span>
+                  </div>
+                </div>
+
+                <div class="tracker-leg-tier2">
+                  <span class="tracker-boy-pill">${leg.boyName || 'SQUAD'}</span>
+                  <span class="tracker-market-desc">${leg.marketLabel}</span>
+                </div>
+
+                <div class="tracker-slider-wrap">
+                  <div class="tracker-progress-track">
+                    <div class="tracker-progress-fill ${statusClass}" style="width: ${pct}%">
+                      ${pct > 0 && !isHit && !isMissed ? '<span class="tracker-slider-thumb"></span>' : ''}
+                    </div>
+                  </div>
+                </div>
+
+                <div class="tracker-leg-tier4">
+                  <span class="tracker-live-detail">${leg.subDetail || `0 Total Goals • Need ≤ ${Math.floor(line)} Goals`}</span>
+                  <span class="tracker-status-badge ${statusClass}">${statusText}</span>
+                </div>
+              </div>
+            `;
+          }
 
           if (isTeamLeg) {
             const isHit = !!leg.teamBetHit;
@@ -3533,6 +3894,9 @@ function renderTracker() {
   if (state.masterSlip && state.masterSlip.potential_payout) {
     payout = parseFloat(state.masterSlip.potential_payout).toFixed(2);
     totalOddsMulti = parseFloat(state.masterSlip.potential_payout) / (state.stake || 1);
+  } else if (state.currentFridayStr === '2026-11-21') {
+    payout = "603.99";
+    totalOddsMulti = 24.16;
   } else if (state.currentFridayStr === '2026-11-13') {
     payout = "1406.25";
     totalOddsMulti = 56.25;
@@ -3612,13 +3976,13 @@ function autoSettleFromLiveTracker() {
       const histLeg = (weekEntry.legs || []).find(hl => hl.boy === leg.boyName);
       if (!histLeg) return;
 
-      const isTeamLeg = !!(leg.isTeamBet || leg.statType === 'puckline' || leg.statType === 'moneyline');
+      const isTeamLeg = isGameLevelLeg(leg);
       if (isTeamLeg) {
         evaluateTeamBetLeg(leg, game);
-        if (isGameFinal && leg.teamBetHit && histLeg.result !== 'hit') {
+        if (leg.teamBetHit && histLeg.result !== 'hit') {
           histLeg.result = 'hit';
           changed = true;
-        } else if (isGameFinal && !leg.teamBetHit && histLeg.result !== 'miss') {
+        } else if ((leg.teamBetBusted || (isGameFinal && !leg.teamBetHit)) && histLeg.result !== 'miss') {
           histLeg.result = 'miss';
           changed = true;
         }
@@ -3754,7 +4118,7 @@ async function fetchAllLiveStats(isManualClick = false) {
           }
 
           (matchingGame.legs || []).forEach(leg => {
-            if (leg.isTeamBet || leg.statType === 'puckline' || leg.statType === 'moneyline') {
+            if (isGameLevelLeg(leg)) {
               if (evaluateTeamBetLeg(leg, matchingGame)) updatedPlayers++;
             }
           });
@@ -3816,7 +4180,7 @@ async function fetchAllLiveStats(isManualClick = false) {
               : `${away} ${g.awayTeam?.score ?? 0} - ${home} ${g.homeTeam?.score ?? 0} (${isFinal ? 'FINAL' : `${period} ${clock}`.trim()})`;
 
             (matchingGame.legs || []).forEach(leg => {
-              if (leg.isTeamBet || leg.statType === 'puckline' || leg.statType === 'moneyline') {
+              if (isGameLevelLeg(leg)) {
                 if (evaluateTeamBetLeg(leg, matchingGame)) updatedPlayers++;
               }
             });
@@ -3876,9 +4240,9 @@ function parseEspnBoxscore(summaryData, gameObj) {
     }
   }
 
-  // Re-evaluate team puckline/moneyline legs now that exact team SOG is populated
+  // Re-evaluate team puckline/moneyline/total legs now that exact team SOG is populated
   (gameObj.legs || []).forEach(leg => {
-    if (leg.isTeamBet || leg.statType === 'puckline' || leg.statType === 'moneyline') {
+    if (isGameLevelLeg(leg)) {
       if (evaluateTeamBetLeg(leg, gameObj)) count++;
     }
   });
@@ -3921,7 +4285,7 @@ function parseEspnBoxscore(summaryData, gameObj) {
         const fullName = athleteRow.athlete?.displayName || "";
 
         gameObj.legs.forEach(leg => {
-          if (leg.isTeamBet || leg.statType === 'puckline' || leg.statType === 'moneyline') return;
+          if (isGameLevelLeg(leg)) return;
           if (doesPlayerNameMatch(leg.playerName, fullName)) {
             if (fullName && !String(leg.playerName || '').includes(' ')) {
               leg.playerName = fullName;
@@ -3980,7 +4344,7 @@ function parseNhlBoxscore(boxData, gameObj) {
   if (boxData.homeTeam?.score !== undefined) gameObj.homeScore = boxData.homeTeam.score;
 
   (gameObj.legs || []).forEach(leg => {
-    if (leg.isTeamBet || leg.statType === 'puckline' || leg.statType === 'moneyline') {
+    if (isGameLevelLeg(leg)) {
       if (evaluateTeamBetLeg(leg, gameObj)) count++;
     }
   });
@@ -4003,7 +4367,7 @@ function parseNhlBoxscore(boxData, gameObj) {
   for (const g of allGoalies) {
     const name = g.name?.default || "";
     gameObj.legs.forEach(leg => {
-      if (leg.isTeamBet || leg.statType === 'puckline' || leg.statType === 'moneyline') return;
+      if (isGameLevelLeg(leg)) return;
       if (leg.statType === "saves" && doesPlayerNameMatch(leg.playerName, name)) {
         const saves = g.saves ?? (parseInt(String(g.saveShotsAgainst || "0").split("/")[0], 10) || 0);
         const sa = g.shotsAgainst ?? (parseInt(String(g.saveShotsAgainst || "0").split("/")[1], 10) || saves);
@@ -4020,7 +4384,7 @@ function parseNhlBoxscore(boxData, gameObj) {
     const name = p.name?.default || "";
 
     gameObj.legs.forEach(leg => {
-      if (leg.isTeamBet || leg.statType === 'puckline' || leg.statType === 'moneyline') return;
+      if (isGameLevelLeg(leg)) return;
       if (doesPlayerNameMatch(leg.playerName, name)) {
         const goals = p.goals ?? 0;
         const assists = p.assists ?? 0;
@@ -4497,6 +4861,15 @@ function formatGameTime(utcString) {
   }
 }
 
+const DEFAULT_NOV21_PICKS = {
+  Axel: { user_name: 'Axel', boy: 'Axel', game: 'NYI @ DET', game_title: 'NYI Islanders @ DET Red Wings', bet_type: 'Player Prop', pick_text: 'Alex DeBrincat — 1+ Points', odds: '-222', chirp: 'I love it when Alex puts his cock in my mouth! 🥰', locked: true },
+  Will: { user_name: 'Will', boy: 'Will', game: 'NYI @ DET', game_title: 'NYI Islanders @ DET Red Wings', bet_type: 'Player Prop', pick_text: 'Matthew Schaefer — 3+ Shots on Goal', odds: '-150', chirp: 'someone snatch up a bo pick make a stack', locked: true },
+  Ben: { user_name: 'Ben', boy: 'Ben', game: 'ANA @ UTA', game_title: 'ANA Ducks @ UTA Mammoth', bet_type: 'Player Prop', pick_text: 'Jackson LaCombe — 1+ Points', odds: '-172', chirp: 'Dish it to Macarooner and let daddy eat.', locked: true },
+  Edward: { user_name: 'Edward', boy: 'Edward', game: 'ANA @ UTA', game_title: 'ANA Ducks @ UTA Mammoth', bet_type: 'Player Prop', pick_text: 'Cutter Gauthier — 4+ Shots on Goal', odds: '-125', chirp: 'Ride the hot roddddddd', locked: true },
+  Jackson: { user_name: 'Jackson', boy: 'Jackson', game: 'CBJ @ TOR', game_title: 'CBJ Blue Jackets @ TOR Maple Leafs', bet_type: 'Moneyline', pick_text: 'Toronto Maple Leafs ML', odds: '-122', chirp: 'Curse breaker night vs Knies', locked: true },
+  Alex: { user_name: 'Alex', boy: 'Alex', game: 'WSH @ BOS', game_title: 'WSH Capitals @ BOS Bruins', bet_type: 'Total', pick_text: 'WSH @ BOS Under 6.5 Total Goals', odds: '-106', chirp: 'I am gay', locked: true }
+};
+
 const DEFAULT_NOV13_PICKS = {
   Edward: { user_name: 'Edward', boy: 'Edward', game: 'NYR @ VAN', game_title: 'NYR Rangers @ VAN Canucks', bet_type: 'Player Prop', pick_text: 'Liam Ohgren — Over 0.5 Total Goals', odds: '+360', chirp: 'Kid is HOT, all sweedish tonight baby', locked: true },
   Will: { user_name: 'Will', boy: 'Will', game: 'NYR @ VAN', game_title: 'NYR Rangers @ VAN Canucks', bet_type: 'Player Prop', pick_text: 'Brock Boeser — Over 0.5 Total Points', odds: '-135', chirp: 'Brock Hard!', locked: true },
@@ -4608,12 +4981,22 @@ const DEFAULT_MASTER_SLIPS = {
     total_odds: '+5525',
     potential_payout: 1406.25,
     notes: 'Settled - Lost on Betway ($25 5-Fold @ +5525 -> $1,406.25 • 4 of 5 hit: Will, Ben, Jackson & Axel cashed; Edward sold on Liam Ohgren 0G!)'
+  },
+  '2026-11-21': {
+    id: '2026-11-21',
+    week_date: '2026-11-21',
+    bettor_name: 'Ben',
+    status: 'placed',
+    stake: 25,
+    total_odds: '+2316',
+    potential_payout: 603.99,
+    notes: 'Placed on FanDuel by Ben ($25 split: $20 @ +2105 -> $441.06 + $5 w/ 50% Profit Boost @ +3158 -> $162.93 = $603.99 total payout)'
   }
 };
 
 function getDefaultStakeForDate(dateStr) {
   if (dateStr === '2026-10-02') return 5;
-  if (dateStr === '2026-10-16' || dateStr === '2026-11-13') return 25;
+  if (dateStr === '2026-10-16' || dateStr === '2026-11-13' || dateStr === '2026-11-21') return 25;
   if ((dateStr === WEEK7_THU_DATE || dateStr === WEEK7_SAT_DATE) && isWeek7SplitMode()) return 15;
   return 30;
 }
@@ -4645,12 +5028,27 @@ function loadLocalData(dateStr) {
       const hasAnyLegs = Object.keys(state.legs).length > 0;
       state.stake = (!parsed.isPlaced && !hasAnyLegs) ? defaultStakeForDate : (parsed.stake || defaultStakeForDate);
       state.isPlaced = !!parsed.isPlaced;
+      // If an official placed/settled master slip exists in code, ensure local draft upgrades cleanly
+      if (state.masterSlip && ['placed', 'won', 'lost'].includes(state.masterSlip.status)) {
+        if (!state.isPlaced) {
+          state.isPlaced = true;
+          state.stake = state.masterSlip.stake || defaultStakeForDate;
+          if (dateStr === '2026-11-21' && Object.keys(state.legs).length < 6) {
+            state.legs = JSON.parse(JSON.stringify(DEFAULT_NOV21_PICKS));
+          }
+          saveLocalData(dateStr);
+        }
+      }
       return;
     } catch (e) {}
   }
 
   // Prepopulate if opening canonical weeks
-  if (dateStr === '2026-11-13') {
+  if (dateStr === '2026-11-21') {
+    state.legs = JSON.parse(JSON.stringify(DEFAULT_NOV21_PICKS));
+    state.stake = 25;
+    state.isPlaced = true;
+  } else if (dateStr === '2026-11-13') {
     state.legs = JSON.parse(JSON.stringify(DEFAULT_NOV13_PICKS));
     state.stake = 25;
     state.isPlaced = true;
@@ -5944,6 +6342,8 @@ function renderBettorBanner() {
     DOM.bettorDesc.innerHTML = `Inaugural Friday Puck Parlay! <strong>${bettor.name}</strong> placed the original 5-guy Bet365 ticket ($${state.stake} total wager).`;
   } else if (weekNum === 2) {
     DOM.bettorDesc.innerHTML = `Week 1 was placed by Ben. For Week 2, <strong>${bettor.name}</strong> placed the 5-leg parlay ticket ($${state.stake} total wager).`;
+  } else if (state.currentFridayStr === '2026-11-21') {
+    DOM.bettorDesc.innerHTML = `Special <strong>Saturday NHL Edition</strong>! <strong>${bettor.name}</strong> locked in a <strong>$25 FanDuel SGP+ split</strong> ($20 @ +2105 → $441.06 + $5 w/ 50% Boost @ +3158 → $162.93 = <strong>$603.99 payout</strong> • +2316 effective).`;
   } else if (state.currentFridayStr === '2026-11-13') {
     DOM.bettorDesc.innerHTML = `<strong>${bettor.name}</strong> placed Week 6's <strong>5-leg $25.00 Betway BetBuilder+</strong> (@ +5525 → $1,406.25) — 4 of 5 hit (Will, Ben, Jackson & Axel cashed; Edward sold on Liam Ohgren 0G!).`;
   } else if (inSplitWeek7) {
@@ -6019,10 +6419,10 @@ function renderSportsbookTicket() {
   const hasValidMasterOdds = state.masterSlip && state.masterSlip.total_odds && state.masterSlip.total_odds !== '--';
   const displayOdds = hasValidMasterOdds
     ? state.masterSlip.total_odds
-    : (state.currentFridayStr === '2026-11-13' ? '+5525' : (state.currentFridayStr === '2026-11-06' ? '+1414' : (state.currentFridayStr === '2026-10-30' ? '+2394' : totals.american)));
+    : (state.currentFridayStr === '2026-11-21' ? '+2316' : (state.currentFridayStr === '2026-11-13' ? '+5525' : (state.currentFridayStr === '2026-11-06' ? '+1414' : (state.currentFridayStr === '2026-10-30' ? '+2394' : totals.american))));
   const displayPayout = (state.masterSlip && state.masterSlip.potential_payout)
     ? parseFloat(state.masterSlip.potential_payout)
-    : (state.currentFridayStr === '2026-11-13' ? 1406.25 : (state.currentFridayStr === '2026-11-06' ? 454.41 : (state.currentFridayStr === '2026-10-30' ? 748.20 : totals.payout)));
+    : (state.currentFridayStr === '2026-11-21' ? 603.99 : (state.currentFridayStr === '2026-11-13' ? 1406.25 : (state.currentFridayStr === '2026-11-06' ? 454.41 : (state.currentFridayStr === '2026-10-30' ? 748.20 : totals.payout))));
   const displayProfit = displayPayout - state.stake;
   const displayDecimal = displayPayout / (state.stake || 1);
 
