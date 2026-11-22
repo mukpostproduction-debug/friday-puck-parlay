@@ -3346,7 +3346,7 @@ function renderStatsView() {
             </div>
             <div class="payout-week-footer">
               <span><strong>${win.bettor}</strong> e-transfers sent: <strong>${paidOutOthers} of ${totalOthers}</strong></span>
-              <span>${allSettled ? `<strong style="color:var(--green-win);">All $${win.payout.toFixed(2)} accounted for ✓</strong>` : `Still owed by ${win.bettor}: <strong style="color:#fbbf24;">$${remainingOwed}</strong>`}</span>
+              <span>${allSettled ? `<strong style="color:var(--green-win);">All $${win.payout.toFixed(2)} accounted for ✓</strong>` : `Still owed by ${win.bettor}: <strong style="color:var(--gold-odds);">$${remainingOwed}</strong>`}</span>
             </div>
           </div>
         `;

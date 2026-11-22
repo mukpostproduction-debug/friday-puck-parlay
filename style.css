@@ -4782,47 +4782,55 @@ span svg,
 }
 
 .bankroll-player-card.has-shortfall {
-  border-color: rgba(245, 158, 11, 0.45);
+  border-color: var(--gold-odds-border);
+  background: var(--gold-odds-bg);
 }
 
 .bpc-turn-tag.shortfall-warn {
-  color: #fbbf24;
+  color: var(--gold-odds);
   font-weight: 700;
 }
 
 .equity-audit-alert {
-  margin-top: 9px;
-  padding: 9px 11px;
-  border-radius: 6px;
-  background: rgba(245, 158, 11, 0.12);
-  border: 1px solid rgba(245, 158, 11, 0.38);
-  color: #fde68a;
+  margin-top: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--gold-odds-bg);
+  border: 1px solid var(--gold-odds-border);
+  color: var(--text-main);
   font-size: 0.76rem;
   line-height: 1.45;
 }
 
 .equity-audit-alert strong {
-  color: #fff;
+  color: var(--gold-odds);
 }
 
-/* PAYOUT & E-TRANSFER SETTLEMENT LOG */
+/* PAYOUT & E-TRANSFER SETTLEMENT LOG (Official NHL Light Theme) */
 .payout-ledger-wrap {
   margin-top: 14px;
   display: flex;
   flex-direction: column;
   gap: 12px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .payout-week-card {
-  background: rgba(15, 23, 42, 0.55);
+  background: var(--nhl-subcard);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
+  border-radius: 12px;
   padding: 14px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .payout-week-card.all-settled {
   border-color: var(--green-win-border);
-  background: linear-gradient(180deg, rgba(0, 255, 135, 0.06) 0%, rgba(15, 23, 42, 0.6) 100%);
+  background: linear-gradient(180deg, var(--green-win-light) 0%, var(--nhl-card-bg) 100%);
 }
 
 .payout-week-top {
@@ -4835,7 +4843,7 @@ span svg,
 }
 
 .payout-week-title {
-  font-size: 0.86rem;
+  font-size: 0.85rem;
   font-weight: 800;
   color: var(--text-main);
   letter-spacing: 0.02em;
@@ -4847,27 +4855,27 @@ span svg,
 
 .payout-week-sub {
   font-size: 0.74rem;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   margin-top: 3px;
 }
 
 .payout-week-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   flex-wrap: wrap;
 }
 
 .payout-status-pill {
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: 800;
-  padding: 4px 9px;
+  padding: 3px 9px;
   border-radius: 999px;
   letter-spacing: 0.03em;
   text-transform: uppercase;
-  background: rgba(245, 158, 11, 0.14);
-  color: #fbbf24;
-  border: 1px solid rgba(245, 158, 11, 0.35);
+  background: var(--gold-odds-bg);
+  color: var(--gold-odds);
+  border: 1px solid var(--gold-odds-border);
 }
 
 .payout-status-pill.settled {
@@ -4877,26 +4885,27 @@ span svg,
 }
 
 .payout-copy-btn {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid var(--border-subtle);
+  background: var(--nhl-card-bg);
+  border: 1px solid var(--border-medium);
   color: var(--text-main);
   font-size: 0.72rem;
   font-weight: 700;
-  padding: 4px 10px;
-  border-radius: 6px;
+  padding: 5px 10px;
+  border-radius: 7px;
   cursor: pointer;
+  box-shadow: var(--shadow-subtle);
   transition: background 0.15s ease, border-color 0.15s ease;
 }
 
 .payout-copy-btn:hover {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.25);
+  background: var(--nhl-subcard-hover);
+  border-color: var(--border-active);
 }
 
 .payout-progress-track {
   width: 100%;
-  height: 5px;
-  background: rgba(255, 255, 255, 0.08);
+  height: 6px;
+  background: var(--border-subtle);
   border-radius: 999px;
   overflow: hidden;
   margin-bottom: 12px;
@@ -4904,7 +4913,7 @@ span svg,
 
 .payout-progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #f59e0b, #00ff87);
+  background: linear-gradient(90deg, #d97706, var(--green-win));
   border-radius: 999px;
   transition: width 0.25s ease;
 }
@@ -4917,17 +4926,33 @@ span svg,
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
+  width: 100%;
 }
 
 .payout-boy-row {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 10px 11px;
-  border-radius: var(--radius-sm);
-  background: rgba(255, 255, 255, 0.03);
+  padding: 11px 12px;
+  border-radius: 10px;
+  background: var(--nhl-card-bg);
   border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-subtle);
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
   transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.payout-boy-row.paid,
+.payout-boy-row.self {
+  background: var(--green-win-light);
+  border-color: var(--green-win-border);
+}
+
+.payout-boy-row.unpaid {
+  background: var(--nhl-card-bg);
+  border-color: var(--border-subtle);
 }
 
 .payout-boy-top {
@@ -4935,128 +4960,25 @@ span svg,
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-}
-
-.payout-et-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 6px;
-  padding: 6px 8px;
-  border-radius: 6px;
-  background: rgba(2, 6, 23, 0.45);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-}
-
-.payout-et-dest {
-  display: flex;
-  align-items: center;
-  gap: 6px;
   min-width: 0;
-  font-size: 0.72rem;
-  color: var(--text-main);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  cursor: pointer;
-}
-
-.payout-et-dest.missing {
-  font-family: inherit;
-  color: var(--text-muted);
-  font-style: italic;
-}
-
-.payout-et-dest-text {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.payout-et-tag {
-  font-family: inherit;
-  font-size: 0.62rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  padding: 1px 5px;
-  border-radius: 4px;
-  background: rgba(56, 189, 248, 0.15);
-  color: #7dd3fc;
-  flex-shrink: 0;
-}
-
-.payout-et-actions {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  flex-shrink: 0;
-}
-
-.payout-et-btn {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  color: var(--text-main);
-  font-size: 0.66rem;
-  font-weight: 700;
-  padding: 3px 7px;
-  border-radius: 5px;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background 0.15s ease, border-color 0.15s ease;
-}
-
-.payout-et-btn:hover {
-  background: rgba(0, 255, 135, 0.14);
-  border-color: var(--green-win-border);
-  color: var(--green-win);
-}
-
-.payout-et-btn.add {
-  background: rgba(56, 189, 248, 0.14);
-  border-color: rgba(56, 189, 248, 0.35);
-  color: #7dd3fc;
-}
-
-.payout-et-btn.add:hover {
-  background: rgba(56, 189, 248, 0.24);
-  color: #bae6fd;
-}
-
-.payout-et-btn.edit {
-  padding: 3px 6px;
-  color: var(--text-muted);
-}
-
-.payout-et-note {
-  font-size: 0.64rem;
-  color: var(--text-muted);
-  margin-top: -4px;
-  padding-left: 2px;
-}
-
-.payout-boy-row.paid,
-.payout-boy-row.self {
-  background: rgba(0, 255, 135, 0.06);
-  border-color: rgba(0, 255, 135, 0.28);
-}
-
-.payout-boy-row.unpaid {
-  background: rgba(245, 158, 11, 0.05);
-  border-color: rgba(245, 158, 11, 0.24);
 }
 
 .payout-boy-left {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
   min-width: 0;
+  flex: 1;
 }
 
 .payout-boy-avatar {
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--nhl-subcard);
+  border: 1px solid var(--border-subtle);
   color: var(--text-main);
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 800;
   display: flex;
   align-items: center;
@@ -5066,7 +4988,8 @@ span svg,
 
 .payout-boy-row.paid .payout-boy-avatar,
 .payout-boy-row.self .payout-boy-avatar {
-  background: rgba(0, 255, 135, 0.16);
+  background: var(--nhl-card-bg);
+  border-color: var(--green-win-border);
   color: var(--green-win);
 }
 
@@ -5077,7 +5000,7 @@ span svg,
 }
 
 .payout-boy-name {
-  font-size: 0.78rem;
+  font-size: 0.84rem;
   font-weight: 800;
   color: var(--text-main);
   white-space: nowrap;
@@ -5086,8 +5009,9 @@ span svg,
 }
 
 .payout-boy-sub {
-  font-size: 0.67rem;
-  color: var(--text-muted);
+  font-size: 0.71rem;
+  color: var(--text-secondary);
+  font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -5095,13 +5019,14 @@ span svg,
 
 .payout-toggle-btn {
   flex-shrink: 0;
-  font-size: 0.68rem;
+  font-size: 0.7rem;
   font-weight: 800;
-  padding: 5px 9px;
-  border-radius: 6px;
+  padding: 6px 10px;
+  border-radius: 7px;
   cursor: pointer;
   border: 1px solid transparent;
   letter-spacing: 0.02em;
+  white-space: nowrap;
   transition: transform 0.1s ease, background 0.15s ease;
 }
 
@@ -5110,44 +5035,159 @@ span svg,
 }
 
 .payout-toggle-btn.mark-paid {
-  background: rgba(245, 158, 11, 0.16);
-  color: #fbbf24;
-  border-color: rgba(245, 158, 11, 0.38);
+  background: var(--gold-odds-bg);
+  color: var(--gold-odds);
+  border-color: var(--gold-odds-border);
 }
 
 .payout-toggle-btn.mark-paid:hover {
-  background: rgba(0, 255, 135, 0.16);
+  background: var(--green-win-light);
   color: var(--green-win);
   border-color: var(--green-win-border);
 }
 
 .payout-toggle-btn.is-paid {
-  background: rgba(0, 255, 135, 0.16);
-  color: var(--green-win);
-  border-color: var(--green-win-border);
+  background: var(--green-win);
+  color: #ffffff;
+  border-color: var(--green-win);
 }
 
 .payout-toggle-btn.is-self {
-  background: rgba(255, 255, 255, 0.07);
-  color: var(--text-muted);
-  border-color: var(--border-subtle);
+  background: var(--nhl-card-bg);
+  color: var(--green-win);
+  border-color: var(--green-win-border);
   cursor: default;
 }
 
+.payout-et-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 9px;
+  border-radius: 8px;
+  background: var(--nhl-subcard);
+  border: 1px solid var(--border-subtle);
+  min-width: 0;
+}
+
+.payout-boy-row.paid .payout-et-bar,
+.payout-boy-row.self .payout-et-bar {
+  background: rgba(255, 255, 255, 0.78);
+  border-color: var(--green-win-border);
+}
+
+.payout-et-dest {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  flex: 1;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--text-main);
+  font-family: var(--font-mono);
+  cursor: pointer;
+}
+
+.payout-et-dest.missing {
+  font-family: var(--font-ui);
+  color: var(--text-muted);
+  font-weight: 500;
+  font-style: italic;
+}
+
+.payout-et-dest-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.payout-et-tag {
+  font-family: var(--font-ui);
+  font-size: 0.62rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--nhl-blue-subtle);
+  color: var(--nhl-blue);
+  border: 1px solid var(--nhl-blue-border);
+  flex-shrink: 0;
+}
+
+.payout-et-actions {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.payout-et-btn {
+  background: var(--nhl-card-bg);
+  border: 1px solid var(--border-medium);
+  color: var(--text-main);
+  font-size: 0.69rem;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.payout-et-btn:hover {
+  background: var(--nhl-black);
+  border-color: var(--nhl-black);
+  color: #ffffff;
+}
+
+.payout-et-btn.add {
+  background: var(--nhl-blue-subtle);
+  border-color: var(--nhl-blue-border);
+  color: var(--nhl-blue);
+}
+
+.payout-et-btn.add:hover {
+  background: var(--nhl-blue);
+  border-color: var(--nhl-blue);
+  color: #ffffff;
+}
+
+.payout-et-btn.edit {
+  padding: 4px 7px;
+  color: var(--text-secondary);
+}
+
+.payout-et-note {
+  font-size: 0.68rem;
+  color: var(--text-secondary);
+  margin-top: -3px;
+  padding-left: 2px;
+}
+
 .payout-week-footer {
-  margin-top: 10px;
-  padding-top: 8px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-subtle);
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
   flex-wrap: wrap;
-  font-size: 0.72rem;
-  color: var(--text-muted);
+  font-size: 0.74rem;
+  color: var(--text-secondary);
+}
+
+.payout-week-footer strong {
+  color: var(--text-main);
 }
 
 @media (max-width: 720px) {
+  .payout-week-card {
+    padding: 11px;
+  }
   .payout-boys-grid {
     grid-template-columns: 1fr;
   }
