@@ -14,7 +14,7 @@
 // Week 4: Friday, Oct 30, 2026 (Will placed $30 6-leg ticket)
 // Week 5: Friday, Nov 6, 2026 (Alex placed $30 6-leg ticket — CASHED $454.41!)
 // Week 6: Friday, Nov 13, 2026 (Edward placed $25 5-leg Betway ticket @ +5525 -> 4/5 hit, Edward sold on Ohgren!)
-// Week 7: Special Saturday NHL Edition (Sat Nov 21, 2026 — Ben placed $25 FanDuel split: $20 @ +2105 -> $441.06 + $5 50% Boost @ +3158 -> $162.93 = $603.99!)
+// Week 7: Special Saturday NHL Edition (Sat Nov 21, 2026 — Ben placed $30 FanDuel split: $20 @ +2105 + $5 50% Boost @ +3158 + $5 top-up = $700.00!)
 // 6-week cycle: Ben -> Axel -> Jackson -> Will -> Alex -> Edward (repeats)
 const SQUAD = [
   { id: 'ben', name: 'Ben', initials: 'BE', color: '#ec4899', defaultRole: 'Week 1 & 7 Bettor' },
@@ -4307,8 +4307,8 @@ function renderTracker() {
     payout = parseFloat(state.masterSlip.potential_payout).toFixed(2);
     totalOddsMulti = parseFloat(state.masterSlip.potential_payout) / (state.stake || 1);
   } else if (state.currentFridayStr === '2026-11-21') {
-    payout = "603.99";
-    totalOddsMulti = 24.16;
+    payout = "700.00";
+    totalOddsMulti = 23.33;
   } else if (state.currentFridayStr === '2026-11-13') {
     payout = "1406.25";
     totalOddsMulti = 56.25;
@@ -5399,16 +5399,16 @@ const DEFAULT_MASTER_SLIPS = {
     week_date: '2026-11-21',
     bettor_name: 'Ben',
     status: 'placed',
-    stake: 25,
-    total_odds: '+2316',
-    potential_payout: 603.99,
-    notes: 'Placed on FanDuel by Ben ($25 split: $20 @ +2105 -> $441.06 + $5 w/ 50% Profit Boost @ +3158 -> $162.93 = $603.99 total payout)'
+    stake: 30,
+    total_odds: '+2233',
+    potential_payout: 700.00,
+    notes: 'Placed on FanDuel by Ben ($30 split: $20 @ +2105 + $5 w/ 50% Profit Boost @ +3158 + $5 top-up -> $700.00 total payout)'
   }
 };
 
 function getDefaultStakeForDate(dateStr) {
   if (dateStr === '2026-10-02') return 5;
-  if (dateStr === '2026-10-16' || dateStr === '2026-11-13' || dateStr === '2026-11-21') return 25;
+  if (dateStr === '2026-10-16' || dateStr === '2026-11-13') return 25;
   if ((dateStr === WEEK7_THU_DATE || dateStr === WEEK7_SAT_DATE) && isWeek7SplitMode()) return 15;
   return 30;
 }
@@ -5442,7 +5442,7 @@ function loadLocalData(dateStr) {
       state.isPlaced = !!parsed.isPlaced;
       // If an official placed/settled master slip exists in code, ensure local draft upgrades cleanly
       if (state.masterSlip && ['placed', 'won', 'lost'].includes(state.masterSlip.status)) {
-        if (!state.isPlaced) {
+        if (!state.isPlaced || (state.masterSlip.stake && state.stake !== state.masterSlip.stake)) {
           state.isPlaced = true;
           state.stake = state.masterSlip.stake || defaultStakeForDate;
           if (dateStr === '2026-11-21' && Object.keys(state.legs).length < 6) {
@@ -5458,7 +5458,7 @@ function loadLocalData(dateStr) {
   // Prepopulate if opening canonical weeks
   if (dateStr === '2026-11-21') {
     state.legs = JSON.parse(JSON.stringify(DEFAULT_NOV21_PICKS));
-    state.stake = 25;
+    state.stake = 30;
     state.isPlaced = true;
   } else if (dateStr === '2026-11-13') {
     state.legs = JSON.parse(JSON.stringify(DEFAULT_NOV13_PICKS));
@@ -6767,7 +6767,7 @@ function renderBettorBanner() {
   } else if (weekNum === 2) {
     DOM.bettorDesc.innerHTML = `Week 1 was placed by Ben. For Week 2, <strong>${bettor.name}</strong> placed the 5-leg parlay ticket ($${state.stake} total wager).`;
   } else if (state.currentFridayStr === '2026-11-21') {
-    DOM.bettorDesc.innerHTML = `Special <strong>Saturday NHL Edition</strong>! <strong>${bettor.name}</strong> bet <strong>$25.00 total ($4.17/guy — $5 short of $30!)</strong> via a FanDuel SGP+ split ($20 @ +2105 → $441.06 + $5 w/ 50% Boost @ +3158 → $162.93 = <strong>$603.99 payout</strong> • +2316 effective).`;
+    DOM.bettorDesc.innerHTML = `Special <strong>Saturday NHL Edition</strong>! <strong>${bettor.name}</strong> locked in the full <strong>$30.00 ($5/guy) FanDuel SGP+ split</strong> ($20 @ +2105 + $5 w/ 50% Boost @ +3158 + $5 top-up = <strong>$700.00 payout</strong> • +2233 effective).`;
   } else if (state.currentFridayStr === '2026-11-13') {
     DOM.bettorDesc.innerHTML = `<strong>${bettor.name}</strong> placed Week 6's <strong>5-leg $25.00 Betway BetBuilder+</strong> (@ +5525 → $1,406.25) — 4 of 5 hit (Will, Ben, Jackson & Axel cashed; Edward sold on Liam Ohgren 0G!).`;
   } else if (inSplitWeek7) {
@@ -6843,10 +6843,10 @@ function renderSportsbookTicket() {
   const hasValidMasterOdds = state.masterSlip && state.masterSlip.total_odds && state.masterSlip.total_odds !== '--';
   const displayOdds = hasValidMasterOdds
     ? state.masterSlip.total_odds
-    : (state.currentFridayStr === '2026-11-21' ? '+2316' : (state.currentFridayStr === '2026-11-13' ? '+5525' : (state.currentFridayStr === '2026-11-06' ? '+1414' : (state.currentFridayStr === '2026-10-30' ? '+2394' : totals.american))));
+    : (state.currentFridayStr === '2026-11-21' ? '+2233' : (state.currentFridayStr === '2026-11-13' ? '+5525' : (state.currentFridayStr === '2026-11-06' ? '+1414' : (state.currentFridayStr === '2026-10-30' ? '+2394' : totals.american))));
   const displayPayout = (state.masterSlip && state.masterSlip.potential_payout)
     ? parseFloat(state.masterSlip.potential_payout)
-    : (state.currentFridayStr === '2026-11-21' ? 603.99 : (state.currentFridayStr === '2026-11-13' ? 1406.25 : (state.currentFridayStr === '2026-11-06' ? 454.41 : (state.currentFridayStr === '2026-10-30' ? 748.20 : totals.payout))));
+    : (state.currentFridayStr === '2026-11-21' ? 700.00 : (state.currentFridayStr === '2026-11-13' ? 1406.25 : (state.currentFridayStr === '2026-11-06' ? 454.41 : (state.currentFridayStr === '2026-10-30' ? 748.20 : totals.payout))));
   const displayProfit = displayPayout - state.stake;
   const displayDecimal = displayPayout / (state.stake || 1);
 
@@ -6855,8 +6855,7 @@ function renderSportsbookTicket() {
   }
   const barcodeTextEl = document.querySelector('.barcode-text');
   if (barcodeTextEl) {
-    const perGuyNote = state.currentFridayStr === '2026-11-21' ? ` • $4.17/GUY` : '';
-    barcodeTextEl.textContent = `* BET THE SHOW POOL • WEEK ${state.weekNumber} • $${state.stake} TOTAL${perGuyNote} *`;
+    barcodeTextEl.textContent = `* BET THE SHOW POOL • WEEK ${state.weekNumber} • $${state.stake} TOTAL *`;
   }
 
   DOM.totalAmericanOdds.textContent = displayOdds;
