@@ -2225,18 +2225,21 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  flex-wrap: wrap;
+  gap: 6px 8px;
   font-size: 0.72rem;
   margin-top: 5px;
   padding: 0 2px;
 }
 
 .tracker-live-detail {
-  font-size: 0.74rem;
+  font-size: 0.73rem;
   color: var(--text-secondary);
   font-weight: 600;
-  letter-spacing: 0.2px;
-  white-space: nowrap;
+  letter-spacing: 0.15px;
+  flex: 1 1 150px;
+  min-width: 0;
+  line-height: 1.35;
 }
 
 .tracker-status-badge {
@@ -2250,6 +2253,9 @@ body {
   color: var(--text-secondary);
   border: 1px solid var(--border-subtle);
   text-transform: uppercase;
+  flex-shrink: 0;
+  white-space: nowrap;
+  margin-left: auto;
 }
 
 .tracker-status-badge.in-progress {

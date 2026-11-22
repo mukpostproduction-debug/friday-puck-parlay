@@ -4137,8 +4137,8 @@ function renderTracker() {
               : (isMissed
                   ? `✗ OVER ${line} (MISSED)`
                   : (isUnder
-                      ? (isGameLive ? `UNDER LIVE (${roomLeft} CUSHION)` : `NEED ≤ ${Math.floor(line)} GOALS`)
-                      : (isGameLive ? `NEED ${Math.max(1, Math.floor(line) + 1 - totalGoals)} MORE` : `NEED ${Math.floor(line) + 1}+ GOALS`)));
+                      ? (isGameLive ? `UNDER • ${roomLeft} LEFT` : `NEED ≤ ${Math.floor(line)} G`)
+                      : (isGameLive ? `NEED ${Math.max(1, Math.floor(line) + 1 - totalGoals)} MORE` : `NEED ${Math.floor(line) + 1}+ G`)));
             const statusClass = isHit ? "hit" : (isMissed ? "miss" : (isCoveringLive || totalGoals > 0 ? "in-progress" : ""));
 
             return `
