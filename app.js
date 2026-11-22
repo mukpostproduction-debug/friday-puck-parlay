@@ -6265,7 +6265,7 @@ function buildDoubleheaderSwitcherHtml() {
 
 function renderWeek7SettledBanner() {
   if (!DOM.week7VoteSettledBanner) return;
-  if (!isWeek7DateStr(state.currentFridayStr) || isViewingWeek7Vote()) {
+  if (!isWeek7DateStr(state.currentFridayStr) || isViewingWeek7Vote() || (state.isPlaced && !isWeek7SplitMode())) {
     DOM.week7VoteSettledBanner.style.display = 'none';
     DOM.week7VoteSettledBanner.innerHTML = '';
     return;
