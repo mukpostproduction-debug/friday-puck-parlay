@@ -5520,7 +5520,7 @@ const DEFAULT_NOV27_PICKS = {
   Edward: { user_name: 'Edward', boy: 'Edward', game: 'COL @ MIN', game_title: 'COL Avalanche @ MIN Wild', bet_type: 'Player Prop', pick_text: 'Kirill Kaprizov — 1+ Points', odds: '-455', chirp: 'If this does not cash then my names not Edward', locked: true },
   Will: { user_name: 'Will', boy: 'Will', game: 'TOR @ BOS', game_title: 'TOR Maple Leafs @ BOS Bruins', bet_type: 'Player Prop', pick_text: 'David Pastrnak — 1+ Assists', odds: '-130', chirp: 'Goooood luck muk', locked: true },
   Jackson: { user_name: 'Jackson', boy: 'Jackson', game: 'TOR @ BOS', game_title: 'TOR Maple Leafs @ BOS Bruins', bet_type: 'Player Prop', pick_text: 'Auston Matthews — 4+ Shots on Goal', odds: '-135', chirp: 'papi 🥵', locked: true },
-  Ben: { user_name: 'Ben', boy: 'Ben', game: 'CGY @ NJD', game_title: 'CGY Flames @ NJD Devils', bet_type: 'Player Prop', pick_text: 'Connor Brown — 2+ Shots on Goal', odds: '-156', chirp: 'Kobe (12:56 PM buzzer beater — heavily suspected Axel bailed him out & sauced him a pick)', locked: true }
+  Ben: { user_name: 'Ben', boy: 'Ben', game: 'CGY @ NJD', game_title: 'CGY Flames @ NJD Devils', bet_type: 'Player Prop', pick_text: 'Connor Brown — 2+ Shots on Goal', odds: '-156', chirp: 'Kobe', locked: true }
 };
 
 const DEFAULT_NOV21_PICKS = {
