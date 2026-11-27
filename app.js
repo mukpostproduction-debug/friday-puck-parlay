@@ -1425,7 +1425,7 @@ const DEFAULT_NOV27_SLATE = [
         playerName: "Connor Brown",
         team: "NJD",
         odds: "-156",
-        marketLabel: "2+ Shots on Goal (-156 • Sub for MIA Ben)",
+        marketLabel: "2+ Shots on Goal (-156 • 12:56 PM Buzzer)",
         statType: "shots",
         target: 2,
         apiStat: 0,
@@ -1731,7 +1731,7 @@ function getSlateForDate(dateStr) {
 const KNOWN_NOV27_PLAYERS = {
   Jackson: { name: 'Auston Matthews', target: 4, type: 'shots', odds: '-135', label: '4+ Shots on Goal (SGP +230)' },
   Will: { name: 'David Pastrnak', target: 1, type: 'assists', odds: '-130', label: '1+ Assists (SGP +230)' },
-  Ben: { name: 'Connor Brown', target: 2, type: 'shots', odds: '-156', label: '2+ Shots on Goal (-156 • Sub for MIA Ben)' },
+  Ben: { name: 'Connor Brown', target: 2, type: 'shots', odds: '-156', label: '2+ Shots on Goal (-156 • 12:56 PM Buzzer)' },
   Edward: { name: 'Kirill Kaprizov', target: 1, type: 'points', odds: '-455', label: '1+ Points (-455)' },
   Axel: { name: 'Alexis Lafreniere', target: 1, type: 'points', odds: '-200', label: '1+ Points (-200)' },
   Alex: { name: 'Evan Bouchard', target: 2, type: 'points', odds: '+180', label: '2+ Points (+180)' }
@@ -5488,7 +5488,7 @@ const DEFAULT_NOV27_PICKS = {
   Edward: { user_name: 'Edward', boy: 'Edward', game: 'COL @ MIN', game_title: 'COL Avalanche @ MIN Wild', bet_type: 'Player Prop', pick_text: 'Kirill Kaprizov — 1+ Points', odds: '-455', chirp: 'If this does not cash then my names not Edward', locked: true },
   Will: { user_name: 'Will', boy: 'Will', game: 'TOR @ BOS', game_title: 'TOR Maple Leafs @ BOS Bruins', bet_type: 'Player Prop', pick_text: 'David Pastrnak — 1+ Assists', odds: '-130', chirp: 'Goooood luck muk', locked: true },
   Jackson: { user_name: 'Jackson', boy: 'Jackson', game: 'TOR @ BOS', game_title: 'TOR Maple Leafs @ BOS Bruins', bet_type: 'Player Prop', pick_text: 'Auston Matthews — 4+ Shots on Goal', odds: '-135', chirp: 'papi 🥵', locked: true },
-  Ben: { user_name: 'Ben', boy: 'Ben', game: 'CGY @ NJD', game_title: 'CGY Flames @ NJD Devils', bet_type: 'Player Prop', pick_text: 'Connor Brown — 2+ Shots on Goal', odds: '-156', chirp: 'MIA past the 1 PM cutoff — still cuddling with his bf in bed (auto-subbed Connor Brown)', locked: true }
+  Ben: { user_name: 'Ben', boy: 'Ben', game: 'CGY @ NJD', game_title: 'CGY Flames @ NJD Devils', bet_type: 'Player Prop', pick_text: 'Connor Brown — 2+ Shots on Goal', odds: '-156', chirp: 'Kobe (12:56 PM buzzer beater — heavily suspected Axel bailed him out & sauced him a pick)', locked: true }
 };
 
 const DEFAULT_NOV21_PICKS = {
@@ -5630,7 +5630,7 @@ const DEFAULT_MASTER_SLIPS = {
     stake: 30,
     total_odds: '+2687',
     potential_payout: 836.07,
-    notes: 'Black Friday Bet365 6-Legger placed by Axel ($30 @ +2687 -> $836.07 • Ben MIA past 1 PM cutoff, still cuddling with his bf in bed — Connor Brown subbed in)'
+    notes: 'Black Friday Bet365 6-Legger placed by Axel ($30 @ +2687 -> $836.07 • Ben hit the 12:56 PM buzzer beater, sus Axel bailed him out & sauced him Connor Brown)'
   }
 };
 
@@ -6999,7 +6999,7 @@ function renderBettorBanner() {
   } else if (weekNum === 2) {
     DOM.bettorDesc.innerHTML = `Week 1 was placed by Ben. For Week 2, <strong>${bettor.name}</strong> placed the 5-leg parlay ticket ($${state.stake} total wager).`;
   } else if (state.currentFridayStr === '2026-11-27') {
-    DOM.bettorDesc.innerHTML = `Black Friday NHL Edition! <strong>${bettor.name}</strong> locked in the <strong>$30.00 Bet365 6-Legger</strong> (@ +2687 → <strong>$836.07 payout</strong>). <em>Ben went MIA past the 1 PM cutoff (still cuddling with his bf in bed — Connor Brown subbed in).</em>`;
+    DOM.bettorDesc.innerHTML = `Black Friday NHL Edition! <strong>${bettor.name}</strong> locked in the <strong>$30.00 Bet365 6-Legger</strong> (@ +2687 → <strong>$836.07 payout</strong>). <em>Ben technically hit the 12:56 PM buzzer beater ("Kobe"), though it's heavily suspected Axel bailed him out & sauced him Connor Brown.</em>`;
   } else if (state.currentFridayStr === '2026-11-21') {
     DOM.bettorDesc.innerHTML = `Special <strong>Saturday NHL Edition</strong>! <strong>${bettor.name}</strong> locked in the full <strong>$30.00 ($5/guy) FanDuel SGP+ split</strong> ($20 @ +2105 + $5 w/ 50% Boost @ +3158 + $5 top-up = <strong>$700.00 payout</strong> • +2233 effective).`;
   } else if (state.currentFridayStr === '2026-11-13') {
