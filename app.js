@@ -15,6 +15,7 @@
 // Week 5: Friday, Nov 6, 2026 (Alex placed $30 6-leg ticket — CASHED $454.41!)
 // Week 6: Friday, Nov 13, 2026 (Edward placed $25 5-leg Betway ticket @ +5525 -> 4/5 hit, Edward sold on Ohgren!)
 // Week 7: Special Saturday NHL Edition (Sat Nov 21, 2026 — Ben placed $30 FanDuel split: $20 @ +2105 + $5 50% Boost @ +3158 + $5 top-up = $700.00!)
+// Week 8: Black Friday NHL Edition (Fri Nov 27, 2026 — Axel placed $30 Bet365 6-Legger @ +2687 -> $836.07! Ben MIA past 1 PM cutoff -> Connor Brown subbed in.)
 // 6-week cycle: Ben -> Axel -> Jackson -> Will -> Alex -> Edward (repeats)
 const SQUAD = [
   { id: 'ben', name: 'Ben', initials: 'BE', color: '#ec4899', defaultRole: 'Week 1 & 7 Bettor' },
@@ -1355,6 +1356,182 @@ const DEFAULT_NOV13_SLATE = [
   }
 ];
 
+const DEFAULT_NOV27_SLATE = [
+  {
+    gameId: "TOR_BOS",
+    title: "SAME GAME PARLAY",
+    odds: "+230",
+    awayTeam: "TOR",
+    awayName: "TOR Maple Leafs",
+    homeTeam: "BOS",
+    homeName: "BOS Bruins",
+    awayScore: 0,
+    homeScore: 0,
+    awaySog: 0,
+    homeSog: 0,
+    gameStatus: "live",
+    statusDetail: "1:00 PM ET",
+    startTime: "Fri Nov 27 • 1:00 PM ET",
+    gameStateText: "1:00 PM ET",
+    legs: [
+      {
+        id: "matthews_sog_nov27",
+        boyName: "Jackson",
+        playerName: "Auston Matthews",
+        team: "TOR",
+        odds: "-135",
+        marketLabel: "4+ Shots on Goal (SGP +230)",
+        statType: "shots",
+        target: 4,
+        apiStat: 0,
+        manualDelta: 0,
+        subDetail: "0G, 0A • 0 SOG"
+      },
+      {
+        id: "pastrnak_ast_nov27",
+        boyName: "Will",
+        playerName: "David Pastrnak",
+        team: "BOS",
+        odds: "-130",
+        marketLabel: "1+ Assists (SGP +230)",
+        statType: "assists",
+        target: 1,
+        apiStat: 0,
+        manualDelta: 0,
+        subDetail: "0G, 0A • 0 SOG"
+      }
+    ]
+  },
+  {
+    gameId: "CGY_NJD",
+    title: "PLAYER PROP",
+    odds: "-156",
+    awayTeam: "CGY",
+    awayName: "CGY Flames",
+    homeTeam: "NJD",
+    homeName: "NJD Devils",
+    awayScore: 0,
+    homeScore: 0,
+    awaySog: 0,
+    homeSog: 0,
+    gameStatus: "live",
+    statusDetail: "1:00 PM ET",
+    startTime: "Fri Nov 27 • 1:00 PM ET",
+    gameStateText: "1:00 PM ET",
+    legs: [
+      {
+        id: "cbrown_sog_nov27",
+        boyName: "Ben",
+        playerName: "Connor Brown",
+        team: "NJD",
+        odds: "-156",
+        marketLabel: "2+ Shots on Goal (-156 • Sub for MIA Ben)",
+        statType: "shots",
+        target: 2,
+        apiStat: 0,
+        manualDelta: 0,
+        subDetail: "0G, 0A • 0 SOG"
+      }
+    ]
+  },
+  {
+    gameId: "COL_MIN",
+    title: "PLAYER PROP",
+    odds: "-455",
+    awayTeam: "COL",
+    awayName: "COL Avalanche",
+    homeTeam: "MIN",
+    homeName: "MIN Wild",
+    awayScore: 0,
+    homeScore: 0,
+    awaySog: 0,
+    homeSog: 0,
+    gameStatus: "pre",
+    statusDetail: "4:00 PM ET",
+    startTime: "Fri Nov 27 • 4:00 PM ET",
+    gameStateText: "4:00 PM ET",
+    legs: [
+      {
+        id: "kaprizov_pts_nov27",
+        boyName: "Edward",
+        playerName: "Kirill Kaprizov",
+        team: "MIN",
+        odds: "-455",
+        marketLabel: "1+ Points (-455)",
+        statType: "points",
+        target: 1,
+        apiStat: 0,
+        manualDelta: 0,
+        subDetail: "0G, 0A • 0 SOG"
+      }
+    ]
+  },
+  {
+    gameId: "NYR_CHI",
+    title: "PLAYER PROP",
+    odds: "-200",
+    awayTeam: "NYR",
+    awayName: "NYR Rangers",
+    homeTeam: "CHI",
+    homeName: "CHI Blackhawks",
+    awayScore: 0,
+    homeScore: 0,
+    awaySog: 0,
+    homeSog: 0,
+    gameStatus: "pre",
+    statusDetail: "5:30 PM ET",
+    startTime: "Fri Nov 27 • 5:30 PM ET",
+    gameStateText: "5:30 PM ET",
+    legs: [
+      {
+        id: "lafreniere_pts_nov27",
+        boyName: "Axel",
+        playerName: "Alexis Lafreniere",
+        team: "NYR",
+        odds: "-200",
+        marketLabel: "1+ Points (-200)",
+        statType: "points",
+        target: 1,
+        apiStat: 0,
+        manualDelta: 0,
+        subDetail: "0G, 0A • 0 SOG"
+      }
+    ]
+  },
+  {
+    gameId: "SEA_EDM",
+    title: "PLAYER PROP",
+    odds: "+180",
+    awayTeam: "SEA",
+    awayName: "SEA Kraken",
+    homeTeam: "EDM",
+    homeName: "EDM Oilers",
+    awayScore: 0,
+    homeScore: 0,
+    awaySog: 0,
+    homeSog: 0,
+    gameStatus: "pre",
+    statusDetail: "8:00 PM ET",
+    startTime: "Fri Nov 27 • 8:00 PM ET",
+    gameStateText: "8:00 PM ET",
+    legs: [
+      {
+        id: "bouchard_pts_nov27",
+        boyName: "Alex",
+        playerName: "Evan Bouchard",
+        team: "EDM",
+        odds: "+180",
+        marketLabel: "2+ Points (+180)",
+        statType: "points",
+        target: 2,
+        apiStat: 0,
+        manualDelta: 0,
+        subDetail: "0G, 0A • 0 SOG"
+      }
+    ]
+  }
+];
+
 const DEFAULT_NOV21_SLATE = [
   {
     gameId: "NYI_DET",
@@ -1545,8 +1722,20 @@ function getSlateForDate(dateStr) {
   if (dateStr === '2026-11-21') {
     return JSON.parse(JSON.stringify(DEFAULT_NOV21_SLATE));
   }
+  if (dateStr === '2026-11-27') {
+    return JSON.parse(JSON.stringify(DEFAULT_NOV27_SLATE));
+  }
   return [];
 }
+
+const KNOWN_NOV27_PLAYERS = {
+  Jackson: { name: 'Auston Matthews', target: 4, type: 'shots', odds: '-135', label: '4+ Shots on Goal (SGP +230)' },
+  Will: { name: 'David Pastrnak', target: 1, type: 'assists', odds: '-130', label: '1+ Assists (SGP +230)' },
+  Ben: { name: 'Connor Brown', target: 2, type: 'shots', odds: '-156', label: '2+ Shots on Goal (-156 • Sub for MIA Ben)' },
+  Edward: { name: 'Kirill Kaprizov', target: 1, type: 'points', odds: '-455', label: '1+ Points (-455)' },
+  Axel: { name: 'Alexis Lafreniere', target: 1, type: 'points', odds: '-200', label: '1+ Points (-200)' },
+  Alex: { name: 'Evan Bouchard', target: 2, type: 'points', odds: '+180', label: '2+ Points (+180)' }
+};
 
 const KNOWN_NOV21_PLAYERS = {
   Axel: { name: 'Alex DeBrincat', target: 1, type: 'points', odds: '-222', label: '1+ Points (SGP +148)' },
@@ -1689,6 +1878,22 @@ function parsePickIntoLeg(boyName, pickObj) {
   const pickText = (pickObj.pick_text || '').trim();
   const oddsStr = (pickObj.odds || '').trim();
   const betTypeRaw = (pickObj.bet_type || pickObj.betType || '').toLowerCase();
+
+  // Official Nov 27 canonical mapping (Black Friday Bet365 6-Legger: $30 @ +2687 -> $836.07)
+  if (state.currentFridayStr === '2026-11-27' && KNOWN_NOV27_PLAYERS[boyName]) {
+    const known = KNOWN_NOV27_PLAYERS[boyName];
+    return {
+      id: `${boyName.toLowerCase()}_${known.type}_nov27`,
+      boyName: boyName,
+      playerName: known.name,
+      odds: oddsStr || known.odds,
+      marketLabel: known.label,
+      statType: known.type,
+      target: known.target,
+      apiStat: 0,
+      subDetail: '0G, 0A • 0 SOG'
+    };
+  }
 
   // Official Nov 21 canonical mapping (FanDuel 6-Leg SGP+ Split: $20 @ +2105 + $5 50% Boost @ +3158 = $603.99)
   if (state.currentFridayStr === '2026-11-21' && KNOWN_NOV21_PLAYERS[boyName]) {
@@ -2058,7 +2263,8 @@ function syncTrackerFromRealPicks() {
                       state.currentFridayStr === '2026-10-30' ||
                       state.currentFridayStr === '2026-11-06' ||
                       state.currentFridayStr === '2026-11-13' ||
-                      state.currentFridayStr === '2026-11-21';
+                      state.currentFridayStr === '2026-11-21' ||
+                      state.currentFridayStr === '2026-11-27';
   if (!isKnownWeek) {
     const groupedGames = {};
     SQUAD.forEach(boy => {
@@ -2144,7 +2350,7 @@ function syncTrackerFromRealPicks() {
 }
 
 // Initialize Tracker Data from LocalStorage or Default (Purely NHL API Data-Driven)
-const TRACKER_STORAGE_KEY = "b365_sgp_tracker_data_v10";
+const TRACKER_STORAGE_KEY = "b365_sgp_tracker_data_v11";
 
 function initTrackerData() {
   const currentKey = `${TRACKER_STORAGE_KEY}_${state.currentFridayStr}`;
@@ -4306,6 +4512,9 @@ function renderTracker() {
   if (state.masterSlip && state.masterSlip.potential_payout) {
     payout = parseFloat(state.masterSlip.potential_payout).toFixed(2);
     totalOddsMulti = parseFloat(state.masterSlip.potential_payout) / (state.stake || 1);
+  } else if (state.currentFridayStr === '2026-11-27') {
+    payout = "836.07";
+    totalOddsMulti = 27.87;
   } else if (state.currentFridayStr === '2026-11-21') {
     payout = "700.00";
     totalOddsMulti = 23.33;
@@ -5273,6 +5482,15 @@ function formatGameTime(utcString) {
   }
 }
 
+const DEFAULT_NOV27_PICKS = {
+  Axel: { user_name: 'Axel', boy: 'Axel', game: 'NYR @ CHI', game_title: 'NYR Rangers @ CHI Blackhawks', bet_type: 'Player Prop', pick_text: 'Alexis Lafreniere — 1+ Points', odds: '-200', chirp: 'laf it up', locked: true },
+  Alex: { user_name: 'Alex', boy: 'Alex', game: 'SEA @ EDM', game_title: 'SEA Kraken @ EDM Oilers', bet_type: 'Player Prop', pick_text: 'Evan Bouchard — 2+ Points', odds: '+180', chirp: 'Thinking with my cock, not my brain', locked: true },
+  Edward: { user_name: 'Edward', boy: 'Edward', game: 'COL @ MIN', game_title: 'COL Avalanche @ MIN Wild', bet_type: 'Player Prop', pick_text: 'Kirill Kaprizov — 1+ Points', odds: '-455', chirp: 'If this does not cash then my names not Edward', locked: true },
+  Will: { user_name: 'Will', boy: 'Will', game: 'TOR @ BOS', game_title: 'TOR Maple Leafs @ BOS Bruins', bet_type: 'Player Prop', pick_text: 'David Pastrnak — 1+ Assists', odds: '-130', chirp: 'Goooood luck muk', locked: true },
+  Jackson: { user_name: 'Jackson', boy: 'Jackson', game: 'TOR @ BOS', game_title: 'TOR Maple Leafs @ BOS Bruins', bet_type: 'Player Prop', pick_text: 'Auston Matthews — 4+ Shots on Goal', odds: '-135', chirp: 'papi 🥵', locked: true },
+  Ben: { user_name: 'Ben', boy: 'Ben', game: 'CGY @ NJD', game_title: 'CGY Flames @ NJD Devils', bet_type: 'Player Prop', pick_text: 'Connor Brown — 2+ Shots on Goal', odds: '-156', chirp: 'MIA past the 1 PM cutoff — still cuddling with his bf in bed (auto-subbed Connor Brown)', locked: true }
+};
+
 const DEFAULT_NOV21_PICKS = {
   Axel: { user_name: 'Axel', boy: 'Axel', game: 'NYI @ DET', game_title: 'NYI Islanders @ DET Red Wings', bet_type: 'Player Prop', pick_text: 'Alex DeBrincat — 1+ Points', odds: '-222', chirp: 'I love it when Alex puts his cock in my mouth! 🥰', locked: true },
   Will: { user_name: 'Will', boy: 'Will', game: 'NYI @ DET', game_title: 'NYI Islanders @ DET Red Wings', bet_type: 'Player Prop', pick_text: 'Matthew Schaefer — 3+ Shots on Goal', odds: '-150', chirp: 'someone snatch up a bo pick make a stack', locked: true },
@@ -5403,6 +5621,16 @@ const DEFAULT_MASTER_SLIPS = {
     total_odds: '+2233',
     potential_payout: 700.00,
     notes: 'Placed on FanDuel by Ben ($30 split: $20 @ +2105 + $5 w/ 50% Profit Boost @ +3158 + $5 top-up -> $700.00 total payout)'
+  },
+  '2026-11-27': {
+    id: '2026-11-27',
+    week_date: '2026-11-27',
+    bettor_name: 'Axel',
+    status: 'placed',
+    stake: 30,
+    total_odds: '+2687',
+    potential_payout: 836.07,
+    notes: 'Black Friday Bet365 6-Legger placed by Axel ($30 @ +2687 -> $836.07 • Ben MIA past 1 PM cutoff, still cuddling with his bf in bed — Connor Brown subbed in)'
   }
 };
 
@@ -5456,7 +5684,11 @@ function loadLocalData(dateStr) {
   }
 
   // Prepopulate if opening canonical weeks
-  if (dateStr === '2026-11-21') {
+  if (dateStr === '2026-11-27') {
+    state.legs = JSON.parse(JSON.stringify(DEFAULT_NOV27_PICKS));
+    state.stake = 30;
+    state.isPlaced = true;
+  } else if (dateStr === '2026-11-21') {
     state.legs = JSON.parse(JSON.stringify(DEFAULT_NOV21_PICKS));
     state.stake = 30;
     state.isPlaced = true;
@@ -6766,6 +6998,8 @@ function renderBettorBanner() {
     DOM.bettorDesc.innerHTML = `Inaugural Friday Puck Parlay! <strong>${bettor.name}</strong> placed the original 5-guy Bet365 ticket ($${state.stake} total wager).`;
   } else if (weekNum === 2) {
     DOM.bettorDesc.innerHTML = `Week 1 was placed by Ben. For Week 2, <strong>${bettor.name}</strong> placed the 5-leg parlay ticket ($${state.stake} total wager).`;
+  } else if (state.currentFridayStr === '2026-11-27') {
+    DOM.bettorDesc.innerHTML = `Black Friday NHL Edition! <strong>${bettor.name}</strong> locked in the <strong>$30.00 Bet365 6-Legger</strong> (@ +2687 → <strong>$836.07 payout</strong>). <em>Ben went MIA past the 1 PM cutoff (still cuddling with his bf in bed — Connor Brown subbed in).</em>`;
   } else if (state.currentFridayStr === '2026-11-21') {
     DOM.bettorDesc.innerHTML = `Special <strong>Saturday NHL Edition</strong>! <strong>${bettor.name}</strong> locked in the full <strong>$30.00 ($5/guy) FanDuel SGP+ split</strong> ($20 @ +2105 + $5 w/ 50% Boost @ +3158 + $5 top-up = <strong>$700.00 payout</strong> • +2233 effective).`;
   } else if (state.currentFridayStr === '2026-11-13') {
@@ -6843,10 +7077,10 @@ function renderSportsbookTicket() {
   const hasValidMasterOdds = state.masterSlip && state.masterSlip.total_odds && state.masterSlip.total_odds !== '--';
   const displayOdds = hasValidMasterOdds
     ? state.masterSlip.total_odds
-    : (state.currentFridayStr === '2026-11-21' ? '+2233' : (state.currentFridayStr === '2026-11-13' ? '+5525' : (state.currentFridayStr === '2026-11-06' ? '+1414' : (state.currentFridayStr === '2026-10-30' ? '+2394' : totals.american))));
+    : (state.currentFridayStr === '2026-11-27' ? '+2687' : (state.currentFridayStr === '2026-11-21' ? '+2233' : (state.currentFridayStr === '2026-11-13' ? '+5525' : (state.currentFridayStr === '2026-11-06' ? '+1414' : (state.currentFridayStr === '2026-10-30' ? '+2394' : totals.american)))));
   const displayPayout = (state.masterSlip && state.masterSlip.potential_payout)
     ? parseFloat(state.masterSlip.potential_payout)
-    : (state.currentFridayStr === '2026-11-21' ? 700.00 : (state.currentFridayStr === '2026-11-13' ? 1406.25 : (state.currentFridayStr === '2026-11-06' ? 454.41 : (state.currentFridayStr === '2026-10-30' ? 748.20 : totals.payout))));
+    : (state.currentFridayStr === '2026-11-27' ? 836.07 : (state.currentFridayStr === '2026-11-21' ? 700.00 : (state.currentFridayStr === '2026-11-13' ? 1406.25 : (state.currentFridayStr === '2026-11-06' ? 454.41 : (state.currentFridayStr === '2026-10-30' ? 748.20 : totals.payout)))));
   const displayProfit = displayPayout - state.stake;
   const displayDecimal = displayPayout / (state.stake || 1);
 
