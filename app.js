@@ -100,7 +100,7 @@ const state = {
   // Stats & Leaderboard historical data
   statsHistory: [],
   payoutLog: {},              // Map of winning week dateStr -> { boyName: { paid: bool, paidAt: isoStr } }
-  selectedHistoryWeek: 6,     // Default to latest settled week (Week 6) for single-week view
+  selectedHistoryWeek: 7,     // Default to latest settled week (Week 7) for single-week view
   // Week 7 Special Thursday vs. Saturday Vote State
   week7Vote: {
     votes: {},                // Map of boyName -> { choice: '2026-11-19' | '2026-11-21', updatedAt: '' }
@@ -2391,7 +2391,7 @@ function loadAragonDemoSlate() {
 // =============================================================================
 // 7. SQUAD STATS & LEADERBOARD HISTORICAL ENGINE
 // =============================================================================
-const STATS_STORAGE_KEY = "bts_squad_stats_history_v12";
+const STATS_STORAGE_KEY = "bts_squad_stats_history_v13";
 const PAYOUT_LOG_STORAGE_KEY = "bts_payout_settlement_log_v1";
 const PAYOUT_LOG_SUPABASE_ID = "payout_log_v1";
 
@@ -2742,6 +2742,24 @@ const DEFAULT_STATS_HISTORY = [
       { boy: 'Jackson', pick: 'Adin Hill — Over 22.5 Total Saves', odds: '-120', result: 'hit' },
       { boy: 'Axel', pick: 'Victor Olofsson — Over 2.5 Shots on Goal', odds: '+125', result: 'hit' }
     ]
+  },
+  {
+    weekNum: 7,
+    dateStr: '2026-11-21',
+    bettor: 'Ben',
+    stake: 30,
+    totalOdds: '+2233',
+    payout: 0,
+    result: 'loss',
+    notes: 'Special Saturday NHL Edition! Ben placed a $30 FanDuel SGP+ split ($20 @ +2105 + $5 w/ 50% Boost @ +3158 + $5 top-up -> $700.00 potential return). Only 1 of 6 legs hit — Axel cashed Alex DeBrincat (1G, 6 SOG) while Schaefer (2 SOG), Leafs ML (3-4), WSH@BOS U6.5 (5-7), LaCombe (0 PTS), and Gauthier (1 SOG) all missed.',
+    legs: [
+      { boy: 'Axel', pick: 'Alex DeBrincat — 1+ Points', odds: '-222', result: 'hit' },
+      { boy: 'Will', pick: 'Matthew Schaefer — 3+ Shots on Goal', odds: '-150', result: 'miss' },
+      { boy: 'Jackson', pick: 'Toronto Maple Leafs ML', odds: '-122', result: 'miss' },
+      { boy: 'Alex', pick: 'WSH @ BOS Under 6.5 Total Goals', odds: '-106', result: 'miss' },
+      { boy: 'Ben', pick: 'Jackson LaCombe — 1+ Points', odds: '-172', result: 'miss' },
+      { boy: 'Edward', pick: 'Cutter Gauthier — 4+ Shots on Goal', odds: '-125', result: 'miss' }
+    ]
   }
 ];
 
@@ -3076,25 +3094,42 @@ function computeSquadAnalytics() {
   const currentWeekNum = getFridayDiffWeeks(targetFri) + 1;
   const settledWeeksCount = sortedWeeks.filter(w => w.result === 'win' || w.result === 'loss').length;
 
-  // Include live placed Week 7 (2026-11-21) bettor stake in bankroll & shortfall audit if not yet settled
-  const week7InHistory = sortedWeeks.some(w => w.dateStr === '2026-11-21' && (w.result === 'win' || w.result === 'loss'));
-  if (!week7InHistory && DEFAULT_MASTER_SLIPS['2026-11-21'] && DEFAULT_MASTER_SLIPS['2026-11-21'].status === 'placed') {
-    const w7 = DEFAULT_MASTER_SLIPS['2026-11-21'];
-    const w7Bettor = w7.bettor_name || 'Ben';
-    const w7Stake = Number(w7.stake || 25);
-    const w7Expected = 30; // 6 legs x $5/guy
-    const w7Short = Math.max(0, w7Expected - w7Stake);
-    if (playerStats[w7Bettor]) {
-      playerStats[w7Bettor].ticketsPlacedCount += 1;
-      playerStats[w7Bettor].placedAmount += w7Stake;
-      playerStats[w7Bettor].expectedPlacedAmount += w7Expected;
-      if (w7Short > 0) {
-        playerStats[w7Bettor].stakeShortfall += w7Short;
-        playerStats[w7Bettor].shortfallBreakdown.push(`W7: $${w7Stake}/$${w7Expected} (-$${w7Short}, $${(w7Stake / 6).toFixed(2)}/guy)`);
-      }
-      playerStats[w7Bettor].ticketsPlacedWeeks.push(`W7 ($${w7Stake} • Live)`);
+  // Automatically include ANY officially placed live ticket (DEFAULT_MASTER_SLIPS + active state.masterSlip)
+  // that hasn't settled into statsHistory yet so bankroll & total wagered update immediately upon lock-in!
+  const settledDateSet = new Set(
+    sortedWeeks.filter(w => w.result === 'win' || w.result === 'loss').map(w => w.dateStr)
+  );
+  const livePlacedMap = {};
+  Object.values(DEFAULT_MASTER_SLIPS || {}).forEach(slip => {
+    if (slip && slip.status === 'placed' && slip.week_date && !settledDateSet.has(slip.week_date)) {
+      livePlacedMap[slip.week_date] = slip;
     }
+  });
+  if (state.masterSlip && state.masterSlip.status === 'placed' && state.masterSlip.week_date && !settledDateSet.has(state.masterSlip.week_date)) {
+    livePlacedMap[state.masterSlip.week_date] = state.masterSlip;
   }
+
+  let livePlacedTotalStake = 0;
+  let livePlacedCount = 0;
+  Object.values(livePlacedMap).sort((a, b) => String(a.week_date).localeCompare(String(b.week_date))).forEach(slip => {
+    const bettorName = slip.bettor_name;
+    const slipStake = Number(slip.stake || 30);
+    const slipWeekNum = getFridayDiffWeeks(parseLocalISODate(slip.week_date)) + 1;
+    const expectedStake = 30;
+    const diffShort = Math.max(0, expectedStake - slipStake);
+    livePlacedTotalStake += slipStake;
+    livePlacedCount += 1;
+    if (bettorName && playerStats[bettorName]) {
+      playerStats[bettorName].ticketsPlacedCount += 1;
+      playerStats[bettorName].placedAmount += slipStake;
+      playerStats[bettorName].expectedPlacedAmount += expectedStake;
+      if (diffShort > 0) {
+        playerStats[bettorName].stakeShortfall += diffShort;
+        playerStats[bettorName].shortfallBreakdown.push(`W${slipWeekNum}: $${slipStake}/$${expectedStake} (-$${diffShort}, $${(slipStake / 6).toFixed(2)}/guy)`);
+      }
+      playerStats[bettorName].ticketsPlacedWeeks.push(`W${slipWeekNum} ($${slipStake} • Live)`);
+    }
+  });
 
   // Calculate percentages, averages, and individual net bankroll profit
   const list = Object.values(playerStats).map(p => {
@@ -3226,11 +3261,8 @@ function computeSquadAnalytics() {
   const parlayWinRate = totalParlays > 0 ? ((wonParlays / totalParlays) * 100).toFixed(1) : "0.0";
   const parlayRecordStr = `${wonParlays} / ${totalParlays} Parlays`;
 
-  // Pick totals & Pool Bankroll P/L (settled weeks + active live placed Week 7 stake)
-  const liveW7Stake = (!week7InHistory && DEFAULT_MASTER_SLIPS['2026-11-21']?.status === 'placed')
-    ? Number(DEFAULT_MASTER_SLIPS['2026-11-21'].stake || 25)
-    : 0;
-  let totalWagered = settledWeeks.reduce((acc, w) => acc + (w.stake || 25), 0) + liveW7Stake;
+  // Pick totals & Pool Bankroll P/L (settled weeks + any active live placed tickets)
+  let totalWagered = settledWeeks.reduce((acc, w) => acc + (w.stake || 25), 0) + livePlacedTotalStake;
   if (totalWagered === 0) totalWagered = 25;
   const totalWon = settledWeeks.reduce((acc, w) => {
     if (w.result !== 'win') return acc;
@@ -5616,11 +5648,11 @@ const DEFAULT_MASTER_SLIPS = {
     id: '2026-11-21',
     week_date: '2026-11-21',
     bettor_name: 'Ben',
-    status: 'placed',
+    status: 'lost',
     stake: 30,
     total_odds: '+2233',
     potential_payout: 700.00,
-    notes: 'Placed on FanDuel by Ben ($30 split: $20 @ +2105 + $5 w/ 50% Profit Boost @ +3158 + $5 top-up -> $700.00 total payout)'
+    notes: 'Settled - Lost on FanDuel ($30 split @ +2233 -> $700.00 • 1 of 6 hit: Axel cashed DeBrincat 1G; Will, Jackson, Alex, Ben & Edward missed)'
   },
   '2026-11-27': {
     id: '2026-11-27',
